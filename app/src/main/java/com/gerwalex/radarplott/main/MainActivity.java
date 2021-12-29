@@ -1,9 +1,11 @@
-package com.gerwalex.radarplott;
+package com.gerwalex.radarplott.main;
 
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.ActivityMainBinding;
 import com.gerwalex.radarplott.radar.Vessel;
 
@@ -15,7 +17,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        Vessel me = new Vessel(100.0, 6);
+        Vessel me = new Vessel(80, 8);
+        MainModel mModel = new ViewModelProvider(this).get(MainModel.class);
+        mModel.ownVessel.setValue(me);
         binding.radar.addVessel(me);
+        Vessel otherVessel = new Vessel('B', 10, 7);
+        Vessel.Lage lage = otherVessel.setSecondSeitenpeilung(12, 20, 4.5, me);
+        binding.radar.addVessel(otherVessel);
+        OwnVesselData input = new OwnVesselData();
+        input.show(getSupportFragmentManager(), null);
     }
 }

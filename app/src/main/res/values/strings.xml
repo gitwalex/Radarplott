@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Radarplott</string>
+    <string name="ownVessel">Eigenes Schiff</string>
+    <string name="heading">KA (rwK)</string>
+    <string name="speed">vA (FdW)</string>
+    <string name="ok">OK</string>
 </resources>

@@ -11,10 +11,10 @@ import androidx.annotation.Nullable;
  */
 public class Gerade2D {
     // Gerade2D ax + by +c = 0
-    private final double a, b, c;
+    private final float a, b, c;
     // Gerade2D Punkt2D_A + lambda * Richtungsvektor
     // Gerade2D y = mx + n
-    private final double m, n;
+    private final float m, n;
     private final Punkt2D punkt1, punkt2;
     /* Richtungsvektor rv und Normalenektor nv der Geraden */
     private final Vektor2D rv, nv;
@@ -60,15 +60,15 @@ public class Gerade2D {
                             " / " + richtung.toString());
             throw new IllegalArgumentException("Die Basispunkte einer Gerade duerfen nicht identisch sein");
         }
-        double x1 = von.x;
-        double y1 = von.y;
-        double x2 = nach.x;
-        double y2 = nach.y;
+        float x1 = von.x;
+        float y1 = von.y;
+        float x2 = nach.x;
+        float y2 = nach.y;
         punkt1 = von;
         punkt2 = nach;
         rv = richtung.getEinheitsvektor();
-        double dx = x2 - x1;
-        double dy = y2 - y1;
+        float dx = x2 - x1;
+        float dy = y2 - y1;
         a = -dy;
         b = dx;
         c = -(x1 * a + y1 * b);
@@ -77,8 +77,8 @@ public class Gerade2D {
             m = (y2 - y1) / (x2 - x1);
             n = y1 - x1 * m;
         } else {
-            m = Double.NaN;
-            n = Double.NaN;
+            m = Float.NaN;
+            n = Float.NaN;
         }
     }
 
@@ -88,10 +88,10 @@ public class Gerade2D {
      * @param x, y Koordinaten des Punktes, zu dem der Abstand ermittelt werden soll
      * @return Abstand
      */
-    public double getAbstand(double x, double y) {
-        double q = a * a + b * b;
-        double p = a * x + b * y + c;
-        return (p) / Math.sqrt(q);
+    public float getAbstand(float x, float y) {
+        float q = a * a + b * b;
+        float p = a * x + b * y + c;
+        return (float) ((p) / Math.sqrt(q));
     }
 
     /**
@@ -100,12 +100,11 @@ public class Gerade2D {
      * @param pkt Punkt, zu dem der Abstand ermittelt werden soll
      * @return Abstand
      */
-    public double getAbstand(Punkt2D pkt) {
-        double q = a * a + b * b;
-        double p = a * pkt.x + b * pkt.y + c;
-        return (p) / Math.sqrt(q);
+    public float getAbstand(Punkt2D pkt) {
+        float q = a * a + b * b;
+        float p = a * pkt.x + b * pkt.y + c;
+        return (float) ((p) / Math.sqrt(q));
     }
-
 
     /**
      * Ermittelt den Abstand zweier Punkte auf der Geraden.
@@ -116,7 +115,7 @@ public class Gerade2D {
      * zurueckgegebeb
      * @throws IllegalArgumentException wenn einer oder beide Punkte nicht auf der Geraden liegen
      */
-    public double getAbstandPunkte(Punkt2D p, Punkt2D q) throws IllegalArgumentException {
+    public float getAbstandPunkte(Punkt2D p, Punkt2D q) throws IllegalArgumentException {
         if (isPunktAufGerade(p) || isPunktAufGerade(q)) {
             return p.abstand(q);
         } else {
@@ -131,9 +130,9 @@ public class Gerade2D {
      * @return Punkt auf der Gerade, der senkrecht zum uebergebenen Punkt liegt.
      */
     public Punkt2D getLotpunkt(Punkt2D p) {
-        double abstand = (double) getAbstand(p);
-        double q1 = p.x + nv.getEndpunkt().x * abstand;
-        double q2 = p.y + nv.getEndpunkt().y * abstand;
+        float abstand = (float) getAbstand(p);
+        float q1 = p.x + nv.getEndpunkt().x * abstand;
+        float q2 = p.y + nv.getEndpunkt().y * abstand;
         Punkt2D q = new Punkt2D(q1, q2);
         if (!isPunktAufGerade(q)) {
             q1 = p.x - nv.getEndpunkt().x * abstand;
@@ -174,7 +173,7 @@ public class Gerade2D {
      * @return Array mit 2 Punkten oder Null, wenn Punkt auf der Geraden liegt.
      */
     @Nullable
-    public Punkt2D[] getPunkteAufGerade(Punkt2D p, double d) {
+    public Punkt2D[] getPunkteAufGerade(Punkt2D p, float d) {
         if (isPunktAufGerade(p)) {
             return null;
         }
@@ -199,7 +198,7 @@ public class Gerade2D {
      */
     public Punkt2D getSchnittpunkt(Gerade2D g) {
         // liefert den Schnittpunkt zweier Geraden
-        double x, y;
+        float x, y;
         if (g.a != 0) {
             y = (a / g.a * g.c - c) / (b - a / g.a * g.b);
             x = (g.b * y + g.c) / (-g.a);
@@ -216,40 +215,41 @@ public class Gerade2D {
      * Schnittpunkte der Geraden mit einem {@link Kreis2D}
      *
      * @param k Kreis
-     * @return Schnittpunkte der Gerade mit dem Kreis. Gibt es keine Schnittpunkte, wird jeweils
+     * @return Schnittpunkte der Gerade mit dem Kreis. Gibt es keine Schnittpunkte, wird
      * null zurueckgeliefert. Bei genau einem Schnittpunkt (Tangente) sind beide Punkte identisch
      */
+    @Nullable
     public Punkt2D[] getSchnittpunkt(Kreis2D k) {
         /*
          * liefert die Schnittpunkte eines uebergebenen Kreises mit der Gerade
          */
-        Punkt2D[] v = new Punkt2D[2];
-        v[0] = null;
-        v[1] = null;
-        double r = k.getRadius();
-        double m1 = k.getMittelpunkt().x;
-        double m2 = k.getMittelpunkt().y;
+        Punkt2D[] v = null;
+        float r = k.getRadius();
+        float m1 = k.getMittelpunkt().x;
+        float m2 = k.getMittelpunkt().y;
         if ((Math.round(b * 1E6)) / 1E6 != 0) {
-            double s = -b * m2 - c;
-            double t = (b * b * m1 + s * a) / (a * a + b * b);
-            double z1 = r * r * b * b - b * b * m1 * m1 - s * s;
-            double z2 = a * a + b * b;
-            double z3 = t * t;
-            double z4 = z1 / z2 + z3;
-            double zwischenergebnis = Math.round(z4 * 1000000);
+            float s = -b * m2 - c;
+            float t = (b * b * m1 + s * a) / (a * a + b * b);
+            float z1 = r * r * b * b - b * b * m1 * m1 - s * s;
+            float z2 = a * a + b * b;
+            float z3 = t * t;
+            float z4 = z1 / z2 + z3;
+            float zwischenergebnis = Math.round(z4 * 1000000);
             if (zwischenergebnis >= 0) {
-                zwischenergebnis = (double) Math.sqrt(zwischenergebnis / 1000000);
+                v = new Punkt2D[2];
+                zwischenergebnis = (float) Math.sqrt(zwischenergebnis / 1000000);
                 zwischenergebnis = -zwischenergebnis;
-                double x = zwischenergebnis + t;
+                float x = zwischenergebnis + t;
                 v[0] = new Punkt2D(x, (-c - a * x) / b);
                 x = -zwischenergebnis + t;
                 v[1] = new Punkt2D(x, (-c - a * x) / b);
             }
         } else {
-            double x = c / a;
-            double y = (double) (m2 + Math.sqrt(r * r - Math.pow(c / a - m1, 2)));
+            v = new Punkt2D[2];
+            float x = c / a;
+            float y = (float) (m2 + Math.sqrt(r * r - Math.pow(c / a - m1, 2)));
             v[0] = new Punkt2D(x, y);
-            y = (double) (m2 - Math.sqrt(r * r - Math.pow(c / a - m1, 2)));
+            y = (float) (m2 - Math.sqrt(r * r - Math.pow(c / a - m1, 2)));
             v[1] = new Punkt2D(x, y);
         }
         return v;
@@ -269,7 +269,7 @@ public class Gerade2D {
      *
      * @return ermittelt den Winkel den die Gerade mit der y-Achse bildet (in 360 Grad-Darstellung)
      */
-    public double getYAxisAngle() {
+    public float getYAxisAngle() {
         return rv.getYAxisAngle();
     }
 
@@ -289,8 +289,8 @@ public class Gerade2D {
      * @param d Wert, der gerundet werden soll
      * @return gerundeter Wert
      */
-    private double rundeWert(double d) {
-        return Math.round(d * 1E6) / 1E6;
+    private float rundeWert(float d) {
+        return (float) (Math.round(d * 1E6) / 1E6);
     }
 
     /*
@@ -300,9 +300,9 @@ public class Gerade2D {
      */
     @Override
     public String toString() {
-        double a = rundeWert(this.a);
-        double b = rundeWert(this.b);
-        double c = rundeWert(this.c);
+        float a = rundeWert(this.a);
+        float b = rundeWert(this.b);
+        float c = rundeWert(this.c);
         return ("Geradengleichung: " + a + " x  + " + b + " y + " + c + " = 0 Punkt: " + punkt1.toString() +
                 "Normalenvektor: " + getNormalenvektor().toString() + ", Richtungsvektor: " + rv.toString() + "m = " +
                 rundeWert(m) + ", n = " + rundeWert(n) + "(y= " + rundeWert(m) + " x " + rundeWert(n) + ")");

@@ -19,8 +19,8 @@ public class LageTest {
 
     @Test
     public void lage() {
-        Vessel myVessel = new Vessel(80.0, 8);
-        Vessel otherVessel = new Vessel(10, 7.0);
+        Vessel myVessel = new Vessel(80, 8);
+        Vessel otherVessel = new Vessel('B', 10, 7.0);
         Vessel.Lage lage = otherVessel.setSecondSeitenpeilung(12, 20, 4.5, myVessel);
         assertEquals(141.5, otherVessel.getHeading(), 0.1);
         assertEquals(15.3, otherVessel.getSpeed(), 0.1);
@@ -35,8 +35,8 @@ public class LageTest {
 
     @Test
     public void manoever() {
-        Vessel otherVessel = new Vessel(70, 8.0);
-        Vessel myVessel = new Vessel(20.0, 6);
+        Vessel otherVessel = new Vessel('B', 70, 8.0);
+        Vessel myVessel = new Vessel(20, 6);
         Vessel.Lage lage = otherVessel.setSecondSeitenpeilung(12, 71, 6, myVessel);
         assertEquals(283.5, otherVessel.getHeading(), 0.1);
         assertEquals(7.4, otherVessel.getSpeed(), 0.1);
@@ -47,7 +47,7 @@ public class LageTest {
         assertEquals(157.0, lage.pCPA, 0.1);
         assertEquals(0.6, lage.bcrDistance, 0.1);
         assertEquals(38.2, lage.tBCR, 0.1);
-        myVessel = new Vessel(40.0, 6);
+        myVessel = new Vessel(40, 6);
         lage = otherVessel.setSecondSeitenpeilung(12, 51, 6, myVessel);
         assertEquals(208.0, otherVessel.getHeading(), 0.1);
         assertEquals(2.9, otherVessel.getSpeed(), 0.1);

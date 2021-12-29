@@ -77,7 +77,7 @@ public class Vektor2D {
      * @return Vektor mit der Laenge eins und der gleichen Richtung
      */
     public final Vektor2D getEinheitsvektor() {
-        double l = (double) length();
+        float l = (float) length();
         return new Vektor2D(new Punkt2D(endpunkt.x / l, endpunkt.y / l));
     }
 
@@ -96,7 +96,7 @@ public class Vektor2D {
      * @param v Vektor, mit dem das Skalarprodukt berechnet wird
      * @return das Skalarprodukt
      */
-    public final double getSkalar(Vektor2D v) {
+    public final float getSkalar(Vektor2D v) {
         return v.getEndpunkt().x * this.getEndpunkt().x + v.getEndpunkt().y * this.getEndpunkt().y;
     }
 
@@ -104,10 +104,10 @@ public class Vektor2D {
      * Liefert den Winkel zwischen zwei Vektoren zurueck
      *
      * @param v Vektor, der zur Winkelberechnung benutzt werden soll
-     * @return double Winkel in Degrees
+     * @return float Winkel in Degrees
      */
-    public final double getWinkel(Vektor2D v) {
-        return Math.toDegrees(Math.acos(getSkalar(v) / (length() * v.length())));
+    public final float getWinkel(Vektor2D v) {
+        return (float) Math.toDegrees(Math.acos(getSkalar(v) / (length() * v.length())));
     }
 
     /**
@@ -115,10 +115,10 @@ public class Vektor2D {
      *
      * @return Winkel zwischen Vektor und Y-Achse in 360-Grad-Darstellung
      */
-    public final double getYAxisAngle() {
+    public final float getYAxisAngle() {
         // Achtung - Besonderheit atan2: Koordinaten muessen vertauscht
         // angegeben werden
-        return (double) ((450 - Math.toDegrees(Math.atan2(endpunkt.y, endpunkt.x))) % 360);
+        return (float) ((450 - Math.toDegrees(Math.atan2(endpunkt.y, endpunkt.x))) % 360);
     }
 
     /**
@@ -126,11 +126,11 @@ public class Vektor2D {
      *
      * @return laenge des Vektors
      */
-    public final double length() {
+    public final float length() {
         /*
          * liefert Laenge des Vektors zurueck (Satz des Phytagoras)
          */
-        return Math.hypot(endpunkt.x, endpunkt.y);
+        return (float) Math.hypot(endpunkt.x, endpunkt.y);
     }
 
     /**

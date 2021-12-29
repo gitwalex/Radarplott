@@ -12,7 +12,7 @@ import java.util.Locale;
 public class Kreis2D {
     // Mittelpunkt und Radius des Kreise
     private final Punkt2D mittelpunkt;
-    private final double radius;
+    private final float radius;
 
     /**
      * Erstellt einen Einheitskreis mit dem Radius 1 um den Nullpunkt des Koordinatensystems
@@ -30,7 +30,7 @@ public class Kreis2D {
      * @param mittelpunkt Mittelpunkt des Kreises
      * @param radius      Radius des Kreises
      */
-    public Kreis2D(Punkt2D mittelpunkt, double radius) {
+    public Kreis2D(Punkt2D mittelpunkt, float radius) {
         this.mittelpunkt = new Punkt2D(mittelpunkt.x, mittelpunkt.y);
         this.radius = radius;
     }
@@ -49,7 +49,7 @@ public class Kreis2D {
      *
      * @return Radius
      */
-    public final double getRadius() {
+    public final float getRadius() {
         return radius;
     }
 
@@ -60,9 +60,9 @@ public class Kreis2D {
      * @return false, wenn es keinen Schnittpunkt gibt, ansonsten true
      */
     public final Punkt2D[] getSchnittpunkt(Kreis2D k) {
-        double r1 = getRadius();
-        double r2 = k.getRadius();
-        double d = k.getMittelpunkt().abstand(getMittelpunkt());
+        float r1 = getRadius();
+        float r2 = k.getRadius();
+        float d = k.getMittelpunkt().abstand(getMittelpunkt());
         /*
          * ist der Abstand der beiden Punkte groesser als die Summe der Radien,
          * gibt es keinen Schnittpunkt.
@@ -83,19 +83,19 @@ public class Kreis2D {
          * voneinander abgezogen werden
          */
         // Mittelpunkte merken
-        double p1 = getMittelpunkt().x;
-        double p2 = getMittelpunkt().y;
-        double m1 = k.getMittelpunkt().x;
-        double m2 = k.getMittelpunkt().y;
+        float p1 = getMittelpunkt().x;
+        float p2 = getMittelpunkt().y;
+        float m1 = k.getMittelpunkt().x;
+        float m2 = k.getMittelpunkt().y;
         // Loesung von hier: http://www.c-plusplus.de/forum/201202-full
-        double dx = m1 - p1;
-        double dy = m2 - p2;
-        double a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
-        double h = (double) Math.sqrt(r1 * r1 - a * a);
-        double sp1x = p1 + (a / d) * dx - (h / d) * dy; // Schnittpunkt 1
-        double sp1y = p2 + (a / d) * dy + (h / d) * dx;
-        double sp2x = p1 + (a / d) * dx + (h / d) * dy; // Schnittpinkt 2
-        double sp2y = p2 + (a / d) * dy - (h / d) * dx;
+        float dx = m1 - p1;
+        float dy = m2 - p2;
+        float a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+        float h = (float) Math.sqrt(r1 * r1 - a * a);
+        float sp1x = p1 + (a / d) * dx - (h / d) * dy; // Schnittpunkt 1
+        float sp1y = p2 + (a / d) * dy + (h / d) * dx;
+        float sp2x = p1 + (a / d) * dx + (h / d) * dy; // Schnittpinkt 2
+        float sp2y = p2 + (a / d) * dy - (h / d) * dx;
         Punkt2D[] e = new Punkt2D[2];
         e[0] = new Punkt2D(sp1x, sp1y);
         e[1] = new Punkt2D(sp2x, sp2y);
@@ -110,7 +110,7 @@ public class Kreis2D {
      * @return Array mit den Beruehrpunkten. Ist null, wenn der Bezugspunkt im Kreis liegt
      */
     public final Punkt2D[] getTangente(Punkt2D bezugspunkt) {
-        double a, b, c, a1, a2, a3;
+        float a, b, c, a1, a2, a3;
         Punkt2D[] p = new Punkt2D[2];
         /*
          * liefert die Beruehrpunkte zweier Tangenten an den Kreis zuruek, die
@@ -127,16 +127,16 @@ public class Kreis2D {
             return p;
         }
         a = radius;
-        c = (double) Math.hypot(mittelpunkt.x - bezugspunkt.x, mittelpunkt.y - bezugspunkt.y);
-        b = (double) Math.sqrt(Math.pow(c, 2) - Math.pow(a, 2));
-        a1 = (double) Math.atan2(bezugspunkt.x - mittelpunkt.x, bezugspunkt.y - mittelpunkt.y);
-        a2 = (double) Math.asin(b / c);
+        c = (float) Math.hypot(mittelpunkt.x - bezugspunkt.x, mittelpunkt.y - bezugspunkt.y);
+        b = (float) Math.sqrt(Math.pow(c, 2) - Math.pow(a, 2));
+        a1 = (float) Math.atan2(bezugspunkt.x - mittelpunkt.x, bezugspunkt.y - mittelpunkt.y);
+        a2 = (float) Math.asin(b / c);
         a3 = a1 - a2;
-        p[0] = new Punkt2D((double) ((Math.sin(a3) * a) + mittelpunkt.x),
-                (double) ((Math.cos(a3) * a) + mittelpunkt.y));
+        p[0] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x),
+                (float) ((Math.cos(a3) * a) + mittelpunkt.y));
         a3 = a1 + a2;
-        p[1] = new Punkt2D((double) ((Math.sin(a3) * a) + mittelpunkt.x),
-                (double) ((Math.cos(a3) * a) + mittelpunkt.y));
+        p[1] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x),
+                (float) ((Math.cos(a3) * a) + mittelpunkt.y));
         return p;
     }
 
@@ -147,9 +147,9 @@ public class Kreis2D {
      * @return true: Punkt liegt auf dem Kreis
      */
     public final boolean isAufKreis(Punkt2D p) {
-        double s = Math.sqrt(
+        float s = (float) Math.sqrt(
                 ((p.x - mittelpunkt.x) * (p.x - mittelpunkt.x)) + ((p.y - mittelpunkt.y) * (p.y - mittelpunkt.y)));
-        double d = s - radius;
+        float d = s - radius;
         return Math.round(d * 1E6) == 0;
     }
 

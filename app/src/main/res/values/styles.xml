@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="RawApp.TextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="RawApp.TextAppearance.Small" parent="RawApp.TextAppearance">
+        <item name="android:textSize">@dimen/smallText</item>
+    </style>
+
+    <style name="RawApp.TextAppearance.Medium" parent="RawApp.TextAppearance.Small">
+        <item name="android:textSize">@dimen/mediumText</item>
+    </style>
+
+
+    <style name="RawApp.TextAppearance.Large" parent="RawApp.TextAppearance.Small">
+        <item name="android:textSize">@dimen/largeText</item>
+    </style>
+
+    <style name="RawApp.TextAppearance.ExtraSmall" parent="RawApp.TextAppearance">
+        <item name="android:textSize">@dimen/extraSmallText</item>
+    </style>
+
+
+</resources>
