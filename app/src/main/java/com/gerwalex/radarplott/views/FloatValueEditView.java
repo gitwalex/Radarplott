@@ -1,6 +1,9 @@
 package com.gerwalex.radarplott.views;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 
 import androidx.annotation.CallSuper;
@@ -13,35 +16,34 @@ import androidx.databinding.InverseBindingListener;
 import java.util.Objects;
 
 /**
- * Zeigt einen Betrag in der jeweiligen Waehrung an. Als Defult wird bei negativen Werten der Text
- * in rot gezeigt.
+ * Eingabe eines Float-Wertes.
  */
-public class DataInputTextView extends AppCompatEditText {
+public class FloatValueEditView extends AppCompatEditText {
     private InverseBindingListener mBindingListener;
     private float value;
 
     @InverseBindingAdapter(attribute = "value")
-    public static float getValue(DataInputTextView view) {
+    public static float getValue(FloatValueEditView view) {
         return view.getValue();
     }
 
     @BindingAdapter(value = {"value", "valueAttrChanged"}, requireAll = false)
-    public static void setValue(DataInputTextView view, float value, InverseBindingListener listener) {
-        view.mBindingListener = listener;
+    public static void setValue(FloatValueEditView view, float value, InverseBindingListener listener) {
+        view.setValueChangeListener(listener);
         view.setValue(value);
     }
 
-    public DataInputTextView(Context context) {
+    public FloatValueEditView(Context context) {
         super(context);
         init();
     }
 
-    public DataInputTextView(Context context, AttributeSet attrs) {
+    public FloatValueEditView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public DataInputTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FloatValueEditView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -61,9 +63,6 @@ public class DataInputTextView extends AppCompatEditText {
     public void setValue(float value) {
         if (!Objects.equals(this.value, value)) {
             this.value = value;
-            if (mBindingListener != null) {
-                mBindingListener.onChange();
-            }
             setText(String.valueOf(value));
         }
     }
@@ -75,13 +74,31 @@ public class DataInputTextView extends AppCompatEditText {
         setEms(7);
         setSelectAllOnFocus(true);
         setCursorVisible(false);
-    }
-
-    public void postValue(float value) {
-        post(() -> setValue(value));
+        setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
     }
 
     public void setValueChangeListener(InverseBindingListener listener) {
         mBindingListener = listener;
+        addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    FloatValueEditView.this.value = Float.parseFloat(s.toString());
+                    if (mBindingListener != null) {
+                        mBindingListener.onChange();
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+        });
     }
 }

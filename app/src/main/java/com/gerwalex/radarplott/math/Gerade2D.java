@@ -117,7 +117,7 @@ public class Gerade2D {
      */
     public float getAbstandPunkte(Punkt2D p, Punkt2D q) throws IllegalArgumentException {
         if (isPunktAufGerade(p) || isPunktAufGerade(q)) {
-            return p.abstand(q);
+            return p.getAbstand(q);
         } else {
             throw new IllegalArgumentException("Beide Punkte muessen auf der Geraden liegen");
         }

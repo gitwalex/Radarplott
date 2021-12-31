@@ -8,6 +8,8 @@ import androidx.databinding.library.baseAdapters.BR;
 import com.gerwalex.radarplott.math.Gerade2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 
+import java.util.Objects;
+
 public class Vessel extends BaseObservable {
     public final Character name;
     private float dist1, dist2;
@@ -15,6 +17,10 @@ public class Vessel extends BaseObservable {
     private float headingRelativ = -1;
     private Gerade2D kurslinieAbsolut;
     private Gerade2D kurslinieRelativ;
+    /**
+     * Abstand zwischen den Peilungen in Minuten
+     */
+    private int minutes;
     private int rwP1, rwP2;
     private float speed;
     private float speedRelativ = -1;
@@ -43,8 +49,8 @@ public class Vessel extends BaseObservable {
         startPosition = new Punkt2D().getPunkt2D(peilungRechtweisend, dist1);
     }
 
-    public Punkt2D getFirstPosition() {
-        return startPosition;
+    public Punkt2D getAktPosition() {
+        return aktPosition;
     }
 
     /**
@@ -60,9 +66,8 @@ public class Vessel extends BaseObservable {
     @Bindable
     public void setHeading(float heading) {
         if (this.heading != heading) {
-            this.heading = heading % 360;
-            aktPosition = new Punkt2D(0, 0);
-            startPosition = aktPosition.getPunkt2D(this.heading, -(speed / 6f));
+            this.heading = heading;
+            startPosition = aktPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
             kurslinieRelativ = kurslinieAbsolut = new Gerade2D(startPosition, aktPosition);
             notifyPropertyChanged(BR.heading);
         }
@@ -81,6 +86,11 @@ public class Vessel extends BaseObservable {
     }
 
     public Lage getLage(Vessel me) {
+        Punkt2D otherPos = me.getPosition(-minutes);
+        relPosition = startPosition.add(otherPos);
+        kurslinieAbsolut = new Gerade2D(relPosition, aktPosition);
+        heading = kurslinieAbsolut.getYAxisAngle();
+        speed = (float) (relPosition.getAbstand(aktPosition) * 60.0 / (float) minutes);
         return new Lage(this, me);
     }
 
@@ -90,10 +100,6 @@ public class Vessel extends BaseObservable {
 
     public Punkt2D getRelPosition() {
         return relPosition;
-    }
-
-    public Punkt2D getSecondPosition() {
-        return aktPosition;
     }
 
     /**
@@ -121,11 +127,42 @@ public class Vessel extends BaseObservable {
         return speedRelativ;
     }
 
+    public Punkt2D getStartPosition() {
+        return startPosition;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Vessel vessel = (Vessel) o;
+        return Float.compare(vessel.dist1, dist1) == 0 && Float.compare(vessel.dist2, dist2) == 0 &&
+                Float.compare(vessel.heading, heading) == 0 &&
+                Float.compare(vessel.headingRelativ, headingRelativ) == 0 && minutes == vessel.minutes &&
+                rwP1 == vessel.rwP1 && rwP2 == vessel.rwP2 && Float.compare(vessel.speed, speed) == 0 &&
+                Float.compare(vessel.speedRelativ, speedRelativ) == 0 && Objects.equals(name, vessel.name) &&
+                Objects.equals(kurslinieAbsolut, vessel.kurslinieAbsolut) &&
+                Objects.equals(kurslinieRelativ, vessel.kurslinieRelativ) &&
+                startPosition.equals(vessel.startPosition) && aktPosition.equals(vessel.aktPosition) &&
+                relPosition.equals(vessel.relPosition);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(name, dist1, dist2, heading, headingRelativ, kurslinieAbsolut, kurslinieRelativ, minutes, rwP1,
+                        rwP2, speed, speedRelativ, startPosition, aktPosition, relPosition);
+    }
+
     public float getTimeTo(@NonNull Punkt2D p) {
         if (!kurslinieRelativ.isPunktAufGerade(p)) {
             throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
         }
-        float timeToP = (float) (aktPosition.abstand(p) / speedRelativ * 60.0);
+        float timeToP = (float) (aktPosition.getAbstand(p) / speedRelativ * 60.0);
         return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
@@ -163,23 +200,28 @@ public class Vessel extends BaseObservable {
     /**
      * Sett die zweite Seitenpeilung. Dabei werden dann Geschwindigkeit und Kurs (neu) berechnet
      *
-     * @param minutes            Zeitunterschied zwischen zwei Peilungen in Minuten
-     * @param radarSeitenPeilung zweite Rechtweisende Peilung
-     * @param distance           distance bei der zweiten Peilung
+     * @param minutes  Zeitunterschied zwischen zwei Peilungen in Minuten
+     * @param rwP      zweite Rechtweisende Peilung
+     * @param distance distance bei der zweiten Peilung
      */
-    public Lage setSecondSeitenpeilung(int minutes, int radarSeitenPeilung, double distance, Vessel me) {
+    public Lage setSecondSeitenpeilung(int minutes, int rwP, double distance, Vessel me) {
         dist2 = (float) distance;
-        rwP2 = radarSeitenPeilung;
-        aktPosition = new Punkt2D().getPunkt2D(radarSeitenPeilung, dist2);
+        rwP2 = rwP;
+        this.minutes = minutes;
+        aktPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         kurslinieRelativ = new Gerade2D(startPosition, aktPosition);
         headingRelativ = kurslinieRelativ.getYAxisAngle();
-        speedRelativ = (float) (aktPosition.abstand(startPosition) * 60.0 / (float) minutes);
-        Punkt2D otherPos = me.getPosition(-minutes);
-        relPosition = startPosition.add(otherPos);
-        kurslinieAbsolut = new Gerade2D(relPosition, aktPosition);
-        heading = kurslinieAbsolut.getYAxisAngle();
-        speed = (float) (relPosition.abstand(aktPosition) * 60.0 / (float) minutes);
+        speedRelativ = (float) (aktPosition.getAbstand(startPosition) * 60.0 / (float) minutes);
         return getLage(me);
+    }
+
+    @Override
+    public String toString() {
+        return "Vessel{" + "name=" + name + ", dist1=" + dist1 + ", dist2=" + dist2 + ", heading=" + heading +
+                ", headingRelativ=" + headingRelativ + ", kurslinieAbsolut=" + kurslinieAbsolut +
+                ", kurslinieRelativ=" + kurslinieRelativ + ", minutes=" + minutes + ", rwP1=" + rwP1 + ", rwP2=" +
+                rwP2 + ", speed=" + speed + ", speedRelativ=" + speedRelativ + ", startPosition=" + startPosition +
+                ", aktPosition=" + aktPosition + ", relPosition=" + relPosition + '}';
     }
 
     public static class Lage {
@@ -222,12 +264,12 @@ public class Vessel extends BaseObservable {
             this.gegner = gegner;
             this.me = me;
             cpa = gegner.kurslinieRelativ.getLotpunkt(me.aktPosition);
-            cpaDistance = cpa.abstand(me.aktPosition);
+            cpaDistance = cpa.getAbstand(me.aktPosition);
             pCPA = new Gerade2D(me.aktPosition, cpa).getYAxisAngle();
             sCPA = (pCPA + me.getHeading());
             tCPA = gegner.getTimeTo(cpa);
             bcr = gegner.kurslinieRelativ.getSchnittpunkt(me.kurslinieRelativ);
-            bcrDistance = me.aktPosition.abstand(bcr);
+            bcrDistance = me.aktPosition.getAbstand(bcr);
             tBCR = gegner.getTimeTo(bcr);
         }
 

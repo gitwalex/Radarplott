@@ -62,7 +62,7 @@ public class Kreis2D {
     public final Punkt2D[] getSchnittpunkt(Kreis2D k) {
         float r1 = getRadius();
         float r2 = k.getRadius();
-        float d = k.getMittelpunkt().abstand(getMittelpunkt());
+        float d = k.getMittelpunkt().getAbstand(getMittelpunkt());
         /*
          * ist der Abstand der beiden Punkte groesser als die Summe der Radien,
          * gibt es keinen Schnittpunkt.
@@ -123,7 +123,7 @@ public class Kreis2D {
         // Ist der Abstand des Bezugspunktes zum Mittelpunkt kleiner als der
         // Radius, liegt der Bezugspunkt in oder auf dem Kreis. Dann gibt es
         // keine Tangente
-        if (mittelpunkt.abstand(bezugspunkt) <= radius) {
+        if (mittelpunkt.getAbstand(bezugspunkt) <= radius) {
             return p;
         }
         a = radius;
@@ -161,7 +161,7 @@ public class Kreis2D {
      * Kreises
      */
     public final boolean liegtImKreis(Punkt2D p) {
-        return (p.abstand(mittelpunkt) < radius);
+        return (p.getAbstand(mittelpunkt) < radius);
     }
 
     @NonNull

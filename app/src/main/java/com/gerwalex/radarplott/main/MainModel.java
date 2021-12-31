@@ -7,5 +7,6 @@ import com.gerwalex.radarplott.radar.Vessel;
 
 public class MainModel extends ViewModel {
 
+    public final MutableLiveData<Vessel> clickedVessel = new MutableLiveData<>();
     public final MutableLiveData<Vessel> ownVessel = new MutableLiveData<>();
 }

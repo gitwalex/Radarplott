@@ -54,7 +54,7 @@ public class Punkt2D {
      * @param p Punkt, zu dem der Abstand berechnet werden soll
      * @return Abstand der beiden Punkte
      */
-    public final float abstand(Punkt2D p) {
+    public final float getAbstand(Punkt2D p) {
         /*
          * Anwendung Satz des Phytagoras
          */

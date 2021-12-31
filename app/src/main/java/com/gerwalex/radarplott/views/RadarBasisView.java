@@ -1,18 +1,22 @@
 package com.gerwalex.radarplott.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.ColorRes;
 import androidx.databinding.Observable;
 
 import com.gerwalex.radarplott.R;
+import com.gerwalex.radarplott.main.MainModel;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.radar.Vessel;
@@ -31,10 +35,20 @@ public class RadarBasisView extends FrameLayout {
     private final int[] colors;
     // Variablen zum Zeichnen
     private final Paint paint = new Paint();
+    private final Path ringPath = new Path();
     private final float sektorlinienlaenge = 40.0f;
+    private final float textWidth;
     private final List<VesselView> vesselList = new ArrayList<>();
-    private int colorRadarBackground;
+    Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
+        @Override
+        public void onPropertyChanged(Observable sender, int propertyId) {
+            invalidate();
+        }
+    };
+    private Bitmap bm;
+    private View canvasView;
     private Vessel mEigenesSchiff;
+    private MainModel mModel;
     private ScaleGestureDetector mScaleDetector;
     private boolean northupOrientierung = true;
     private float scale;
@@ -55,23 +69,71 @@ public class RadarBasisView extends FrameLayout {
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(getResources().getColor(R.color.colorRadarLinien));
-        colorRadarBackground = getResources().getColor(R.color.white);
         setWillNotDraw(false);
         colors = getResources().getIntArray(R.array.vesselcolors);
+        paint.setTextSize(getPx(10));
+        textWidth = paint.measureText("0000");
     }
 
     public void addVessel(Vessel vessel) {
-        if (vesselList.size() == 0) {
-            mEigenesSchiff = vessel;
-        }
         VesselView vesselView = new VesselView(vessel, colors[vesselList.size()]);
         vesselList.add(vesselView);
-        vessel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                invalidate();
+    }
+
+    private void createRadarBitmap2(int w, int h) {
+        Kreis2D outerRing = new Kreis2D(new Punkt2D(), sm * RADARRINGE);
+        bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+        canvas.translate(w / 2f, h / 2f);
+        for (int i = 0; i < RADARRINGE; i++) {
+            // zeichne Radarringe
+            canvas.drawCircle(0, 0, sm * (i + 1), paint);
+        }
+        float radius = outerRing.getRadius();
+        float startsektorlinie2grad = radius - sektorlinienlaenge / 3;
+        float endsektorlinie2grad = radius + sektorlinienlaenge / 3;
+        float startsektorlinie5grad = radius - sektorlinienlaenge / 2;
+        float endsektorlinie5grad = radius + sektorlinienlaenge / 2;
+        for (int winkel = 0; winkel < 180; winkel++) {
+            // Festlegen Laenge der sektorlienien auf dem Aussenkreis
+            // Alle 2 Grad: halbe sektorlinienlaenge
+            // Alle 10 Grad: sektorlinienlaenge
+            // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
+            // Berechnen der Linien - Abstand 2 Grad
+            if (winkel % 10 == 0) {
+                canvas.drawLine(0, -radius - sektorlinienlaenge, 0, radius + sektorlinienlaenge, paint);
+            } else {
+                if (winkel % 5 == 0) {
+                    canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, paint);
+                    canvas.drawLine(0, -startsektorlinie5grad, 0, -endsektorlinie5grad, paint);
+                } else {
+                    canvas.drawLine(0, startsektorlinie2grad, 0, endsektorlinie2grad, paint);
+                    canvas.drawLine(0, -startsektorlinie2grad, 0, -endsektorlinie2grad, paint);
+                }
             }
-        });
+            canvas.rotate(1);
+        }
+    }
+
+    private void drawVessels() {
+        if (canvasView == null) {
+            canvasView = new View(getContext()) {
+                @Override
+                protected void onDraw(Canvas canvas) {
+                    for (int i = 0; i < vesselList.size(); i++) {
+                        VesselView v = vesselList.get(i);
+                        v.onDraw(canvas, RadarBasisView.this, mEigenesSchiff);
+                    }
+                }
+            };
+            canvasView.setLayoutParams(new LayoutParams(getWidth(), getHeight()));
+            addView(canvasView);
+            canvasView.invalidate();
+        }
+    }
+
+    private int getPx(int dp) {
+        return (int) (getResources().getDisplayMetrics().density * dp);
     }
 
     public Kreis2D getRadarAussenkreis() {
@@ -101,52 +163,28 @@ public class RadarBasisView extends FrameLayout {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mEigenesSchiff != null) {
+            mEigenesSchiff.removeOnPropertyChangedCallback(ownVesselObserver);
+            vesselList.remove(0);
+        }
+    }
+
+    @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.save();
         int width = getWidth();
         int height = getHeight();
-        canvas.translate(width / 2, height / 2);
         // Hintergrundfarbe setzen
-        canvas.drawColor(colorRadarBackground);
+        //        canvas.drawColor(colorRadarBackground);
         // Mittelpunkt des Radars liegt in der Mitte des Bildes (Canvas).
         if (!northupOrientierung && mEigenesSchiff != null) {
             canvas.rotate(mEigenesSchiff.getHeading());
         }
-        for (int i = 0; i < RADARRINGE; i++) {
-            // zeichne Radarringe
-            canvas.drawCircle(0, 0, sm * (i + 1), paint);
-        }
-        int innerScale = sm * RADARRINGE;
-        for (int winkel = 0; winkel < 180; winkel++) {
-            // Festlegen Laenge der sektorlienien auf dem Aussenkreis
-            // Alle 2 Grad: halbe sektorlinienlaenge
-            // Alle 10 Grad: sektorlinienlaenge
-            // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
-            // Berechnen der Linien - Abstand 2 Grad
-            float startsektorlinie2grad = innerScale - sektorlinienlaenge / 3;
-            float endsektorlinie2grad = innerScale + sektorlinienlaenge / 3;
-            float startsektorlinie5grad = innerScale - sektorlinienlaenge / 2;
-            float endsektorlinie5grad = innerScale + sektorlinienlaenge / 2;
-            if (winkel % 10 == 0) {
-                canvas.drawLine(0, -innerScale - sektorlinienlaenge, 0, innerScale + sektorlinienlaenge, paint);
-            } else {
-                if (winkel % 5 == 0) {
-                    canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, paint);
-                    canvas.drawLine(0, -startsektorlinie5grad, 0, -endsektorlinie5grad, paint);
-                } else {
-                    canvas.drawLine(0, startsektorlinie2grad, 0, endsektorlinie2grad, paint);
-                    canvas.drawLine(0, -startsektorlinie2grad, 0, -endsektorlinie2grad, paint);
-                }
-            }
-            canvas.rotate(1);
-        }
-        for (int i = 0; i < vesselList.size(); i++) {
-            canvas.save();
-            VesselView v = vesselList.get(i);
-            v.onDraw(canvas, this);
-            canvas.restore();
-        }
+        canvas.drawBitmap(bm, 0, 0, paint);
+        drawVessels();
         canvas.restore();
     }
 
@@ -160,28 +198,61 @@ public class RadarBasisView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Log.v("Chart onMeasure w", MeasureSpec.toString(widthMeasureSpec));
         Log.v("Chart onMeasure h", MeasureSpec.toString(heightMeasureSpec));
-        int textSize = (int) paint.measureText(" 000 ");
-        int desiredWidth = getSuggestedMinimumWidth() + getPaddingLeft() + getPaddingRight() - textSize;
-        int desiredHeight = getSuggestedMinimumHeight() + getPaddingTop() + getPaddingBottom() - textSize;
-        setMeasuredDimension(measureDimension(desiredWidth, widthMeasureSpec),
+        int desiredWidth = getSuggestedMinimumWidth() + getPaddingLeft() + getPaddingRight();
+        int desiredHeight = getSuggestedMinimumHeight() + getPaddingTop() + getPaddingBottom();
+        int size = Math.min(measureDimension(desiredWidth, widthMeasureSpec),
                 measureDimension(desiredHeight, heightMeasureSpec));
+        setMeasuredDimension(size, size);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         scale = Math.min(h, w) / 2.0f;
-        sm = (int) (scale / RADARRINGE);
+        sm = (int) (scale - textWidth) / RADARRINGE;
         Log.d("gerwalex", "1sm Pixel: " + sm);
+        drawVessels();
+        createRadarBitmap2(w, h);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        performClick();
         if (MotionEvent.ACTION_DOWN == event.getAction()) {
-            Punkt2D pkt = new Punkt2D(event.getX(), event.getY());
+            int width = getWidth() / 2;
+            int height = getHeight() / 2;
+            float x = event.getX();
+            float y = event.getY();
+            Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
+            for (VesselView vesselView : vesselList) {
+                if (vesselView.isClicked(pkt)) {
+                    mModel.clickedVessel.setValue(vesselView.getVessel());
+                    Log.d("gerwalex", "click: : " + vesselView.getVessel());
+                }
+            }
             if (mEigenesSchiff != null && mEigenesSchiff.isPunktAufKurslinie(pkt)) {
             }
         }
         return mScaleDetector.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
+    public void setModel(MainModel model) {
+        mModel = model;
+        setOwnVessel(mModel.ownVessel.getValue());
+    }
+
+    public void setOwnVessel(Vessel me) {
+        if (mEigenesSchiff != null) {
+            mEigenesSchiff.removeOnPropertyChangedCallback(ownVesselObserver);
+            vesselList.remove(0);
+        }
+        mEigenesSchiff = me;
+        mEigenesSchiff.addOnPropertyChangedCallback(ownVesselObserver);
+        vesselList.add(0, new VesselView(me, colors[0]));
     }
 
     public boolean toggleNorthUpOrientierung() {

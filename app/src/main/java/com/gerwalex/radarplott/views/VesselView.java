@@ -30,11 +30,12 @@ public class VesselView {
     private final Path startpath = new Path();
     private final Paint textPaint = new Paint();
     private final Vessel vessel;
+    private Vessel.Lage aktLage;
 
     public VesselView(Vessel vessel, int color) {
         this.vessel = vessel;
-        startPos = vessel.getFirstPosition();
-        endPos = vessel.getSecondPosition();
+        startPos = vessel.getStartPosition();
+        endPos = vessel.getAktPosition();
         relPos = vessel.getRelPosition(); // null, wenn eigenes Schiff
         absolutKursLine.setStrokeWidth(relPos == null ? thickPath : thinPath);
         absolutKursLine.setAntiAlias(true);
@@ -63,7 +64,21 @@ public class VesselView {
         return null;
     }
 
-    public void onDraw(Canvas canvas, RadarBasisView radar) {
+    public Vessel getVessel() {
+        return vessel;
+    }
+
+    @Override
+    public String toString() {
+        return "VesselView{" + "vessel=" + vessel + '}';
+    }
+
+    public boolean isClicked(Punkt2D pkt) {
+        Kreis2D k = new Kreis2D(vessel.getAktPosition(), 0.5f);
+        return k.liegtImKreis(pkt);
+    }
+
+    public void onDraw(Canvas canvas, RadarBasisView radar, Vessel mEigenesSchiff) {
         float sm = radar.getSMSizeInPixel();
         Kreis2D aussenkreis = radar.getRadarAussenkreis();
         Punkt2D dest = getEndOfKurslinie(vessel.getKurslinieRelativ(), aussenkreis);
@@ -77,6 +92,7 @@ public class VesselView {
         relativPath.addCircle(-endPos.x * sm, endPos.y * sm, markerRadius, Path.Direction.CW);
         if (relPos != null) {
             // Gegner
+            aktLage = vessel.getLage(mEigenesSchiff);
             startpath.reset();
             startpath.moveTo(-endPos.x * sm, endPos.y * sm);
             startpath.lineTo(-startPos.x * sm, startPos.y * sm);
