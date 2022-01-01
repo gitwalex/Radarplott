@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.ActivityMainBinding;
+import com.gerwalex.radarplott.radar.OpponentVessel;
 import com.gerwalex.radarplott.radar.Vessel;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
         Vessel me = new Vessel(80, 8);
         mModel.ownVessel.setValue(me);
         binding.radar.setModel(mModel);
-        Vessel otherVessel = new Vessel('B', 10, 7);
-        Vessel.Lage lage = otherVessel.setSecondSeitenpeilung(12, 20, 4.5, me);
+        OpponentVessel otherVessel = new OpponentVessel('B', 10, 7);
+        otherVessel.setSecondSeitenpeilung(12, 20, 4.5, me);
         binding.radar.addVessel(otherVessel);
         mModel.clickedVessel.observe(this, new Observer<Vessel>() {
             @Override

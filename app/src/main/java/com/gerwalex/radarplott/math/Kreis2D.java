@@ -45,6 +45,18 @@ public class Kreis2D {
     }
 
     /**
+     * Liefert einen Punkt auf dem Kreis, der in einem bestimmten Winkel zur X-Achse liegt
+     *
+     * @param winkel winkel
+     * @return Punkt auf dem Kreis
+     */
+    public Punkt2D getPunkt(int winkel) {
+        float x = (float) (Math.cos(winkel) * radius);
+        float y = (float) (Math.sin(winkel) * radius);
+        return new Punkt2D(x, y);
+    }
+
+    /**
      * Liefert den Radius des Kreises
      *
      * @return Radius
@@ -132,11 +144,9 @@ public class Kreis2D {
         a1 = (float) Math.atan2(bezugspunkt.x - mittelpunkt.x, bezugspunkt.y - mittelpunkt.y);
         a2 = (float) Math.asin(b / c);
         a3 = a1 - a2;
-        p[0] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x),
-                (float) ((Math.cos(a3) * a) + mittelpunkt.y));
+        p[0] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x), (float) ((Math.cos(a3) * a) + mittelpunkt.y));
         a3 = a1 + a2;
-        p[1] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x),
-                (float) ((Math.cos(a3) * a) + mittelpunkt.y));
+        p[1] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x), (float) ((Math.cos(a3) * a) + mittelpunkt.y));
         return p;
     }
 
@@ -147,8 +157,8 @@ public class Kreis2D {
      * @return true: Punkt liegt auf dem Kreis
      */
     public final boolean isAufKreis(Punkt2D p) {
-        float s = (float) Math.sqrt(
-                ((p.x - mittelpunkt.x) * (p.x - mittelpunkt.x)) + ((p.y - mittelpunkt.y) * (p.y - mittelpunkt.y)));
+        float s = (float) Math.sqrt(((p.x - mittelpunkt.x) * (p.x - mittelpunkt.x)) +
+                ((p.y - mittelpunkt.y) * (p.y - mittelpunkt.y)));
         float d = s - radius;
         return Math.round(d * 1E6) == 0;
     }
