@@ -5,6 +5,8 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 
+import androidx.annotation.NonNull;
+
 import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.radar.OpponentVessel;
 import com.gerwalex.radarplott.radar.Vessel;
@@ -16,9 +18,7 @@ import com.gerwalex.radarplott.radar.Vessel;
  * @author Alexander Winkler
  */
 public class OpponentVesselView extends VesselView {
-    private static final int thickPath = 5;
-    private final Paint ownVesselPaint = new Paint();
-    private final Path ownVesselPath = new Path();
+    private static final int thickPath = 3;
     private final OpponentVessel vessel;
     private final Paint vesselPaint = new Paint();
     private final Path vesselPath = new Path();
@@ -32,13 +32,10 @@ public class OpponentVesselView extends VesselView {
         vesselPaint.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
         vesselPaint.setStrokeWidth(thickPath);
         //
-        ownVesselPaint.setAntiAlias(true);
-        ownVesselPaint.setStyle(Paint.Style.STROKE);
-        ownVesselPaint.setStrokeWidth(thickPath);
     }
 
     @Override
-    public void drawVessel(Canvas canvas, RadarBasisView radar) {
+    public void drawVessel(@NonNull Canvas canvas, @NonNull RadarBasisView radar) {
         super.drawVessel(canvas, radar);
         Punkt2D relPos = vessel.getRelPosition();
         Punkt2D startPos = vessel.getStartPosition();
@@ -47,18 +44,15 @@ public class OpponentVesselView extends VesselView {
         radar.drawLine(vesselPath, aktPos, startPos);
         radar.drawLine(vesselPath, startPos, relPos);
         radar.drawLine(vesselPath, relPos, aktPos);
-        radar.addCircle(vesselPath, startPos);
-        radar.addSymbol(RadarBasisView.Symbols.ownMove, vesselPath, relPos.getMittelpunkt(startPos));
-        radar.addSymbol(RadarBasisView.Symbols.realMove, vesselPath, relPos.getMittelpunkt(aktPos));
-        radar.addSymbol(RadarBasisView.Symbols.relativeMove, vesselPath, startPos.getMittelpunkt(aktPos));
+        radar.addCircle(courseline, startPos);
         canvas.drawPath(vesselPath, vesselPaint);
         //
         Vessel me = radar.getEigenesSchiff();
         if (me != null) {
             radar.drawLine(courseline, me.getAktPosition(), vessel.getCPA(me));
             radar.drawEndText(canvas, vessel.getCPA(me), "CPA");
-            canvas.drawPath(courseline, courslineStyle);
         }
+        canvas.drawPath(courseline, courslineStyle);
     }
 
     public OpponentVessel getVessel() {

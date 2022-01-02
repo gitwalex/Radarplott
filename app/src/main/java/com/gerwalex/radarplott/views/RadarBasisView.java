@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -42,17 +43,6 @@ public class RadarBasisView extends FrameLayout {
     private final Paint radarLineStyle = new Paint();
     private final float sektorlinienlaenge = 40.0f;
     private final Path symbolPath = new Path();
-    private final Paint textStyle = new Paint();
-    private final List<VesselView> vesselList = new ArrayList<>();
-    public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
-        @Override
-        public void onPropertyChanged(Observable sender, int propertyId) {
-            invalidate();
-        }
-    };
-    private Bitmap bm;
-    private Vessel mEigenesSchiff;
-    private VesselView mEigenesSchiffView;
     private final Observer<Vessel> ownVesselObserver = new Observer<Vessel>() {
         @Override
         public void onChanged(Vessel vessel) {
@@ -62,11 +52,22 @@ public class RadarBasisView extends FrameLayout {
             }
             mEigenesSchiff = vessel;
             mEigenesSchiff.addOnPropertyChangedCallback(vesselObserver);
-            mEigenesSchiffView = new VesselView(mEigenesSchiff, getEigenesSchiffColor());
+            VesselView mEigenesSchiffView = new VesselView(mEigenesSchiff, getEigenesSchiffColor());
             vesselList.add(0, mEigenesSchiffView);
             invalidate();
         }
     };
+    private final int textSize;
+    private final List<VesselView> vesselList = new ArrayList<>();
+    public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
+        @Override
+        public void onPropertyChanged(Observable sender, int propertyId) {
+            invalidate();
+        }
+    };
+    private Bitmap bm;
+    private Vessel mEigenesSchiff;
+    private final Paint textStyle = new TextPaint();
     private MainModel mModel;
     private ScaleGestureDetector mScaleDetector;
     private boolean northupOrientierung = true;
@@ -90,8 +91,9 @@ public class RadarBasisView extends FrameLayout {
         radarLineStyle.setStyle(Paint.Style.STROKE);
         radarLineStyle.setColor(getResources().getColor(R.color.colorRadarLinien));
         colors = getResources().getIntArray(R.array.vesselcolors);
-        textStyle.setColor(getResources().getColor(android.R.color.white));
-        textStyle.setTextSize(getResources().getDimensionPixelSize(R.dimen.smallText));
+        textStyle.setColor(getResources().getColor(R.color.white));
+        textSize = getResources().getDimensionPixelSize(R.dimen.smallText);
+        textStyle.setTextSize(textSize);
         textStyle.setAntiAlias(true);
         setWillNotDraw(false);
     }
@@ -123,7 +125,7 @@ public class RadarBasisView extends FrameLayout {
         float radius = outerRing.getRadius();
         Punkt2D mp = outerRing.getMittelpunkt();
         for (int i = 0; i < 36; i++) {
-            Punkt2D pkt = mp.getPunkt2D(i * 10, radius + sektorlinienlaenge);
+            Punkt2D pkt = mp.getPunkt2D(i * 10, radius + sektorlinienlaenge + textSize);
             String text = "000" + i * 10;
             drawCenteredText(canvas, new Punkt2D(pkt.x / sm, pkt.y / sm), text.substring(text.length() - 3));
         }

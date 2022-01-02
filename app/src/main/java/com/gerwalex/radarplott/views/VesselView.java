@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.gerwalex.radarplott.math.Gerade2D;
@@ -31,7 +32,7 @@ public class VesselView {
         courslineStyle.setColor(color);
     }
 
-    public void drawVessel(Canvas canvas, RadarBasisView radar) {
+    public void drawVessel(@NonNull Canvas canvas, @NonNull RadarBasisView radar) {
         Kreis2D aussenkreis = radar.getRadarAussenkreis();
         Punkt2D dest = getEndOfKurslinie(vessel.getKurslinie(), aussenkreis);
         if (dest == null) {
