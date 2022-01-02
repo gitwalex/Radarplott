@@ -4,4 +4,7 @@
     <string name="heading">KA (rwK)</string>
     <string name="speed">vA (FdW)</string>
     <string name="ok">OK</string>
+    <string name="ownVesselData">Eigenes Schiff</string>
+    <string name="rwK">KA (rwK): %03d </string>
+    <string name="fdw">vA (FdW): %.1f kn </string>
 </resources>

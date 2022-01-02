@@ -71,6 +71,10 @@ public class Vessel extends BaseObservable {
         }
     }
 
+    public int getHeadingFormatted() {
+        return Math.round((heading + 0.5f) * 10) / 10;
+    }
+
     public final Gerade2D getKurslinie() {
         return kurslinie;
     }

@@ -35,15 +35,15 @@ import java.util.List;
  */
 public class RadarBasisView extends FrameLayout {
     public final static int RADARRINGE = 8;
-    private final Paint blackPaint = new Paint();
     @ColorRes
     private final int[] colors;
-    // Variablen zum Zeichnen
-    private final Paint linienPaint = new Paint();
     private final float markerRadius = 20f;
+    // Variablen zum Zeichnen
+    private final Paint radarLineStyle = new Paint();
     private final float sektorlinienlaenge = 40.0f;
     private final Path symbolPath = new Path();
-    private final List<OpponentVesselView> vesselList = new ArrayList<>();
+    private final Paint textStyle = new Paint();
+    private final List<VesselView> vesselList = new ArrayList<>();
     public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
         @Override
         public void onPropertyChanged(Observable sender, int propertyId) {
@@ -58,10 +58,12 @@ public class RadarBasisView extends FrameLayout {
         public void onChanged(Vessel vessel) {
             if (mEigenesSchiff != null) {
                 mEigenesSchiff.removeOnPropertyChangedCallback(vesselObserver);
+                vesselList.remove(0);
             }
             mEigenesSchiff = vessel;
             mEigenesSchiff.addOnPropertyChangedCallback(vesselObserver);
             mEigenesSchiffView = new VesselView(mEigenesSchiff, getEigenesSchiffColor());
+            vesselList.add(0, mEigenesSchiffView);
             invalidate();
         }
     };
@@ -82,16 +84,15 @@ public class RadarBasisView extends FrameLayout {
 
     public RadarBasisView(Context context, AttributeSet attrs, int style) {
         super(context, attrs, style);
-        linienPaint.setTextSize(40);
-        linienPaint.setFakeBoldText(true);
-        linienPaint.setAntiAlias(true);
-        linienPaint.setStyle(Paint.Style.STROKE);
-        linienPaint.setColor(getResources().getColor(R.color.colorRadarLinien));
+        radarLineStyle.setTextSize(40);
+        radarLineStyle.setFakeBoldText(true);
+        radarLineStyle.setAntiAlias(true);
+        radarLineStyle.setStyle(Paint.Style.STROKE);
+        radarLineStyle.setColor(getResources().getColor(R.color.colorRadarLinien));
         colors = getResources().getIntArray(R.array.vesselcolors);
-        blackPaint.setColor(getResources().getColor(R.color.black));
-        blackPaint.setTextSize(30f);
-        blackPaint.setAntiAlias(true);
-        blackPaint.setStyle(Paint.Style.STROKE);
+        textStyle.setColor(getResources().getColor(android.R.color.white));
+        textStyle.setTextSize(getResources().getDimensionPixelSize(R.dimen.smallText));
+        textStyle.setAntiAlias(true);
         setWillNotDraw(false);
     }
 
@@ -99,8 +100,8 @@ public class RadarBasisView extends FrameLayout {
         path.addCircle(pos.x * sm, -pos.y * sm, markerRadius, Path.Direction.CW);
     }
 
-    public void addSymbol(Symbols symbol, Punkt2D mittelpunkt) {
-        symbol.addSymbol(symbolPath, mittelpunkt, sm);
+    public void addSymbol(Symbols symbol, Path path, Punkt2D mittelpunkt) {
+        symbol.addSymbol(path, mittelpunkt, sm);
     }
 
     public void addVessel(OpponentVessel vessel) {
@@ -109,7 +110,7 @@ public class RadarBasisView extends FrameLayout {
     }
 
     private void createRadarBitmap2(int w, int h) {
-        int textWidth = getTextRect(blackPaint, "000").width();
+        int textWidth = getTextRect(textStyle, "000").width();
         sm = (int) (scale - textWidth * 2) / RADARRINGE;
         outerRing = new Kreis2D(new Punkt2D(), sm * RADARRINGE);
         bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
@@ -117,7 +118,7 @@ public class RadarBasisView extends FrameLayout {
         canvas.translate(w / 2f, h / 2f);
         for (int i = 0; i < RADARRINGE; i++) {
             // zeichne Radarringe
-            canvas.drawCircle(0, 0, sm * (i + 1), linienPaint);
+            canvas.drawCircle(0, 0, sm * (i + 1), radarLineStyle);
         }
         float radius = outerRing.getRadius();
         Punkt2D mp = outerRing.getMittelpunkt();
@@ -137,14 +138,14 @@ public class RadarBasisView extends FrameLayout {
             // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
             // Berechnen der Linien - Abstand 2 Grad
             if (winkel % 10 == 0) {
-                canvas.drawLine(0, -radius - sektorlinienlaenge, 0, radius + sektorlinienlaenge, linienPaint);
+                canvas.drawLine(0, -radius - sektorlinienlaenge, 0, radius + sektorlinienlaenge, radarLineStyle);
             } else {
                 if (winkel % 5 == 0) {
-                    canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, linienPaint);
-                    canvas.drawLine(0, -startsektorlinie5grad, 0, -endsektorlinie5grad, linienPaint);
+                    canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, radarLineStyle);
+                    canvas.drawLine(0, -startsektorlinie5grad, 0, -endsektorlinie5grad, radarLineStyle);
                 } else {
-                    canvas.drawLine(0, startsektorlinie2grad, 0, endsektorlinie2grad, linienPaint);
-                    canvas.drawLine(0, -startsektorlinie2grad, 0, -endsektorlinie2grad, linienPaint);
+                    canvas.drawLine(0, startsektorlinie2grad, 0, endsektorlinie2grad, radarLineStyle);
+                    canvas.drawLine(0, -startsektorlinie2grad, 0, -endsektorlinie2grad, radarLineStyle);
                 }
             }
             canvas.rotate(1);
@@ -152,14 +153,14 @@ public class RadarBasisView extends FrameLayout {
     }
 
     public void drawCenteredText(Canvas canvas, Punkt2D ankerPos, String text) {
-        Rect result = getTextRect(blackPaint, text);
+        Rect result = getTextRect(textStyle, text);
         canvas.drawText(text, ankerPos.x * sm - result.width() / 2f, -ankerPos.y * sm + result.height() / 2f,
-                blackPaint);
+                textStyle);
     }
 
     public void drawEndText(Canvas canvas, Punkt2D ankerPos, String text) {
-        Rect result = getTextRect(blackPaint, text);
-        canvas.drawText(text, ankerPos.x * sm, -ankerPos.y * sm + result.height() / 2f, blackPaint);
+        Rect result = getTextRect(textStyle, text);
+        canvas.drawText(text, ankerPos.x * sm, -ankerPos.y * sm + result.height() / 2f, textStyle);
     }
 
     public void drawLine(Path path, Punkt2D from, Punkt2D to) {
@@ -181,10 +182,6 @@ public class RadarBasisView extends FrameLayout {
 
     public Kreis2D getRadarAussenkreis() {
         return new Kreis2D(new Punkt2D(), RADARRINGE);
-    }
-
-    public int getSMSizeInPixel() {
-        return sm;
     }
 
     private Rect getTextRect(Paint paint, String text) {
@@ -233,15 +230,12 @@ public class RadarBasisView extends FrameLayout {
         if (!northupOrientierung && mEigenesSchiff != null) {
             canvas.rotate(getEigenesSchiff().getHeading());
         }
-        canvas.drawBitmap(bm, 0, 0, linienPaint);
+        canvas.drawBitmap(bm, 0, 0, radarLineStyle);
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
-        if (mEigenesSchiffView != null) {
-            mEigenesSchiffView.drawVessel(canvas, this);
-        }
-        for (OpponentVesselView vv : vesselList) {
+        for (VesselView vv : vesselList) {
             vv.drawVessel(canvas, this);
         }
-        canvas.drawPath(symbolPath, blackPaint);
+        canvas.drawPath(symbolPath, textStyle);
         canvas.restore();
     }
 
@@ -255,11 +249,14 @@ public class RadarBasisView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Log.v("Chart onMeasure w", MeasureSpec.toString(widthMeasureSpec));
         Log.v("Chart onMeasure h", MeasureSpec.toString(heightMeasureSpec));
-        int desiredWidth = getSuggestedMinimumWidth() + getPaddingLeft() + getPaddingRight();
-        int desiredHeight = getSuggestedMinimumHeight() + getPaddingTop() + getPaddingBottom();
+        int desiredWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int desiredHeight = MeasureSpec.getSize(heightMeasureSpec);
         int size = Math.min(measureDimension(desiredWidth, widthMeasureSpec),
                 measureDimension(desiredHeight, heightMeasureSpec));
         setMeasuredDimension(size, size);
+        if (getPaddingLeft() + getPaddingRight() + getPaddingTop() + getPaddingBottom() != 0) {
+            Log.w("gerwalex", "RadarView: Padding ignored ");
+        }
     }
 
     @Override
@@ -278,7 +275,7 @@ public class RadarBasisView extends FrameLayout {
             float y = event.getY();
             Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
             Kreis2D k = new Kreis2D(pkt, 40f);
-            for (OpponentVesselView opponentVesselView : vesselList) {
+            for (VesselView opponentVesselView : vesselList) {
                 if (k.liegtImKreis(opponentVesselView.getVessel().getAktPosition())) {
                 }
             }

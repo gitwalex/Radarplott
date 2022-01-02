@@ -19,16 +19,16 @@ import com.gerwalex.radarplott.radar.Vessel;
  */
 public class VesselView {
     private static final int thinPath = 2;
-    private final Paint coursline = new Paint();
-    private final Path futureCourseline = new Path();
+    protected final Path courseline = new Path();
+    protected final Paint courslineStyle = new Paint();
     private final Vessel vessel;
 
     public VesselView(Vessel vessel, int color) {
         this.vessel = vessel;
-        coursline.setStrokeWidth(thinPath);
-        coursline.setAntiAlias(true);
-        coursline.setStyle(Paint.Style.STROKE);
-        coursline.setColor(color);
+        courslineStyle.setStrokeWidth(thinPath);
+        courslineStyle.setAntiAlias(true);
+        courslineStyle.setStyle(Paint.Style.STROKE);
+        courslineStyle.setColor(color);
     }
 
     public void drawVessel(Canvas canvas, RadarBasisView radar) {
@@ -39,10 +39,10 @@ public class VesselView {
             return;
         }
         Punkt2D endPos = vessel.getAktPosition();
-        futureCourseline.reset();
-        radar.drawLine(futureCourseline, endPos, dest);
-        radar.addCircle(futureCourseline, endPos);
-        canvas.drawPath(futureCourseline, coursline);
+        courseline.reset();
+        radar.drawLine(courseline, endPos, dest);
+        radar.addCircle(courseline, endPos);
+        canvas.drawPath(courseline, courslineStyle);
     }
 
     /**

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="RawApp.TextAppearance" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">@android:color/black</item>
-    </style>
+
+    <style name="RawApp.TextAppearance" parent="TextAppearance.AppCompat"></style>
 
     <style name="RawApp.TextAppearance.Small" parent="RawApp.TextAppearance">
         <item name="android:textSize">@dimen/smallText</item>
