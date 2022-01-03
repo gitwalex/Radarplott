@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
 import com.gerwalex.radarplott.radar.OpponentVessel;
 import com.gerwalex.radarplott.radar.Vessel;
+import com.gerwalex.radarplott.views.RadarBasisView;
 
 public class RadarFragment extends Fragment {
     private RadarViewBinding binding;
@@ -30,7 +31,12 @@ public class RadarFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = RadarViewBinding.inflate(inflater, container, false);
-        binding.radar.setModel(mModel);
+        binding.radar.setOnVessselClickListener(new RadarBasisView.OnVesselClickListener() {
+            @Override
+            public void onVesselClick(Vessel vessel) {
+                mModel.clickedVessel.setValue(vessel);
+            }
+        });
         return binding.getRoot();
     }
 
@@ -41,6 +47,7 @@ public class RadarFragment extends Fragment {
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel vessel) {
+                binding.radar.setOwnVessel(vessel);
                 otherVessel.setSecondSeitenpeilung(12, 20, 4.5, vessel);
                 binding.radar.addVessel(otherVessel);
             }

@@ -157,7 +157,7 @@ public class OpponentVessel extends Vessel {
         return lambda > 0;
     }
 
-    private void setRelativeValues(Vessel me) {
+    public void calculateRelativeValues(Vessel me) {
         Punkt2D otherPos = me.getPosition(-minutes);
         relPosition = startPosition.add(otherPos);
         kurslinieRelativ = new Gerade2D(relPosition, aktPosition);
@@ -181,11 +181,11 @@ public class OpponentVessel extends Vessel {
         kurslinie = new Gerade2D(startPosition, aktPosition);
         heading = kurslinie.getYAxisAngle();
         speed = (float) (startPosition.getAbstand(aktPosition) * 60.0 / (float) minutes);
-        setRelativeValues(me);
+        calculateRelativeValues(me);
         me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                setRelativeValues(me);
+                calculateRelativeValues(me);
             }
         });
     }

@@ -22,9 +22,7 @@ public class MainActivity extends AppCompatActivity {
         mModel.clickedVessel.observe(this, new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel vessel) {
-                if (vessel.equals(me)) {
-                    OwnVesselData input = new OwnVesselData();
-                    input.show(getSupportFragmentManager(), null);
+                if (!vessel.equals(me)) {
                 }
             }
         });

@@ -1,5 +1,7 @@
 package com.gerwalex.radarplott.main;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OwnVesselBinding;
+import com.gerwalex.radarplott.databinding.OwnVesselDataBinding;
 import com.gerwalex.radarplott.radar.Vessel;
 
 public class OwnVessel extends Fragment {
@@ -29,6 +33,21 @@ public class OwnVessel extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = OwnVesselBinding.inflate(inflater, container, false);
+        binding.getRoot().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                OwnVesselDataBinding dlg = OwnVesselDataBinding.inflate(LayoutInflater.from(requireContext()));
+                dlg.setVessel(binding.getOwnVessel());
+                builder.setView(dlg.getRoot());
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                builder.show();
+            }
+        });
         return binding.getRoot();
     }
 

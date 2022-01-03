@@ -19,7 +19,6 @@ import androidx.lifecycle.Observer;
 
 import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.main.MainModel;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.radar.OpponentVessel;
@@ -43,6 +42,17 @@ public class RadarBasisView extends FrameLayout {
     private final Paint radarLineStyle = new Paint();
     private final float sektorlinienlaenge = 40.0f;
     private final Path symbolPath = new Path();
+    private final int textSize;
+    private final Paint textStyle = new TextPaint();
+    private final List<VesselView> vesselList = new ArrayList<>();
+    public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
+        @Override
+        public void onPropertyChanged(Observable sender, int propertyId) {
+            invalidate();
+        }
+    };
+    private Bitmap bm;
+    private Vessel mEigenesSchiff;
     private final Observer<Vessel> ownVesselObserver = new Observer<Vessel>() {
         @Override
         public void onChanged(Vessel vessel) {
@@ -57,18 +67,7 @@ public class RadarBasisView extends FrameLayout {
             invalidate();
         }
     };
-    private final int textSize;
-    private final List<VesselView> vesselList = new ArrayList<>();
-    public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
-        @Override
-        public void onPropertyChanged(Observable sender, int propertyId) {
-            invalidate();
-        }
-    };
-    private Bitmap bm;
-    private Vessel mEigenesSchiff;
-    private final Paint textStyle = new TextPaint();
-    private MainModel mModel;
+    private OnVesselClickListener mOnClickListener;
     private ScaleGestureDetector mScaleDetector;
     private boolean northupOrientierung = true;
     private Kreis2D outerRing;
@@ -213,9 +212,6 @@ public class RadarBasisView extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mModel != null) {
-            mModel.ownVessel.removeObserver(ownVesselObserver);
-        }
         if (mEigenesSchiff != null) {
             mEigenesSchiff.removeOnPropertyChangedCallback(vesselObserver);
         }
@@ -267,19 +263,17 @@ public class RadarBasisView extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         performClick();
-        if (MotionEvent.ACTION_DOWN == event.getAction()) {
+        if (MotionEvent.ACTION_DOWN == event.getAction() && mOnClickListener != null) {
             int width = getWidth() / 2;
             int height = getHeight() / 2;
             float x = event.getX();
             float y = event.getY();
             Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
             Kreis2D k = new Kreis2D(pkt, 40f);
-            for (VesselView opponentVesselView : vesselList) {
-                if (k.liegtImKreis(opponentVesselView.getVessel().getAktPosition())) {
+            for (VesselView vesssel : vesselList) {
+                if (k.liegtImKreis(vesssel.getVessel().getAktPosition())) {
+                    mOnClickListener.onVesselClick(mEigenesSchiff);
                 }
-            }
-            if (mEigenesSchiff != null && k.liegtImKreis(getEigenesSchiff().getAktPosition())) {
-                mModel.clickedVessel.setValue(mEigenesSchiff);
             }
             if (BuildConfig.DEBUG) {
                 Snackbar.make(this, pkt.toString(), Snackbar.LENGTH_SHORT).show();
@@ -293,9 +287,20 @@ public class RadarBasisView extends FrameLayout {
         return super.performClick();
     }
 
-    public void setModel(MainModel model) {
-        mModel = model;
-        mModel.ownVessel.observeForever(ownVesselObserver);
+    public void setOnVessselClickListener(OnVesselClickListener listener) {
+        mOnClickListener = listener;
+    }
+
+    public void setOwnVessel(Vessel vessel) {
+        if (mEigenesSchiff != null) {
+            mEigenesSchiff.removeOnPropertyChangedCallback(vesselObserver);
+            vesselList.remove(0);
+        }
+        mEigenesSchiff = vessel;
+        mEigenesSchiff.addOnPropertyChangedCallback(vesselObserver);
+        VesselView mEigenesSchiffView = new VesselView(mEigenesSchiff, getEigenesSchiffColor());
+        vesselList.add(0, mEigenesSchiffView);
+        invalidate();
     }
 
     public boolean toggleNorthUpOrientierung() {
@@ -324,6 +329,10 @@ public class RadarBasisView extends FrameLayout {
         private static final int radius = 15;
 
         public abstract void addSymbol(Path path, Punkt2D mp, float sm);
+    }
+
+    public interface OnVesselClickListener {
+        void onVesselClick(Vessel vessel);
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
