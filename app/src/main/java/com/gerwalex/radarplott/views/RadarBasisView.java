@@ -226,9 +226,6 @@ public class RadarBasisView extends FrameLayout {
         super.onDraw(canvas);
         symbolPath.reset();
         canvas.save();
-        // Hintergrundfarbe setzen
-        //        canvas.drawColor(colorRadarBackground);
-        // Mittelpunkt des Radars liegt in der Mitte des Bildes (Canvas).
         if (!northupOrientierung && mEigenesSchiff != null) {
             canvas.rotate(getEigenesSchiff().getHeading());
         }
