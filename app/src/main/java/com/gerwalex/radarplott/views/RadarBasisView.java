@@ -14,6 +14,7 @@ import android.view.ScaleGestureDetector;
 import android.widget.FrameLayout;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.Nullable;
 import androidx.databinding.Observable;
 import androidx.lifecycle.Observer;
 
@@ -113,7 +114,7 @@ public class RadarBasisView extends FrameLayout {
     private void createRadarBitmap2(int w, int h) {
         int textWidth = getTextRect(textStyle, "000").width();
         sm = (int) (scale - textWidth * 2) / RADARRINGE;
-        outerRing = new Kreis2D(new Punkt2D(), sm * RADARRINGE);
+        outerRing = new Kreis2D(new Punkt2D(), RADARRINGE);
         bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bm);
         canvas.translate(w / 2f, h / 2f);
@@ -121,7 +122,7 @@ public class RadarBasisView extends FrameLayout {
             // zeichne Radarringe
             canvas.drawCircle(0, 0, sm * (i + 1), radarLineStyle);
         }
-        float radius = outerRing.getRadius();
+        float radius = outerRing.getRadius() * sm;
         Punkt2D mp = outerRing.getMittelpunkt();
         for (int i = 0; i < 36; i++) {
             Punkt2D pkt = mp.getPunkt2D(i * 10, radius + sektorlinienlaenge + textSize);
@@ -177,12 +178,24 @@ public class RadarBasisView extends FrameLayout {
         return colors[0];
     }
 
-    private int getPx(int dp) {
-        return (int) (getResources().getDisplayMetrics().density * dp);
+    /**
+     * Hilfsmethode zum berechnen des Endpunktes einer Kurslinie auuf einem Radarring
+     *
+     * @param vessel Vessel
+     * @return endpunkt, null, wenn der Schnittpunkt nicht in Fahrtrichtung liegt (Dann ist Schiff ausserhalb
+     * Raadarbild)
+     */
+    @Nullable
+    protected Punkt2D getEndOfKurslinie(Vessel vessel) {
+        Punkt2D[] sc = vessel.getKurslinie().getSchnittpunkt(outerRing);
+        if (sc != null) {
+            return vessel.isPunktInFahrtrichtung(sc[0]) ? sc[0] : sc[1];
+        }
+        return null;
     }
 
-    public Kreis2D getRadarAussenkreis() {
-        return new Kreis2D(new Punkt2D(), RADARRINGE);
+    private int getPx(int dp) {
+        return (int) (getResources().getDisplayMetrics().density * dp);
     }
 
     private Rect getTextRect(Paint paint, String text) {
