@@ -2,8 +2,8 @@ package com.gerwalex.radarplott;
 
 import static org.junit.Assert.assertEquals;
 
-import com.gerwalex.radarplott.radar.OpponentVessel;
-import com.gerwalex.radarplott.radar.Vessel;
+import com.gerwalex.radarplott.main.OpponentVessel;
+import com.gerwalex.radarplott.main.Vessel;
 
 import org.junit.Before;
 import org.junit.Test;

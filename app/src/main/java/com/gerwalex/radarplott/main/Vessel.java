@@ -1,4 +1,4 @@
-package com.gerwalex.radarplott.radar;
+package com.gerwalex.radarplott.main;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
@@ -12,7 +12,6 @@ import java.util.Objects;
 public class Vessel extends BaseObservable {
     protected float heading;
     protected Gerade2D kurslinie;
-    protected Character name;
     protected float speed;
     protected Punkt2D startPosition, aktPosition;
 
@@ -21,7 +20,6 @@ public class Vessel extends BaseObservable {
     }
 
     public Vessel(int heading, float speed) {
-        name = null; // Kein Name fuer eigenes Schiff
         this.heading = heading % 360;
         this.speed = speed;
         aktPosition = new Punkt2D(0, 0);
@@ -38,8 +36,8 @@ public class Vessel extends BaseObservable {
             return false;
         }
         Vessel vessel = (Vessel) o;
-        return Objects.equals(name, vessel.name) && startPosition.equals(vessel.startPosition) &&
-                aktPosition.equals(vessel.aktPosition) && vessel.heading == heading && vessel.speed == speed;
+        return startPosition.equals(vessel.startPosition) && aktPosition.equals(vessel.aktPosition) &&
+                vessel.heading == heading && vessel.speed == speed;
     }
 
     public final Punkt2D getAktPosition() {
@@ -122,7 +120,7 @@ public class Vessel extends BaseObservable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, heading, kurslinie, kurslinie, speed, startPosition, aktPosition);
+        return Objects.hash(heading, kurslinie, kurslinie, speed, startPosition, aktPosition);
     }
 
     /**
@@ -159,8 +157,8 @@ public class Vessel extends BaseObservable {
     @NonNull
     @Override
     public String toString() {
-        return "Vessel{" + "name=" + name + ", heading=" + heading + " speed=" + speed + ",startPosition=" +
-                startPosition + ", aktPosition=" + aktPosition + ", kurslinie=" + kurslinie + "}";
+        return "Vessel{ heading=" + heading + " speed=" + speed + ",startPosition=" + startPosition + ", aktPosition=" +
+                aktPosition + ", kurslinie=" + kurslinie + "}";
     }
 }
 

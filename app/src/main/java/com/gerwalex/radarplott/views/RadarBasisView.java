@@ -3,6 +3,7 @@ package com.gerwalex.radarplott.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -16,14 +17,13 @@ import android.widget.FrameLayout;
 import androidx.annotation.ColorRes;
 import androidx.annotation.Nullable;
 import androidx.databinding.Observable;
-import androidx.lifecycle.Observer;
 
 import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
+import com.gerwalex.radarplott.main.OpponentVessel;
+import com.gerwalex.radarplott.main.Vessel;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
-import com.gerwalex.radarplott.radar.OpponentVessel;
-import com.gerwalex.radarplott.radar.Vessel;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -36,16 +36,23 @@ import java.util.List;
  */
 public class RadarBasisView extends FrameLayout {
     public final static int RADARRINGE = 8;
+    private static final int thickPath = 3;
+    private static final int thinPath = 2;
+    protected final Path courseline = new Path();
+    protected final Paint courslineStyle = new Paint();
     @ColorRes
     private final int[] colors;
     private final float markerRadius = 20f;
+    private final int ownVesselColor;
     // Variablen zum Zeichnen
     private final Paint radarLineStyle = new Paint();
     private final float sektorlinienlaenge = 40.0f;
     private final Path symbolPath = new Path();
     private final int textSize;
     private final Paint textStyle = new TextPaint();
-    private final List<VesselView> vesselList = new ArrayList<>();
+    private final List<OpponentVessel> vesselList = new ArrayList<>();
+    private final Path vesselPosition = new Path();
+    private final Paint vesselPositionStyle = new Paint();
     public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
         @Override
         public void onPropertyChanged(Observable sender, int propertyId) {
@@ -54,20 +61,6 @@ public class RadarBasisView extends FrameLayout {
     };
     private Bitmap bm;
     private Vessel mEigenesSchiff;
-    private final Observer<Vessel> ownVesselObserver = new Observer<Vessel>() {
-        @Override
-        public void onChanged(Vessel vessel) {
-            if (mEigenesSchiff != null) {
-                mEigenesSchiff.removeOnPropertyChangedCallback(vesselObserver);
-                vesselList.remove(0);
-            }
-            mEigenesSchiff = vessel;
-            mEigenesSchiff.addOnPropertyChangedCallback(vesselObserver);
-            VesselView mEigenesSchiffView = new VesselView(mEigenesSchiff, getEigenesSchiffColor());
-            vesselList.add(0, mEigenesSchiffView);
-            invalidate();
-        }
-    };
     private OnVesselClickListener mOnClickListener;
     private ScaleGestureDetector mScaleDetector;
     private boolean northupOrientierung = true;
@@ -85,12 +78,21 @@ public class RadarBasisView extends FrameLayout {
 
     public RadarBasisView(Context context, AttributeSet attrs, int style) {
         super(context, attrs, style);
+        colors = getResources().getIntArray(R.array.vesselcolors);
+        ownVesselColor = getResources().getColor(R.color.ownVesselColor);
         radarLineStyle.setTextSize(40);
         radarLineStyle.setFakeBoldText(true);
         radarLineStyle.setAntiAlias(true);
         radarLineStyle.setStyle(Paint.Style.STROKE);
         radarLineStyle.setColor(getResources().getColor(R.color.colorRadarLinien));
-        colors = getResources().getIntArray(R.array.vesselcolors);
+        courslineStyle.setStrokeWidth(thinPath);
+        courslineStyle.setAntiAlias(true);
+        courslineStyle.setStyle(Paint.Style.STROKE);
+        vesselPositionStyle.setAntiAlias(true);
+        vesselPositionStyle.setStyle(Paint.Style.STROKE);
+        vesselPositionStyle.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
+        vesselPositionStyle.setStrokeWidth(thickPath);
+        //
         textStyle.setColor(getResources().getColor(R.color.white));
         textSize = getResources().getDimensionPixelSize(R.dimen.smallText);
         textStyle.setTextSize(textSize);
@@ -107,8 +109,7 @@ public class RadarBasisView extends FrameLayout {
     }
 
     public void addVessel(OpponentVessel vessel) {
-        OpponentVesselView opponentVesselView = new OpponentVesselView(vessel, colors[vesselList.size()]);
-        vesselList.add(opponentVesselView);
+        vesselList.add(vessel);
     }
 
     private void createRadarBitmap2(int w, int h) {
@@ -160,6 +161,20 @@ public class RadarBasisView extends FrameLayout {
                 textStyle);
     }
 
+    private void drawCourseline(Canvas canvas, Vessel vessel, int color) {
+        Punkt2D dest = getEndOfKurslinie(vessel);
+        if (dest == null) {
+            // Schiff ist ausserhalb des Radars
+            return;
+        }
+        courseline.reset();
+        courslineStyle.setColor(color);
+        Punkt2D endPos = vessel.getAktPosition();
+        drawLine(courseline, endPos, dest);
+        addCircle(courseline, endPos);
+        canvas.drawPath(courseline, courslineStyle);
+    }
+
     public void drawEndText(Canvas canvas, Punkt2D ankerPos, String text) {
         Rect result = getTextRect(textStyle, text);
         canvas.drawText(text, ankerPos.x * sm, -ankerPos.y * sm + result.height() / 2f, textStyle);
@@ -168,6 +183,24 @@ public class RadarBasisView extends FrameLayout {
     public void drawLine(Path path, Punkt2D from, Punkt2D to) {
         path.moveTo(from.x * sm, -from.y * sm);
         path.lineTo(to.x * sm, -to.y * sm);
+    }
+
+    private void drawPosition(Canvas canvas, OpponentVessel vessel, int color) {
+        if (mEigenesSchiff != null) {
+            vesselPositionStyle.setColor(color);
+            Punkt2D relPos = vessel.getRelPosition(mEigenesSchiff);
+            Punkt2D startPos = vessel.getStartPosition();
+            Punkt2D aktPos = vessel.getAktPosition();
+            drawLine(courseline, mEigenesSchiff.getAktPosition(), vessel.getCPA(mEigenesSchiff));
+            drawEndText(canvas, vessel.getCPA(mEigenesSchiff), "CPA");
+            vesselPosition.reset();
+            drawLine(vesselPosition, aktPos, startPos);
+            drawLine(vesselPosition, startPos, relPos);
+            drawLine(vesselPosition, relPos, aktPos);
+            addCircle(courseline, startPos);
+            canvas.drawPath(vesselPosition, vesselPositionStyle);
+            canvas.drawPath(courseline, courslineStyle);
+        }
     }
 
     public Vessel getEigenesSchiff() {
@@ -240,8 +273,14 @@ public class RadarBasisView extends FrameLayout {
         }
         canvas.drawBitmap(bm, 0, 0, radarLineStyle);
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
-        for (VesselView vv : vesselList) {
-            vv.drawVessel(canvas, this);
+        if (mEigenesSchiff != null) {
+            drawCourseline(canvas, mEigenesSchiff, ownVesselColor);
+        }
+        for (int i = 0; i < vesselList.size(); i++) {
+            OpponentVessel vessel = vesselList.get(i);
+            int color = colors[i];
+            drawCourseline(canvas, vessel, color);
+            drawPosition(canvas, vessel, color);
         }
         canvas.drawPath(symbolPath, textStyle);
         canvas.restore();
@@ -283,8 +322,8 @@ public class RadarBasisView extends FrameLayout {
             float y = event.getY();
             Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
             Kreis2D k = new Kreis2D(pkt, 40f);
-            for (VesselView vesssel : vesselList) {
-                if (k.liegtImKreis(vesssel.getVessel().getAktPosition())) {
+            for (Vessel vesssel : vesselList) {
+                if (k.liegtImKreis(vesssel.getAktPosition())) {
                     mOnClickListener.onVesselClick(mEigenesSchiff);
                 }
             }
@@ -307,12 +346,9 @@ public class RadarBasisView extends FrameLayout {
     public void setOwnVessel(Vessel vessel) {
         if (mEigenesSchiff != null) {
             mEigenesSchiff.removeOnPropertyChangedCallback(vesselObserver);
-            vesselList.remove(0);
         }
         mEigenesSchiff = vessel;
         mEigenesSchiff.addOnPropertyChangedCallback(vesselObserver);
-        VesselView mEigenesSchiffView = new VesselView(mEigenesSchiff, getEigenesSchiffColor());
-        vesselList.add(0, mEigenesSchiffView);
         invalidate();
     }
 

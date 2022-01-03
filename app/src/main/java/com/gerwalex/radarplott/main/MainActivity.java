@@ -7,7 +7,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.ActivityMainBinding;
-import com.gerwalex.radarplott.radar.Vessel;
+
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,12 +18,10 @@ public class MainActivity extends AppCompatActivity {
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         MainModel mModel = new ViewModelProvider(this).get(MainModel.class);
-        Vessel me = new Vessel(80, 8);
-        mModel.ownVessel.setValue(me);
         mModel.clickedVessel.observe(this, new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel vessel) {
-                if (!vessel.equals(me)) {
+                if (!Objects.equals(mModel.ownVessel.getValue(), vessel)) {
                 }
             }
         });

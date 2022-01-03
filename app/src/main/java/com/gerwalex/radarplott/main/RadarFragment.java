@@ -12,8 +12,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
-import com.gerwalex.radarplott.radar.OpponentVessel;
-import com.gerwalex.radarplott.radar.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
 
 public class RadarFragment extends Fragment {

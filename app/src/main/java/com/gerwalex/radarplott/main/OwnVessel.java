@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OwnVesselBinding;
 import com.gerwalex.radarplott.databinding.OwnVesselDataBinding;
-import com.gerwalex.radarplott.radar.Vessel;
 
 public class OwnVessel extends Fragment {
     private OwnVesselBinding binding;
