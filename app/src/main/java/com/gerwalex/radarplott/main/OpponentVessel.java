@@ -114,6 +114,10 @@ public class OpponentVessel extends Vessel {
         return String.format(Locale.getDefault(), "%02d:%02d", (int) startTime / 60, startTime % 60);
     }
 
+    public int getTime() {
+        return startTime + minutes;
+    }
+
     /**
      * /**
      * Sett die zweite Seitenpeilung. Dabei werden dann Geschwindigkeit und Kurs (neu) berechnet

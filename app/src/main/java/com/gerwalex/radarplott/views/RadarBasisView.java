@@ -42,6 +42,7 @@ import java.util.List;
  */
 public class RadarBasisView extends FrameLayout {
     public final static int RADARRINGE = 8;
+    private static final float sektorlinienlaenge = 40.0f;
     private static final int textPadding = 30;
     private static final int thickPath = 3;
     private static final int thinPath = 2;
@@ -54,14 +55,12 @@ public class RadarBasisView extends FrameLayout {
     private final int ownVesselColor;
     // Variablen zum Zeichnen
     private final Paint radarLineStyle = new Paint();
-    private final float sektorlinienlaenge = 40.0f;
     private final int smallTextSize;
     private final Path symbolPath = new Path();
     private final int textColor;
     private final Paint textStyle = new TextPaint();
     private final List<OpponentVessel> vesselList = new ArrayList<>();
     private final Path vesselPosition = new Path();
-    private final Path vesselPositionRelativ = new Path();
     private final Paint vesselPositionStyle = new Paint();
     public ObservableInt maxTime = new ObservableInt(0);
     public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
@@ -81,6 +80,7 @@ public class RadarBasisView extends FrameLayout {
     private Kreis2D outerRing;
     private float scale;
     private int sm;
+    private int startTime;
 
     public RadarBasisView(Context context) {
         this(context, null);
@@ -122,6 +122,7 @@ public class RadarBasisView extends FrameLayout {
 
     public void addVessel(OpponentVessel vessel) {
         vesselList.add(vessel);
+        startTime = Math.min(vessel.getTime(), 24 * 60);
     }
 
     private void createRadarBitmap2(int w, int h) {
@@ -176,7 +177,6 @@ public class RadarBasisView extends FrameLayout {
     private void drawCourseline(Canvas canvas, Vessel vessel, int color) {
         Punkt2D dest = getEndOfKurslinie(vessel);
         if (dest != null) {
-            maxTime.set((int) Math.max(vessel.getTimeTo(dest), maxTime.get()));
             courseline.reset();
             courslineStyle.setColor(color);
             Punkt2D endPos = vessel.getAktPosition();
@@ -218,8 +218,8 @@ public class RadarBasisView extends FrameLayout {
 
     public Punkt2D drawEndText(Canvas canvas, Punkt2D ankerPos, String text, float textSize) {
         textStyle.setTextSize(textSize);
-        Rect result = getTextRect(textStyle, text + ",");
-        canvas.drawText(text + " ", ankerPos.x * sm + markerRadius, -ankerPos.y * sm + result.height() / 2f, textStyle);
+        Rect result = getTextRect(textStyle, text);
+        canvas.drawText(text, ankerPos.x * sm + textPadding, -ankerPos.y * sm + result.height() / 2f, textStyle);
         return new Punkt2D(ankerPos.x + result.width() / (float) sm, ankerPos.y);
     }
 
@@ -228,6 +228,7 @@ public class RadarBasisView extends FrameLayout {
         path.lineTo(to.x * sm, -to.y * sm);
     }
 
+    @SuppressLint("DefaultLocale")
     private void drawPosition(Canvas canvas, OpponentVessel vessel, int color) {
         if (mEigenesSchiff != null) {
             vesselPosition.reset();
@@ -239,6 +240,18 @@ public class RadarBasisView extends FrameLayout {
             drawLine(vesselPosition, startPos, aktPos);
             drawLine(vesselPosition, startPos, relPos);
             drawLine(vesselPosition, relPos, aktPos);
+            Punkt2D nextPos = vessel.getPosition(minutes);
+            if (outerRing.liegtImKreis(nextPos)) {
+                Punkt2D dest = getEndOfKurslinie(vessel);
+                assert dest != null;
+                maxTime.set((int) Math.max(vessel.getTimeTo(dest), maxTime.get()));
+                addCircle(vesselPosition, nextPos);
+                if (minutes != 0) {
+                    int time = vessel.getTime() + minutes;
+                    drawTextView(canvas, nextPos,
+                            new SpannableString(String.format("%1s %02d:%02d", vessel.name, time / 60, time % 60)));
+                }
+            }
             canvas.drawPath(vesselPosition, vesselPositionStyle);
             canvas.drawPath(courseline, courslineStyle);
         }
@@ -288,6 +301,10 @@ public class RadarBasisView extends FrameLayout {
             return vessel.isPunktInFahrtrichtung(sc[0]) ? sc[0] : sc[1];
         }
         return null;
+    }
+
+    public int getStarttimeInMinutes() {
+        return startTime;
     }
 
     private Rect getTextRect(Paint paint, String text) {
@@ -429,6 +446,7 @@ public class RadarBasisView extends FrameLayout {
         }
         mEigenesSchiff = vessel;
         mEigenesSchiff.addOnPropertyChangedCallback(vesselObserver);
+        maxTime.set(0);
         invalidate();
     }
 

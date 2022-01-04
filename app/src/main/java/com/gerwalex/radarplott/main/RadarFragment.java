@@ -1,5 +1,6 @@
 package com.gerwalex.radarplott.main;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
 import com.gerwalex.radarplott.views.RadarBasisView;
+import com.google.android.material.slider.LabelFormatter;
 
 public class RadarFragment extends Fragment {
     private RadarViewBinding binding;
@@ -48,6 +50,15 @@ public class RadarFragment extends Fragment {
                 binding.radar.setCurrentTime((int) value);
             }
         });
+        binding.time.setLabelFormatter(new LabelFormatter() {
+            @SuppressLint("DefaultLocale")
+            @NonNull
+            @Override
+            public String getFormattedValue(float value) {
+                int time = (int) (value + binding.radar.getStarttimeInMinutes());
+                return String.format("%02d:%02d", time / 60, time % 60);
+            }
+        });
         binding.kurs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -66,12 +77,12 @@ public class RadarFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        OpponentVessel otherVessel = new OpponentVessel(0, 'B', 10, 7);
+        OpponentVessel otherVessel = new OpponentVessel(600, 'B', 10, 7);
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel vessel) {
                 binding.radar.setOwnVessel(vessel);
-                otherVessel.setSecondSeitenpeilung(12, 20, 4.5);
+                otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
                 binding.radar.addVessel(otherVessel);
             }
         });
