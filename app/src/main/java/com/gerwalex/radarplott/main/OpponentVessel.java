@@ -6,10 +6,13 @@ import androidx.databinding.Bindable;
 import com.gerwalex.radarplott.math.Gerade2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 
+import java.util.Locale;
+
 public class OpponentVessel extends Vessel {
+    public final String name;
     private final float dist1;
-    private final Character name;
     private final int rwP1;
+    private final int startTime;
     private float dist2;
     private float headingRelativ;
     /**
@@ -23,12 +26,15 @@ public class OpponentVessel extends Vessel {
     /**
      * Erstellt ein Schiff aus Seitenpeilung. Schiff hat Geschwindigkeit 0 und Kurs 0
      *
+     * @param time                Uhrzeit in Minuten nach Mitternacht
+     * @param name                Name
      * @param peilungRechtweisend Rechtweisende Peilung
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(Character name, int peilungRechtweisend, double distance) {
-        this.name = name;
+    public OpponentVessel(int time, @NonNull Character name, int peilungRechtweisend, double distance) {
+        this.name = name.toString();
+        startTime = time;
         dist1 = (float) distance;
         rwP1 = peilungRechtweisend;
         setStartPosition(new Punkt2D().getPunkt2D(peilungRechtweisend, dist1));
@@ -85,6 +91,11 @@ public class OpponentVessel extends Vessel {
         return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
+    public String getSecondTime() {
+        return String
+                .format(Locale.getDefault(), "%02d:%02d", (int) (startTime + minutes) / 60, (startTime + minutes) % 60);
+    }
+
     public float getSeitenpeilungCPA(Vessel me) {
         return getPeilungRechtweisendCPA(me) + me.getHeading();
     }
@@ -99,18 +110,22 @@ public class OpponentVessel extends Vessel {
         return speedRelativ;
     }
 
+    public String getStartTime() {
+        return String.format(Locale.getDefault(), "%02d:%02d", (int) startTime / 60, startTime % 60);
+    }
+
     /**
      * /**
      * Sett die zweite Seitenpeilung. Dabei werden dann Geschwindigkeit und Kurs (neu) berechnet
      *
-     * @param minutes  Zeitunterschied zwischen zwei Peilungen in Minuten
+     * @param time     zweite Uhrzeit in Minuten nach Mitternacht
      * @param rwP      zweite Rechtweisende Peilung
      * @param distance distance bei der zweiten Peilung
      */
-    public void setSecondSeitenpeilung(int minutes, int rwP, double distance, Vessel me) {
+    public void setSecondSeitenpeilung(int time, int rwP, double distance) {
         dist2 = (float) distance;
         rwP2 = rwP;
-        this.minutes = minutes;
+        this.minutes = time - startTime;
         aktPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         kurslinie = new Gerade2D(startPosition, aktPosition);
         heading = kurslinie.getYAxisAngle();

@@ -7,4 +7,7 @@
     <string name="ownVesselData">Eigenes Schiff</string>
     <string name="rwK">KA (rwK): %03d </string>
     <string name="fdw">vA (FdW): %.1f kn </string>
+    <string name="sm">%.1f sm</string>
+    <string name="kurse">Kurse</string>
+    <string name="positionen">Positionen</string>
 </resources>

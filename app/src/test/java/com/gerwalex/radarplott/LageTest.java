@@ -21,8 +21,8 @@ public class LageTest {
     @Test
     public void lageNeu() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel otherVessel = new OpponentVessel('B', 10, 7.0);
-        otherVessel.setSecondSeitenpeilung(12, 20, 4.5, me);
+        OpponentVessel otherVessel = new OpponentVessel(0, 'B', 10, 7.0);
+        otherVessel.setSecondSeitenpeilung(12, 20, 4.5);
         assertEquals(141.5, otherVessel.getHeadingRelativ(), 0.1);
         assertEquals(15.3, otherVessel.getSpeedRelativ(), 0.1);
         assertEquals(173.1, otherVessel.getHeading(), 0.1);

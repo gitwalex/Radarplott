@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -35,18 +37,41 @@ public class RadarFragment extends Fragment {
                 mModel.clickedVessel.setValue(vessel);
             }
         });
+        binding.radar.maxTime.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                binding.time.setValueTo(binding.radar.maxTime.get());
+            }
+        });
+        binding.time.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                binding.radar.setCurrentTime((int) value);
+            }
+        });
+        binding.kurs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                binding.radar.setDrawCourselineTexte(isChecked);
+            }
+        });
+        binding.position.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                binding.radar.setDrawPositionTexte(isChecked);
+            }
+        });
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        OpponentVessel otherVessel = new OpponentVessel('B', 10, 7);
+        OpponentVessel otherVessel = new OpponentVessel(0, 'B', 10, 7);
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel vessel) {
                 binding.radar.setOwnVessel(vessel);
-                otherVessel.setSecondSeitenpeilung(12, 20, 4.5, vessel);
+                otherVessel.setSecondSeitenpeilung(12, 20, 4.5);
                 binding.radar.addVessel(otherVessel);
             }
         });
