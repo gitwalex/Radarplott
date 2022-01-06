@@ -1,9 +1,11 @@
 package com.gerwalex.radarplott.main;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.Bindable;
 
 import com.gerwalex.radarplott.math.Gerade2D;
+import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 
 import java.util.Locale;
@@ -15,6 +17,7 @@ public class OpponentVessel extends Vessel {
     private final int startTime;
     private float dist2;
     private float headingRelativ;
+    private Gerade2D kurslinieRelativ;
     /**
      * Abstand zwischen den Peilungen in Minuten
      */
@@ -37,15 +40,15 @@ public class OpponentVessel extends Vessel {
         startTime = time;
         dist1 = (float) distance;
         rwP1 = peilungRechtweisend;
-        setStartPosition(new Punkt2D().getPunkt2D(peilungRechtweisend, dist1));
+        setFirstPosition(new Punkt2D().getPunkt2D(peilungRechtweisend, dist1));
     }
 
     public float getAbstandBCR(Vessel me) {
-        return me.getAktPosition().getAbstand(getBCR(me));
+        return me.getSecondPosition().getAbstand(getBCR(me));
     }
 
     public float getAbstandCPA(Vessel me) {
-        return getCPA(me).getAbstand(me.getAktPosition());
+        return getCPA(me).getAbstand(me.getSecondPosition());
     }
 
     public Punkt2D getBCR(Vessel me) {
@@ -53,7 +56,7 @@ public class OpponentVessel extends Vessel {
     }
 
     public Punkt2D getCPA(Vessel me) {
-        return kurslinie.getLotpunkt(me.getAktPosition());
+        return kurslinie.getLotpunkt(me.getSecondPosition());
     }
 
     /**
@@ -66,20 +69,59 @@ public class OpponentVessel extends Vessel {
         return headingRelativ;
     }
 
+    /**
+     * Liefert einen neuen Kurs zu einem Manöver, dass in {minutes} Minuten in der Zukunft liegt und zu einen CPA von
+     * {cpaDistance} zu {other} führen soll.
+     *
+     * @param other    anderes Schiff
+     * @param minutes  Zeitpunkt in Minuten, zu dem das Manöver stattfinden soll
+     * @param distance Gewünschte Distanz
+     * @return Neuen Kurs, wenn möglich.
+     * Null in folgenden Fällen:
+     * <br> - zeitpunkt liegt in der Vergangenheit
+     * <br> - die Position zum Zeitpunkt ist geringer als die gewuenschte Distanz
+     * <br> - der Aktuelle CPA wurde bereits passiert
+     * @throws IllegalManoeverException Kursänderung wiederspricht KVR §§ 19 und ist daher nicht erlaubt
+     *                                  -
+     */
+    @Nullable
+    public Float getHeadingforCPADistance(@NonNull Vessel other, int minutes, float distance)
+            throws IllegalManoeverException {
+        Punkt2D cpa = getCPA(other);
+        Float heading = null;
+        if (minutes > 0 && getTimeTo(cpa) > minutes) {
+            heading = 0f;
+            Punkt2D futurePosition = getPosition(minutes);
+            Punkt2D otherFuturePosition = other.getPosition(minutes);
+            Kreis2D k = new Kreis2D(otherFuturePosition, distance);
+            Punkt2D[] bp = k.getBeruehrpunkte(futurePosition);
+            if (bp != null) {
+                getRelPosition(other);
+                Gerade2D t1 = new Gerade2D(futurePosition, bp[0]);
+                Gerade2D kursAbsolutNeu = kurslinieRelativ.verschiebeParallell(bp[0]);
+            }
+        }
+        return checkForValidKurs(heading);
+    }
+
+    public Gerade2D getKurslinieRelativ() {
+        return kurslinieRelativ;
+    }
+
     public int getMinutes() {
         return minutes;
     }
 
     public float getPeilungRechtweisendCPA(Vessel me) {
-        return new Gerade2D(me.getAktPosition(), getCPA(me)).getYAxisAngle();
+        return new Gerade2D(me.getSecondPosition(), getCPA(me)).getYAxisAngle();
     }
 
     public Punkt2D getRelPosition(@NonNull Vessel me) {
         Punkt2D otherPos = me.getPosition(-minutes);
-        relPosition = startPosition.add(otherPos);
-        Gerade2D kurslinieRelativ = new Gerade2D(relPosition, aktPosition);
+        relPosition = firstPosition.add(otherPos);
+        kurslinieRelativ = new Gerade2D(relPosition, secondPosition);
         headingRelativ = kurslinieRelativ.getYAxisAngle();
-        speedRelativ = (float) (relPosition.getAbstand(aktPosition) * 60.0 / (float) minutes);
+        speedRelativ = (float) (relPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
         return relPosition;
     }
 
@@ -87,13 +129,12 @@ public class OpponentVessel extends Vessel {
         if (!kurslinie.isPunktAufGerade(p)) {
             throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
         }
-        float timeToP = (float) (aktPosition.getAbstand(p) / speed * 60.0);
+        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
         return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
     public String getSecondTime() {
-        return String
-                .format(Locale.getDefault(), "%02d:%02d", (int) (startTime + minutes) / 60, (startTime + minutes) % 60);
+        return String.format(Locale.getDefault(), "%02d:%02d", (startTime + minutes) / 60, (startTime + minutes) % 60);
     }
 
     public float getSeitenpeilungCPA(Vessel me) {
@@ -111,7 +152,7 @@ public class OpponentVessel extends Vessel {
     }
 
     public String getStartTime() {
-        return String.format(Locale.getDefault(), "%02d:%02d", (int) startTime / 60, startTime % 60);
+        return String.format(Locale.getDefault(), "%02d:%02d", startTime / 60, startTime % 60);
     }
 
     public int getTime() {
@@ -119,7 +160,16 @@ public class OpponentVessel extends Vessel {
     }
 
     /**
-     * /**
+     * Ein Entgegenkommer fährt mit einem relativen Kurs zwischen 90 und 270 Grad
+     *
+     * @return true, wennn relativer Kurs zum anderen Schiff zwischen 90 und 270 Grad ist.
+     */
+    public boolean isEntgegenkommer(Vessel me) {
+        getRelPosition(me);
+        return headingRelativ > 90 && headingRelativ < 270;
+    }
+
+    /**
      * Sett die zweite Seitenpeilung. Dabei werden dann Geschwindigkeit und Kurs (neu) berechnet
      *
      * @param time     zweite Uhrzeit in Minuten nach Mitternacht
@@ -130,10 +180,10 @@ public class OpponentVessel extends Vessel {
         dist2 = (float) distance;
         rwP2 = rwP;
         this.minutes = time - startTime;
-        aktPosition = new Punkt2D().getPunkt2D(rwP, dist2);
-        kurslinie = new Gerade2D(startPosition, aktPosition);
+        secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
+        kurslinie = new Gerade2D(firstPosition, secondPosition);
         heading = kurslinie.getYAxisAngle();
-        speed = (float) (startPosition.getAbstand(aktPosition) * 60.0 / (float) minutes);
+        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
     }
 
     @NonNull

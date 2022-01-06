@@ -13,6 +13,7 @@ import java.util.Locale;
  * Nullpunkt.
  */
 public class Vektor2D {
+    public final float x, y;
     /**
      *
      */
@@ -25,6 +26,8 @@ public class Vektor2D {
      */
     public Vektor2D(Punkt2D p) {
         endpunkt = p;
+        x = endpunkt.x;
+        y = endpunkt.y;
     }
 
     /**
@@ -77,7 +80,7 @@ public class Vektor2D {
      * @return Vektor mit der Laenge eins und der gleichen Richtung
      */
     public final Vektor2D getEinheitsvektor() {
-        float l = (float) length();
+        float l = length();
         return new Vektor2D(new Punkt2D(endpunkt.x / l, endpunkt.y / l));
     }
 

@@ -48,19 +48,8 @@ public class Punkt2D {
         this(p.x, p.y);
     }
 
-    /**
-     * Liefert den Abstand eines uebergebenen Punktes zum Punkt zurueck
-     *
-     * @param p Punkt, zu dem der Abstand berechnet werden soll
-     * @return Abstand der beiden Punkte
-     */
-    public final float getAbstand(Punkt2D p) {
-        /*
-         * Anwendung Satz des Phytagoras
-         */
-        float a = (p.x - x) * (p.x - x);
-        float b = (p.y - y) * (p.y - y);
-        return (float) Math.sqrt(a + b);
+    public Punkt2D add(Vektor2D v) {
+        return new Punkt2D(x + v.x, y + v.y);
     }
 
     /**
@@ -83,6 +72,21 @@ public class Punkt2D {
         }
         Punkt2D punkt2D = (Punkt2D) o;
         return Float.compare(punkt2D.x, x) == 0 && Float.compare(punkt2D.y, y) == 0;
+    }
+
+    /**
+     * Liefert den Abstand eines uebergebenen Punktes zum Punkt zurueck
+     *
+     * @param p Punkt, zu dem der Abstand berechnet werden soll
+     * @return Abstand der beiden Punkte
+     */
+    public final float getAbstand(Punkt2D p) {
+        /*
+         * Anwendung Satz des Phytagoras
+         */
+        float a = (p.x - x) * (p.x - x);
+        float b = (p.y - y) * (p.y - y);
+        return (float) Math.sqrt(a + b);
     }
 
     /**

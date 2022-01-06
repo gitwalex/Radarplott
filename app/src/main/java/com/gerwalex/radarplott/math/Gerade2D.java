@@ -2,6 +2,7 @@ package com.gerwalex.radarplott.math;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
@@ -130,7 +131,7 @@ public class Gerade2D {
      * @return Punkt auf der Gerade, der senkrecht zum uebergebenen Punkt liegt.
      */
     public Punkt2D getLotpunkt(Punkt2D p) {
-        float abstand = (float) getAbstand(p);
+        float abstand = getAbstand(p);
         float q1 = p.x + nv.getEndpunkt().x * abstand;
         float q2 = p.y + nv.getEndpunkt().y * abstand;
         Punkt2D q = new Punkt2D(q1, q2);
@@ -298,6 +299,7 @@ public class Gerade2D {
      *
      * @see java.lang.Object#toString()
      */
+    @NonNull
     @Override
     public String toString() {
         float a = rundeWert(this.a);
@@ -312,7 +314,7 @@ public class Gerade2D {
      * Verschiebt die Gerade parallel in einen neuen Punkt.
      *
      * @param p Punkt, in den die neue Gerade verschoben werden soll
-     * @return neue Gerade, verschoben in den Punkt.Der Punkt ist Startpunkt der Gearden
+     * @return neue Gerade, verschoben in den Punkt.Der Punkt ist Startpunkt der Geraden
      */
     public Gerade2D verschiebeParallell(Punkt2D p) {
         return new Gerade2D(p, getRichtungsvektor());

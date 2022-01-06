@@ -179,7 +179,7 @@ public class RadarBasisView extends FrameLayout {
         if (dest != null) {
             courseline.reset();
             courslineStyle.setColor(color);
-            Punkt2D endPos = vessel.getAktPosition();
+            Punkt2D endPos = vessel.getSecondPosition();
             drawLine(courseline, endPos, dest);
             addCircle(courseline, endPos);
             canvas.drawPath(courseline, courslineStyle);
@@ -194,11 +194,11 @@ public class RadarBasisView extends FrameLayout {
         Punkt2D[] dest = vessel.getKurslinie().getSchnittpunkt(outerRing);
         Punkt2D mp;
         if (dest != null) {
-            Punkt2D akt = vessel.getAktPosition();
+            Punkt2D akt = vessel.getSecondPosition();
             mp = vessel.isPunktInFahrtrichtung(dest[0]) ? dest[0].getMittelpunkt(akt) : dest[1].getMittelpunkt(akt);
             drawTextView(canvas, mp, new SpannableString(String.format("%03.1f deg, %.1f kn", hdg, vessel.getSpeed())));
         }
-        mp = vessel.getAktPosition().getMittelpunkt(vessel.getRelPosition(mEigenesSchiff));
+        mp = vessel.getSecondPosition().getMittelpunkt(vessel.getRelPosition(mEigenesSchiff));
         float relHdg = vessel.getHeadingRelativ();
         drawTextView(canvas, mp,
                 new SpannableString(String.format("%03.1f deg, %.1f kn", relHdg, vessel.getSpeedRelativ())));
@@ -234,9 +234,9 @@ public class RadarBasisView extends FrameLayout {
             vesselPosition.reset();
             vesselPositionStyle.setColor(color);
             Punkt2D relPos = vessel.getRelPosition(mEigenesSchiff);
-            Punkt2D startPos = vessel.getStartPosition();
-            Punkt2D aktPos = vessel.getAktPosition();
-            drawLine(courseline, mEigenesSchiff.getAktPosition(), vessel.getCPA(mEigenesSchiff));
+            Punkt2D startPos = vessel.getFirstPosition();
+            Punkt2D aktPos = vessel.getSecondPosition();
+            drawLine(courseline, mEigenesSchiff.getSecondPosition(), vessel.getCPA(mEigenesSchiff));
             drawLine(vesselPosition, startPos, aktPos);
             drawLine(vesselPosition, startPos, relPos);
             drawLine(vesselPosition, relPos, aktPos);
@@ -261,8 +261,8 @@ public class RadarBasisView extends FrameLayout {
     private void drawPositionTexte(Canvas canvas, OpponentVessel vessel, int color) {
         textStyle.setColor(color);
         textStyle.setTextSize(smallTextSize);
-        Punkt2D startPos = vessel.getStartPosition();
-        Punkt2D aktPos = vessel.getAktPosition();
+        Punkt2D startPos = vessel.getFirstPosition();
+        Punkt2D aktPos = vessel.getSecondPosition();
         Punkt2D cpa = vessel.getCPA(mEigenesSchiff);
         drawTextView(canvas, startPos, new SpannableString(vessel.name));
         drawTextView(canvas, aktPos, new SpannableString(vessel.name));
@@ -405,7 +405,7 @@ public class RadarBasisView extends FrameLayout {
             Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
             Kreis2D k = new Kreis2D(pkt, 40f);
             for (Vessel vesssel : vesselList) {
-                if (k.liegtImKreis(vesssel.getAktPosition())) {
+                if (k.liegtImKreis(vesssel.getSecondPosition())) {
                     mOnClickListener.onVesselClick(mEigenesSchiff);
                 }
             }

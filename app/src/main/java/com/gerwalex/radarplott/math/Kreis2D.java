@@ -1,6 +1,7 @@
 package com.gerwalex.radarplott.math;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Locale;
 
@@ -33,6 +34,45 @@ public class Kreis2D {
     public Kreis2D(Punkt2D mittelpunkt, float radius) {
         this.mittelpunkt = new Punkt2D(mittelpunkt.x, mittelpunkt.y);
         this.radius = radius;
+    }
+
+    /**
+     * Liefert die Beruehrpunkte zweier Tangenten an den {@link Kreis2D} zuruek, die durch einen
+     * Bezugspunkt (bezugspunkt) gehen
+     *
+     * @param bezugspunkt Punkt, von dem aus die Tangenten geführt werden sollen.
+     * @return Array mit den Beruehrpunkten. Null, wenn der Bezugspunkt im Kreis liegt
+     */
+    @Nullable
+    public final Punkt2D[] getBeruehrpunkte(Punkt2D bezugspunkt) {
+        float a, b, c, a1, a2, a3;
+        Punkt2D[] p = null;
+        /*
+         * liefert die Beruehrpunkte zweier Tangenten an den Kreis zuruek, die
+         * durch einen Bezugspunkt (bezugspunkt) gehen
+         */
+        /*
+         * siehe auch
+         * http://www.delphi-forum.de/topic_kreis+tangente_12873,0.html
+         */
+        // Ist der Abstand des Bezugspunktes zum Mittelpunkt kleiner als der
+        // Radius, liegt der Bezugspunkt in oder auf dem Kreis. Dann gibt es
+        // keine Tangente
+        if (mittelpunkt.getAbstand(bezugspunkt) > radius) {
+            a = radius;
+            c = (float) Math.hypot(mittelpunkt.x - bezugspunkt.x, mittelpunkt.y - bezugspunkt.y);
+            b = (float) Math.sqrt(Math.pow(c, 2) - Math.pow(a, 2));
+            a1 = (float) Math.atan2(bezugspunkt.x - mittelpunkt.x, bezugspunkt.y - mittelpunkt.y);
+            a2 = (float) Math.asin(b / c);
+            a3 = a1 - a2;
+            p = new Punkt2D[2];
+            p[0] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x),
+                    (float) ((Math.cos(a3) * a) + mittelpunkt.y));
+            a3 = a1 + a2;
+            p[1] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x),
+                    (float) ((Math.cos(a3) * a) + mittelpunkt.y));
+        }
+        return p;
     }
 
     /**
@@ -112,42 +152,6 @@ public class Kreis2D {
         e[0] = new Punkt2D(sp1x, sp1y);
         e[1] = new Punkt2D(sp2x, sp2y);
         return e;
-    }
-
-    /**
-     * Liefert die Beruehrpunkte zweier Tangenten an den {@link Kreis2D} zuruek, die durch einen
-     * Bezugspunkt (bezugspunkt) gehen
-     *
-     * @param bezugspunkt
-     * @return Array mit den Beruehrpunkten. Ist null, wenn der Bezugspunkt im Kreis liegt
-     */
-    public final Punkt2D[] getTangente(Punkt2D bezugspunkt) {
-        float a, b, c, a1, a2, a3;
-        Punkt2D[] p = new Punkt2D[2];
-        /*
-         * liefert die Beruehrpunkte zweier Tangenten an den Kreis zuruek, die
-         * durch einen Bezugspunkt (bezugspunkt) gehen
-         */
-        /*
-         * siehe auch
-         * http://www.delphi-forum.de/topic_kreis+tangente_12873,0.html
-         */
-        // Ist der Abstand des Bezugspunktes zum Mittelpunkt kleiner als der
-        // Radius, liegt der Bezugspunkt in oder auf dem Kreis. Dann gibt es
-        // keine Tangente
-        if (mittelpunkt.getAbstand(bezugspunkt) <= radius) {
-            return p;
-        }
-        a = radius;
-        c = (float) Math.hypot(mittelpunkt.x - bezugspunkt.x, mittelpunkt.y - bezugspunkt.y);
-        b = (float) Math.sqrt(Math.pow(c, 2) - Math.pow(a, 2));
-        a1 = (float) Math.atan2(bezugspunkt.x - mittelpunkt.x, bezugspunkt.y - mittelpunkt.y);
-        a2 = (float) Math.asin(b / c);
-        a3 = a1 - a2;
-        p[0] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x), (float) ((Math.cos(a3) * a) + mittelpunkt.y));
-        a3 = a1 + a2;
-        p[1] = new Punkt2D((float) ((Math.sin(a3) * a) + mittelpunkt.x), (float) ((Math.cos(a3) * a) + mittelpunkt.y));
-        return p;
     }
 
     /**

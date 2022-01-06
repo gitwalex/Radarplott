@@ -2,8 +2,14 @@ package com.gerwalex.radarplott;
 
 import static org.junit.Assert.assertEquals;
 
+import androidx.annotation.NonNull;
+
 import com.gerwalex.radarplott.main.OpponentVessel;
 import com.gerwalex.radarplott.main.Vessel;
+import com.gerwalex.radarplott.math.Gerade2D;
+import com.gerwalex.radarplott.math.Kreis2D;
+import com.gerwalex.radarplott.math.Punkt2D;
+import com.gerwalex.radarplott.math.Vektor2D;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +20,35 @@ import org.junit.Test;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class LageTest {
+
+    private float getHeading(@NonNull OpponentVessel other, int minutes, float distance) {
+        Vessel me = new Vessel(80, 8);
+        Punkt2D cpa = other.getCPA(me);
+        Float h = null;
+        if (minutes >= 0 && other.getTimeTo(cpa) > minutes) {
+            Punkt2D otherFuturePosition = other.getPosition(minutes);
+            Kreis2D k = new Kreis2D(new Punkt2D(), distance);
+            Punkt2D[] bp = k.getBeruehrpunkte(otherFuturePosition);
+            if (bp != null) {
+                Vektor2D v = new Vektor2D(other.getSecondPosition(), bp[0]);
+                Punkt2D relPos = other.getRelPosition(me).add(v);
+                h = new Gerade2D(relPos, otherFuturePosition).getYAxisAngle();
+                System.out.printf("heading1: %03.1f%n", h);
+                v = new Vektor2D(other.getSecondPosition(), bp[1]);
+                relPos = other.getRelPosition(me).add(v);
+                h = new Gerade2D(relPos, otherFuturePosition).getYAxisAngle();
+                System.out.printf("heading1: %03.1f%n", h);
+            }
+        }
+        return h;
+    }
+
+    private void getOpponentVessel(@NonNull OpponentVessel other, int minutes, float distance) {
+        Vessel me = new Vessel(80, 8);
+        if (minutes >= 0) {
+        }
+    }
+
     @Before
     public void initialize() {
     }
@@ -23,6 +58,7 @@ public class LageTest {
         Vessel me = new Vessel(80, 8);
         OpponentVessel otherVessel = new OpponentVessel(0, 'B', 10, 7.0);
         otherVessel.setSecondSeitenpeilung(12, 20, 4.5);
+        Punkt2D relPos = otherVessel.getRelPosition(me);
         assertEquals(141.5, otherVessel.getHeadingRelativ(), 0.1);
         assertEquals(15.3, otherVessel.getSpeedRelativ(), 0.1);
         assertEquals(173.1, otherVessel.getHeading(), 0.1);
@@ -33,31 +69,12 @@ public class LageTest {
         assertEquals(17.9, otherVessel.getRelativTimeTo(otherVessel.getCPA(me)), 0.1);
         assertEquals(17.4, otherVessel.getRelativTimeTo(otherVessel.getBCR(me)), 0.1);
     }
-    //    @Test
-    //    public void manoever() {
-    //        Vessel otherVessel = new Vessel('B', 70, 8.0);
-    //        Vessel myVessel = new Vessel(20, 6);
-    //        otherVessel.setSecondSeitenpeilung(12, 71, 6, myVessel);
-    //        assertEquals(283.5, otherVessel.getHeadingRelativ(), 0.1);
-    //        assertEquals(7.4, otherVessel.getSpeedRelativ(), 0.1);
-    //        assertEquals(247.0, otherVessel.getHeadingRelativ(), 0.1);
-    //        assertEquals(10.0, otherVessel.getSpeedRelativ(), 0.1);
-    //        Lage lage = otherVessel.getLage(myVessel,0);
-    //        assertEquals(0.4, lage.cpaDistance, 0.1);
-    //        assertEquals(35.8, lage.tCPA, 0.1);
-    //        assertEquals(157.0, lage.pCPA, 0.1);
-    //        assertEquals(0.6, lage.bcrDistance, 0.1);
-    //        assertEquals(38.2, lage.tBCR, 0.1);
-    //        myVessel = new Vessel(40, 6);
-    //        otherVessel.setSecondSeitenpeilung(12, 51, 6, myVessel);
-    //        assertEquals(208.0, otherVessel.getHeadingRelativ(), 0.1);
-    //        assertEquals(2.9, otherVessel.getSpeedRelativ(), 0.1);
-    //        assertEquals(247.0, otherVessel.getHeadingRelativ(), 0.1);
-    //        assertEquals(10.0, otherVessel.getSpeedRelativ(), 0.1);
-    //        assertEquals(0.4, lage.cpaDistance, 0.1);
-    //        assertEquals(35.8, lage.tCPA, 0.1);
-    //        assertEquals(157.0, lage.pCPA, 0.1);
-    //        assertEquals(1.9, lage.bcrDistance, 0.1);
-    //        assertEquals(25.0, lage.tBCR, 0.1);
-    //    }
+
+    @Test
+    public void manoever() {
+        OpponentVessel otherVessel = new OpponentVessel(0, 'B', 10, 7.0);
+        otherVessel.setSecondSeitenpeilung(12, 20, 4.5);
+        getHeading(otherVessel, 6, 2.1f);
+        getHeading(otherVessel, 6, 2.5f);
+    }
 }

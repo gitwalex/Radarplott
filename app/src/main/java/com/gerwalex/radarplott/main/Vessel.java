@@ -5,26 +5,34 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
 import com.gerwalex.radarplott.math.Gerade2D;
+import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 
 import java.util.Objects;
 
 public class Vessel extends BaseObservable {
+    protected Punkt2D firstPosition, secondPosition;
     protected float heading;
     protected Gerade2D kurslinie;
     protected float speed;
-    protected Punkt2D startPosition, aktPosition;
 
     protected Vessel() {
-        startPosition = aktPosition = new Punkt2D();
+        firstPosition = secondPosition = new Punkt2D();
     }
 
     public Vessel(int heading, float speed) {
         this.heading = heading % 360;
         this.speed = speed;
-        aktPosition = new Punkt2D(0, 0);
-        startPosition = aktPosition.getPunkt2D(this.heading, -(speed / 6f));
-        kurslinie = new Gerade2D(startPosition, aktPosition);
+        secondPosition = new Punkt2D(0, 0);
+        firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
+        kurslinie = new Gerade2D(firstPosition, secondPosition);
+    }
+
+    public float checkForValidKurs(Float newKurs) throws IllegalManoeverException {
+        if (newKurs != null) {
+            return newKurs;
+        }
+        throw new IllegalManoeverException("Kurs nicht erlaubt.");
     }
 
     @Override
@@ -36,17 +44,17 @@ public class Vessel extends BaseObservable {
             return false;
         }
         Vessel vessel = (Vessel) o;
-        return startPosition.equals(vessel.startPosition) && aktPosition.equals(vessel.aktPosition) &&
+        return firstPosition.equals(vessel.firstPosition) && secondPosition.equals(vessel.secondPosition) &&
                 vessel.heading == heading && vessel.speed == speed;
     }
 
-    public final Punkt2D getAktPosition() {
-        return aktPosition;
+    public final Punkt2D getFirstPosition() {
+        return firstPosition;
     }
 
-    public final void setAktPosition(Punkt2D aktPosition) {
-        this.aktPosition = aktPosition;
-        kurslinie = new Gerade2D(startPosition, aktPosition);
+    public void setFirstPosition(Punkt2D firstPosition) {
+        this.firstPosition = firstPosition;
+        kurslinie = new Gerade2D(firstPosition, secondPosition);
     }
 
     /**
@@ -59,14 +67,8 @@ public class Vessel extends BaseObservable {
         return heading;
     }
 
-    @Bindable
-    public final void setHeading(float heading) {
-        if (this.heading != heading) {
-            this.heading = heading;
-            startPosition = aktPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
-            kurslinie = new Gerade2D(startPosition, aktPosition);
-            notifyChange();
-        }
+    public final Punkt2D getPosition(int minutes) {
+        return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
     }
 
     public int getHeadingFormatted() {
@@ -77,8 +79,16 @@ public class Vessel extends BaseObservable {
         return kurslinie;
     }
 
-    public final Punkt2D getPosition(int minutes) {
-        return aktPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
+    public final Punkt2D getSecondPosition() {
+        return secondPosition;
+    }
+
+    public final float getTimeTo(@NonNull Punkt2D p) {
+        if (!kurslinie.isPunktAufGerade(p)) {
+            throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
+        }
+        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
+        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
     /**
@@ -91,46 +101,36 @@ public class Vessel extends BaseObservable {
         return speed;
     }
 
-    @Bindable
-    public final void setSpeed(float speed) {
-        if (this.speed != speed) {
-            this.speed = speed;
-            startPosition = aktPosition.getPunkt2D(this.heading, -(speed / 6f));
-            kurslinie = new Gerade2D(startPosition, aktPosition);
-            notifyChange();
+    /**
+     * Berechnet die Zeit bis ein bestimmter Abstand zu einem anderen Schiff erreicht ist
+     *
+     * @param abstand abstand in sm
+     * @return null, wenn dieser Abstand nicht erreichbar ist, ansonsten ein Array mit einem oder zwei Punkten. Dabei
+     * ist in float[0] die kuerzere, in float[1] die gleiche (wenn es nur einen Punkt gibt) oder die groessere Zeit
+     * enthalten.
+     */
+    public float[] getTimeToAbstand(OpponentVessel other, float abstand) {
+        float[] time = null;
+        Kreis2D k = new Kreis2D(secondPosition, abstand);
+        Punkt2D[] sc = other.kurslinie.getSchnittpunkt(k);
+        if (sc != null) {
+            time = new float[2];
+            float t1 = getTimeTo(sc[0]);
+            float t2 = getTimeTo(sc[1]);
+            if (t1 > t2) {
+                time[0] = t2;
+                time[1] = t1;
+            } else {
+                time[0] = t1;
+                time[1] = t2;
+            }
         }
-    }
-
-    public final Punkt2D getStartPosition() {
-        return startPosition;
-    }
-
-    public void setStartPosition(Punkt2D startPosition) {
-        this.startPosition = startPosition;
-        kurslinie = new Gerade2D(startPosition, aktPosition);
-    }
-
-    public final float getTimeTo(@NonNull Punkt2D p) {
-        if (!kurslinie.isPunktAufGerade(p)) {
-            throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
-        }
-        float timeToP = (float) (aktPosition.getAbstand(p) / speed * 60.0);
-        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
+        return time;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(heading, kurslinie, kurslinie, speed, startPosition, aktPosition);
-    }
-
-    /**
-     * Prueft, ob ein Punkt auf der EigenesSchiff liegt. Toleranz ist 1E6.
-     *
-     * @param p Punkt
-     * @return true, wenn der Punkt auf der EigenesSchiff liegt, ansonsten false.
-     */
-    public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
-        return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E6) == 0;
+        return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
     }
 
     /**
@@ -147,18 +147,54 @@ public class Vessel extends BaseObservable {
         double wegy = kurslinie.getRichtungsvektor().getEndpunkt().y;
         double lambda;
         if (wegx != 0) {
-            lambda = (p.x - aktPosition.x) / wegx;
+            lambda = (p.x - secondPosition.x) / wegx;
         } else {
-            lambda = (p.y - aktPosition.y) / wegy;
+            lambda = (p.y - secondPosition.y) / wegy;
         }
         return lambda > 0;
+    }
+
+    @Bindable
+    public final void setHeading(float heading) {
+        if (this.heading != heading) {
+            this.heading = heading;
+            firstPosition = secondPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
+            kurslinie = new Gerade2D(firstPosition, secondPosition);
+            notifyChange();
+        }
+    }
+
+    /**
+     * Prueft, ob ein Punkt auf der EigenesSchiff liegt. Toleranz ist 1E6.
+     *
+     * @param p Punkt
+     * @return true, wenn der Punkt auf der EigenesSchiff liegt, ansonsten false.
+     */
+    public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
+        return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E6) == 0;
+    }
+
+    @Bindable
+    public final void setSpeed(float speed) {
+        if (this.speed != speed) {
+            this.speed = speed;
+            firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
+            kurslinie = new Gerade2D(firstPosition, secondPosition);
+            notifyChange();
+        }
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "Vessel{ heading=" + heading + " speed=" + speed + ",startPosition=" + startPosition + ", aktPosition=" +
-                aktPosition + ", kurslinie=" + kurslinie + "}";
+        return "Vessel{ heading=" + heading + " speed=" + speed + ",startPosition=" + firstPosition + ", aktPosition=" +
+                secondPosition + ", kurslinie=" + kurslinie + "}";
+    }
+
+    public static class IllegalManoeverException extends Exception {
+        public IllegalManoeverException(String msg) {
+            super(msg);
+        }
     }
 }
 
