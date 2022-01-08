@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.databinding.Bindable;
 
 import com.gerwalex.radarplott.math.Gerade2D;
-import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
 
 import java.util.Locale;
@@ -16,15 +15,16 @@ public class OpponentVessel extends Vessel {
     private final int rwP1;
     private final int startTime;
     private float dist2;
-    private float headingRelativ;
-    private Gerade2D kurslinieRelativ;
+    private float headingAbsolut;
+    private Vessel manoeverVessel;
+    private Vessel me;
     /**
      * Abstand zwischen den Peilungen in Minuten
      */
     private int minutes;
     private Punkt2D relPosition;
     private int rwP2;
-    private float speedRelativ;
+    private float speedAbsolut;
 
     /**
      * Erstellt ein Schiff aus Seitenpeilung. Schiff hat Geschwindigkeit 0 und Kurs 0
@@ -43,20 +43,15 @@ public class OpponentVessel extends Vessel {
         setFirstPosition(new Punkt2D().getPunkt2D(peilungRechtweisend, dist1));
     }
 
-    public float getAbstandBCR(Vessel me) {
-        return me.getSecondPosition().getAbstand(getBCR(me));
-    }
-
-    public float getAbstandCPA(Vessel me) {
-        return getCPA(me).getAbstand(me.getSecondPosition());
-    }
-
-    public Punkt2D getBCR(Vessel me) {
-        return kurslinie.getSchnittpunkt(me.getKurslinie());
-    }
-
-    public Punkt2D getCPA(Vessel me) {
-        return kurslinie.getLotpunkt(me.getSecondPosition());
+    public Vessel createManoever(Vessel manoever, int minutes) {
+        Punkt2D mp = getPosition(minutes);
+        Punkt2D mpMe = manoever.getPosition(this.minutes);
+        Punkt2D mpRelPos = relPosition.add(mpMe);
+        Gerade2D kurslinie = new Gerade2D(mpRelPos, secondPosition);
+        kurslinie.verschiebeParallell(mp);
+        manoeverVessel =
+                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
+        return manoeverVessel;
     }
 
     /**
@@ -65,8 +60,8 @@ public class OpponentVessel extends Vessel {
      * @return heading
      */
     @Bindable
-    public float getHeadingRelativ() {
-        return headingRelativ;
+    public float getHeadingAbsolut() {
+        return headingAbsolut;
     }
 
     /**
@@ -85,43 +80,23 @@ public class OpponentVessel extends Vessel {
      *                                  -
      */
     @Nullable
-    public Float getHeadingforCPADistance(@NonNull Vessel other, int minutes, float distance)
+    public Float getHeadingforCPADistance(@NonNull OpponentVessel other, int minutes, float distance)
             throws IllegalManoeverException {
-        Punkt2D cpa = getCPA(other);
         Float heading = null;
-        if (minutes > 0 && getTimeTo(cpa) > minutes) {
-            heading = 0f;
-            Punkt2D futurePosition = getPosition(minutes);
-            Punkt2D otherFuturePosition = other.getPosition(minutes);
-            Kreis2D k = new Kreis2D(otherFuturePosition, distance);
-            Punkt2D[] bp = k.getBeruehrpunkte(futurePosition);
-            if (bp != null) {
-                getRelPosition(other);
-                Gerade2D t1 = new Gerade2D(futurePosition, bp[0]);
-                Gerade2D kursAbsolutNeu = kurslinieRelativ.verschiebeParallell(bp[0]);
-            }
-        }
         return checkForValidKurs(heading);
-    }
-
-    public Gerade2D getKurslinieRelativ() {
-        return kurslinieRelativ;
     }
 
     public int getMinutes() {
         return minutes;
     }
 
-    public float getPeilungRechtweisendCPA(Vessel me) {
-        return new Gerade2D(me.getSecondPosition(), getCPA(me)).getYAxisAngle();
-    }
-
-    public Punkt2D getRelPosition(@NonNull Vessel me) {
+    public final Punkt2D getRelPosition(@NonNull Vessel me) {
+        this.me = me;
         Punkt2D otherPos = me.getPosition(-minutes);
         relPosition = firstPosition.add(otherPos);
-        kurslinieRelativ = new Gerade2D(relPosition, secondPosition);
-        headingRelativ = kurslinieRelativ.getYAxisAngle();
-        speedRelativ = (float) (relPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+        Gerade2D kurslinieAbsolut = new Gerade2D(relPosition, secondPosition);
+        headingAbsolut = kurslinieAbsolut.getYAxisAngle();
+        speedAbsolut = (float) (relPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
         return relPosition;
     }
 
@@ -137,7 +112,7 @@ public class OpponentVessel extends Vessel {
         return String.format(Locale.getDefault(), "%02d:%02d", (startTime + minutes) / 60, (startTime + minutes) % 60);
     }
 
-    public float getSeitenpeilungCPA(Vessel me) {
+    public float getSeitenpeilungCPA(OpponentVessel me) {
         return getPeilungRechtweisendCPA(me) + me.getHeading();
     }
 
@@ -147,8 +122,8 @@ public class OpponentVessel extends Vessel {
      * @return speed
      */
     @Bindable
-    public float getSpeedRelativ() {
-        return speedRelativ;
+    public float getSpeedAbsolut() {
+        return speedAbsolut;
     }
 
     public String getStartTime() {
@@ -166,7 +141,7 @@ public class OpponentVessel extends Vessel {
      */
     public boolean isEntgegenkommer(Vessel me) {
         getRelPosition(me);
-        return headingRelativ > 90 && headingRelativ < 270;
+        return headingAbsolut > 90 && headingAbsolut < 270;
     }
 
     /**
@@ -189,8 +164,8 @@ public class OpponentVessel extends Vessel {
     @NonNull
     @Override
     public String toString() {
-        return "Vessel{name=" + name + "dist1=" + dist1 + ", dist2=" + dist2 + ", headingRelativ=" + headingRelativ +
+        return "Vessel{name=" + name + "dist1=" + dist1 + ", dist2=" + dist2 + ", headingRelativ=" + headingAbsolut +
                 ", " + "minutes=" + minutes + ", relPosition=" + relPosition + ", rwP1=" + rwP1 + ", rwP2=" + rwP2 +
-                ", speedRelativ=" + speedRelativ + '}' + super.toString();
+                ", speedRelativ=" + speedAbsolut + '}' + super.toString();
     }
 }

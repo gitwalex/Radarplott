@@ -3,31 +3,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".main.MainActivity">
+        android:layout_height="match_parent">
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/radar"
-            android:name="com.gerwalex.radarplott.main.RadarFragment"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/ownVessel"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout="@layout/radar_view" />
+            android:layout_height="match_parent"
+            tools:context=".main.MainActivity">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/radar"
+                android:name="com.gerwalex.radarplott.main.RadarFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/ownVessel"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout="@layout/radar_view" />
 
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/ownVessel"
-            android:name="com.gerwalex.radarplott.main.OwnVessel"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/ownVessel"
+                android:name="com.gerwalex.radarplott.main.OwnVessel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:layout="@layout/own_vessel" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nav_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:layout="@layout/own_vessel" />
+            android:layout_gravity="start" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+    </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

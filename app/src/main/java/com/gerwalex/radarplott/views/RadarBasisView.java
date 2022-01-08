@@ -13,6 +13,7 @@ import android.text.SpannableString;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.FrameLayout;
@@ -30,6 +31,7 @@ import com.gerwalex.radarplott.main.OpponentVessel;
 import com.gerwalex.radarplott.main.Vessel;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
+import com.gerwalex.radarplott.math.Vektor2D;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -48,19 +50,21 @@ public class RadarBasisView extends FrameLayout {
     private static final int thinPath = 2;
     protected final Path courseline = new Path();
     protected final Paint courslineStyle = new Paint();
+    private final long clickTime = -1;
     @ColorRes
     private final int[] colors;
+    private final float extraSmallTextSize;
+    private final GestureDetector gestureDetector;
     private final float markerRadius = 20f;
-    private final int mediumTextSize;
     private final int ownVesselColor;
     // Variablen zum Zeichnen
     private final Paint radarLineStyle = new Paint();
-    private final int smallTextSize;
+    private final Path relCourseline = new Path();
+    private final float smallTextSize;
     private final Path symbolPath = new Path();
     private final int textColor;
     private final Paint textStyle = new TextPaint();
     private final List<OpponentVessel> vesselList = new ArrayList<>();
-    private final Path vesselPosition = new Path();
     private final Paint vesselPositionStyle = new Paint();
     public ObservableInt maxTime = new ObservableInt(0);
     public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
@@ -72,7 +76,9 @@ public class RadarBasisView extends FrameLayout {
     private Bitmap bm;
     private boolean drawCourselineText = true;
     private boolean drawPositionText = true;
+    private boolean longPressed;
     private Vessel mEigenesSchiff;
+    private Vessel mManoeverVessel;
     private OnVesselClickListener mOnClickListener;
     private ScaleGestureDetector mScaleDetector;
     private int minutes;
@@ -109,11 +115,38 @@ public class RadarBasisView extends FrameLayout {
         //
         textColor = getResources().getColor(R.color.white);
         textStyle.setColor(textColor);
-        mediumTextSize = getResources().getDimensionPixelSize(R.dimen.mediumText);
-        smallTextSize = getResources().getDimensionPixelSize(R.dimen.extraSmallText);
-        textStyle.setTextSize(mediumTextSize);
+        smallTextSize = getResources().getDimension(R.dimen.mediumText);
+        extraSmallTextSize = getResources().getDimension(R.dimen.extraSmallText);
+        textStyle.setTextSize(smallTextSize);
         textStyle.setAntiAlias(true);
         setWillNotDraw(false);
+        gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                int width = getWidth() / 2;
+                int height = getHeight() / 2;
+                float x = e.getX();
+                float y = e.getY();
+                Punkt2D pkt = new Punkt2D((x - width), (height - y));
+                Kreis2D k = new Kreis2D(pkt, 40f);
+                if (mOnClickListener != null) {
+                    for (Vessel vesssel : vesselList) {
+                        if (k.liegtImKreis(vesssel.getSecondPosition())) {
+                            mOnClickListener.onVesselClick(vesssel);
+                        }
+                    }
+                }
+                if (BuildConfig.DEBUG) {
+                    Snackbar.make(RadarBasisView.this, pkt.toString(), Snackbar.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                longPressed = true;
+            }
+        });
     }
 
     public void addCircle(Path path, Punkt2D pos) {
@@ -139,7 +172,7 @@ public class RadarBasisView extends FrameLayout {
         float radius = outerRing.getRadius() * sm;
         Punkt2D mp = outerRing.getMittelpunkt();
         for (int i = 0; i < 36; i++) {
-            Punkt2D pkt = mp.getPunkt2D(i * 10, radius + sektorlinienlaenge + mediumTextSize);
+            Punkt2D pkt = mp.getPunkt2D(i * 10, radius + sektorlinienlaenge + smallTextSize);
             String text = "000" + i * 10;
             drawCenteredText(canvas, new Punkt2D(pkt.x / sm, pkt.y / sm), text.substring(text.length() - 3));
         }
@@ -180,39 +213,22 @@ public class RadarBasisView extends FrameLayout {
             courseline.reset();
             courslineStyle.setColor(color);
             Punkt2D endPos = vessel.getSecondPosition();
-            drawLine(courseline, endPos, dest);
-            addCircle(courseline, endPos);
+            if (vessel.getHeading() <= 180) {
+                drawLine(courseline, endPos, dest);
+            } else {
+                drawLine(courseline, dest, endPos);
+            }
             canvas.drawPath(courseline, courslineStyle);
         }
     }
 
     @SuppressLint("DefaultLocale")
-    private void drawCourselineTexte(Canvas canvas, OpponentVessel vessel, int color) {
+    private void drawCourselineTexte(Canvas canvas, Vessel vessel, int color) {
         textStyle.setColor(color);
-        textStyle.setTextSize(smallTextSize);
-        float hdg = vessel.getHeading();
-        Punkt2D[] dest = vessel.getKurslinie().getSchnittpunkt(outerRing);
-        Punkt2D mp;
-        if (dest != null) {
-            Punkt2D akt = vessel.getSecondPosition();
-            mp = vessel.isPunktInFahrtrichtung(dest[0]) ? dest[0].getMittelpunkt(akt) : dest[1].getMittelpunkt(akt);
-            drawTextView(canvas, mp, new SpannableString(String.format("%03.1f deg, %.1f kn", hdg, vessel.getSpeed())));
-        }
-        mp = vessel.getSecondPosition().getMittelpunkt(vessel.getRelPosition(mEigenesSchiff));
-        float relHdg = vessel.getHeadingRelativ();
-        drawTextView(canvas, mp,
-                new SpannableString(String.format("%03.1f deg, %.1f kn", relHdg, vessel.getSpeedRelativ())));
-        //        canvas.drawTextOnPath(String.format(Locale.getDefault(), "%03d", (int) vessel.getHeading()), courseline,
-        //                smallTextSize * 2, 0, textStyle);
-        //        canvas.drawTextOnPath(String.format(Locale.getDefault(), "%03d", (int) vessel.getHeadingRelativ()),
-        //                vesselPositionRelativ, smallTextSize * 2, 0, textStyle);
-        //        Punkt2D endPos = drawEndText(canvas, vessel.getCPA(mEigenesSchiff), "CPA", mediumTextSize);
-        //        drawEndText(canvas, endPos, getResources().getString(R.string.sm, vessel.getAbstandCPA(mEigenesSchiff)),
-        //                smallTextSize);
-        //        endPos = drawEndText(canvas, vessel.getStartPosition(), vessel.name, mediumTextSize);
-        //        drawEndText(canvas, endPos, vessel.getStartTime(), smallTextSize);
-        //        endPos = drawEndText(canvas, vessel.getAktPosition(), vessel.name, mediumTextSize);
-        //        drawEndText(canvas, endPos, vessel.getSecondTime(), smallTextSize);
+        textStyle.setTextSize(extraSmallTextSize);
+        textStyle.setTextAlign(Paint.Align.CENTER);
+        String text = String.format("%03.1f deg, %.1f kn", vessel.getHeading(), vessel.getSpeed());
+        canvas.drawTextOnPath(text, courseline, 0, -10, textStyle);
         textStyle.setColor(textColor);
     }
 
@@ -231,28 +247,28 @@ public class RadarBasisView extends FrameLayout {
     @SuppressLint("DefaultLocale")
     private void drawPosition(Canvas canvas, OpponentVessel vessel, int color) {
         if (mEigenesSchiff != null) {
-            vesselPosition.reset();
+            relCourseline.reset();
             vesselPositionStyle.setColor(color);
             Punkt2D relPos = vessel.getRelPosition(mEigenesSchiff);
             Punkt2D startPos = vessel.getFirstPosition();
             Punkt2D aktPos = vessel.getSecondPosition();
-            drawLine(courseline, mEigenesSchiff.getSecondPosition(), vessel.getCPA(mEigenesSchiff));
-            drawLine(vesselPosition, startPos, aktPos);
-            drawLine(vesselPosition, startPos, relPos);
-            drawLine(vesselPosition, relPos, aktPos);
+            drawLine(courseline, mEigenesSchiff.getSecondPosition(), mEigenesSchiff.getCPA(vessel));
+            drawLine(relCourseline, relPos, aktPos);
+            drawLine(relCourseline, startPos, aktPos);
+            drawLine(relCourseline, startPos, relPos);
             Punkt2D nextPos = vessel.getPosition(minutes);
             if (outerRing.liegtImKreis(nextPos)) {
                 Punkt2D dest = getEndOfKurslinie(vessel);
                 assert dest != null;
                 maxTime.set((int) Math.max(vessel.getTimeTo(dest), maxTime.get()));
-                addCircle(vesselPosition, nextPos);
+                addCircle(relCourseline, nextPos);
                 if (minutes != 0) {
                     int time = vessel.getTime() + minutes;
                     drawTextView(canvas, nextPos,
                             new SpannableString(String.format("%1s %02d:%02d", vessel.name, time / 60, time % 60)));
                 }
             }
-            canvas.drawPath(vesselPosition, vesselPositionStyle);
+            canvas.drawPath(relCourseline, vesselPositionStyle);
             canvas.drawPath(courseline, courslineStyle);
         }
     }
@@ -260,14 +276,16 @@ public class RadarBasisView extends FrameLayout {
     @SuppressLint("DefaultLocale")
     private void drawPositionTexte(Canvas canvas, OpponentVessel vessel, int color) {
         textStyle.setColor(color);
-        textStyle.setTextSize(smallTextSize);
+        textStyle.setTextSize(extraSmallTextSize);
         Punkt2D startPos = vessel.getFirstPosition();
         Punkt2D aktPos = vessel.getSecondPosition();
-        Punkt2D cpa = vessel.getCPA(mEigenesSchiff);
-        drawTextView(canvas, startPos, new SpannableString(vessel.name));
-        drawTextView(canvas, aktPos, new SpannableString(vessel.name));
+        Punkt2D cpa = mEigenesSchiff.getCPA(vessel);
+        String text = String.format("%1s %2s", vessel.name, vessel.getStartTime());
+        drawTextView(canvas, startPos, new SpannableString(text));
+        text = String.format("%1s %2s", vessel.name, vessel.getSecondTime());
+        drawTextView(canvas, aktPos, new SpannableString(text));
         drawTextView(canvas, cpa,
-                new SpannableString(String.format("CPA %.1f sm", vessel.getAbstandCPA(mEigenesSchiff))));
+                new SpannableString(String.format("CPA %.1f sm", mEigenesSchiff.getAbstandCPA(vessel))));
     }
 
     public void drawTextView(Canvas canvas, Punkt2D ankerPos, Spannable text) {
@@ -281,7 +299,7 @@ public class RadarBasisView extends FrameLayout {
         textView.setTextColor(textStyle.getColor());
         textView.layout(0, 0, 600, 500);
         textView.setText(text);
-        canvas.translate(ankerPos.x * sm + textPadding, -ankerPos.y * sm - mediumTextSize / 2f);
+        canvas.translate(ankerPos.x * sm + textPadding, -ankerPos.y * sm - smallTextSize / 2f);
         canvas.rotate(degrees);
         textView.draw(canvas);
         canvas.restore();
@@ -351,6 +369,11 @@ public class RadarBasisView extends FrameLayout {
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
         if (mEigenesSchiff != null) {
             drawCourseline(canvas, mEigenesSchiff, ownVesselColor);
+            drawCourselineTexte(canvas, mEigenesSchiff, ownVesselColor);
+        }
+        if (mManoeverVessel != null) {
+            drawCourseline(canvas, mManoeverVessel, ownVesselColor);
+            drawCourselineTexte(canvas, mManoeverVessel, ownVesselColor);
         }
         for (int i = 0; i < vesselList.size(); i++) {
             OpponentVessel vessel = vesselList.get(i);
@@ -362,6 +385,10 @@ public class RadarBasisView extends FrameLayout {
             }
             if (drawPositionText) {
                 drawPositionTexte(canvas, vessel, color);
+            }
+            if (mManoeverVessel != null) {
+                Vessel v = vessel.createManoever(mManoeverVessel, minutes);
+                drawCourseline(canvas, v, color);
             }
         }
         canvas.drawPath(symbolPath, textStyle);
@@ -397,23 +424,24 @@ public class RadarBasisView extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         performClick();
-        if (MotionEvent.ACTION_DOWN == event.getAction() && mOnClickListener != null) {
-            int width = getWidth() / 2;
-            int height = getHeight() / 2;
-            float x = event.getX();
-            float y = event.getY();
-            Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
-            Kreis2D k = new Kreis2D(pkt, 40f);
-            for (Vessel vesssel : vesselList) {
-                if (k.liegtImKreis(vesssel.getSecondPosition())) {
-                    mOnClickListener.onVesselClick(mEigenesSchiff);
-                }
-            }
-            if (BuildConfig.DEBUG) {
-                Snackbar.make(this, pkt.toString(), Snackbar.LENGTH_SHORT).show();
+        boolean consumed = gestureDetector.onTouchEvent(event);
+        if (!consumed) {
+            int action = event.getAction();
+            if (action == MotionEvent.ACTION_MOVE && longPressed) {
+                int width = getWidth() / 2;
+                int height = getHeight() / 2;
+                float x = event.getX();
+                float y = event.getY();
+                Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
+                float angle = new Vektor2D(new Punkt2D(), pkt).getYAxisAngle();
+                mManoeverVessel = new Vessel((int) angle, mEigenesSchiff.getSpeed());
+                invalidate();
+                consumed = true;
+            } else if (action == MotionEvent.ACTION_UP) {
+                longPressed = false;
             }
         }
-        return mScaleDetector.onTouchEvent(event);
+        return consumed || super.onTouchEvent(event);
     }
 
     @Override

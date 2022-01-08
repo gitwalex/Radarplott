@@ -5,6 +5,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Die Klasse Gerade2D bietet Funktionen zur Berechnung von Werten im 2-dimensionalen Raum
  *
@@ -81,6 +83,26 @@ public class Gerade2D {
             m = Float.NaN;
             n = Float.NaN;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Gerade2D gerade2D = (Gerade2D) o;
+        return Float.compare(gerade2D.a, a) == 0 && Float.compare(gerade2D.b, b) == 0 &&
+                Float.compare(gerade2D.c, c) == 0 && Float.compare(gerade2D.m, m) == 0 &&
+                Float.compare(gerade2D.n, n) == 0 && punkt1.equals(gerade2D.punkt1) && punkt2.equals(gerade2D.punkt2) &&
+                rv.equals(gerade2D.rv) && nv.equals(gerade2D.nv);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b, c, m, n, punkt1, punkt2, rv, nv);
     }
 
     /**
