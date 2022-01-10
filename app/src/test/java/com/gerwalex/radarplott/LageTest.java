@@ -34,7 +34,6 @@ public class LageTest {
         Punkt2D cpa = me.getCPA(other);
         assertEquals(2.0, me.getAbstand(cpa), 0.1);
         assertEquals(83.1, me.getPeilungRechtweisend(cpa), 0.1);
-        assertEquals(83.1, me.getPeilungRechtweisendCPA(other), 0.1);
         Punkt2D bcr = me.getBCR(other);
         assertEquals(2.0, me.getAbstand(bcr), 0.1);
         assertEquals(17.9, other.getRelativTimeTo(me.getCPA(other)), 0.1);

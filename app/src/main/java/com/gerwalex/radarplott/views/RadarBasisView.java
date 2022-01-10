@@ -227,7 +227,10 @@ public class RadarBasisView extends FrameLayout {
                 drawLine(courseline, dest, endPos);
             }
             Punkt2D cpa = me.getCPA(vessel);
-            drawLine(courseline, me.getSecondPosition(), cpa);
+            Punkt2D pos = me.getSecondPosition();
+            if (!pos.equals(cpa) && vessel.isPunktInFahrtrichtung(cpa)) {
+                drawLine(courseline, me.getSecondPosition(), cpa);
+            }
             if (drawCourselineText) {
                 textStyle.setColor(color);
                 textStyle.setTextSize(extraSmallTextSize);

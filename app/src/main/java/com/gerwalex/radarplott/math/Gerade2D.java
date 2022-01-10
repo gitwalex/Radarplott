@@ -158,7 +158,7 @@ public class Gerade2D {
             q = new Punkt2D(q1, q2);
         }
         if (!isPunktAufGerade(q)) {
-            System.out.println(p + " nicht auf Gerade");
+            Log.d("gerwalex", p + " nicht auf Gerade");
         }
         return q;
     }

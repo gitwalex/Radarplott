@@ -7,6 +7,7 @@ import androidx.databinding.Bindable;
 import com.gerwalex.radarplott.math.Gerade2D;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
+import com.gerwalex.radarplott.math.Vektor2D;
 
 import java.util.Objects;
 
@@ -85,7 +86,10 @@ public class Vessel extends BaseObservable {
     }
 
     public float getPeilungRechtweisend(Punkt2D pkt) {
-        return new Gerade2D(secondPosition, pkt).getYAxisAngle();
+        if (secondPosition.equals(pkt)) {
+            throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
+        }
+        return new Vektor2D(secondPosition, pkt).getYAxisAngle();
     }
 
     public int getHeadingFormatted() {
@@ -98,10 +102,6 @@ public class Vessel extends BaseObservable {
 
     public float getSeitenPeilung(Punkt2D pkt) {
         return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
-    }
-
-    public float getPeilungRechtweisendCPA(OpponentVessel other) {
-        return new Gerade2D(secondPosition, getCPA(other)).getYAxisAngle();
     }
 
     /**
@@ -190,17 +190,6 @@ public class Vessel extends BaseObservable {
         return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
     }
 
-    /**
-     * Prueft, ob ein Punkt in Fahrtrichtung liegt.
-     *
-     * @param p zu pruefender Punkt
-     * @return true, wenn der Punkt in Fahrtrichtung liegt. Sonst false.
-     */
-    public final boolean isPunktInFahrtrichtung(Punkt2D p) {
-        float plg = getSeitenPeilung(p);
-        return plg > 270 || plg < 90;
-    }
-
     @Bindable
     public final void setHeading(float heading) {
         if (this.heading != heading) {
@@ -219,6 +208,17 @@ public class Vessel extends BaseObservable {
             kurslinie = new Gerade2D(firstPosition, secondPosition);
             notifyChange();
         }
+    }
+
+    /**
+     * Prueft, ob ein Punkt in Fahrtrichtung liegt.
+     *
+     * @param p zu pruefender Punkt
+     * @return true, wenn der Punkt in Fahrtrichtung liegt. Sonst false.
+     */
+    public final boolean isPunktInFahrtrichtung(Punkt2D p) {
+        float plg = getSeitenPeilung(p);
+        return plg > 270 || plg < 90;
     }
 
     @NonNull

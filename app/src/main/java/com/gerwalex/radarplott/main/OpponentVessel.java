@@ -6,6 +6,7 @@ import androidx.databinding.Bindable;
 
 import com.gerwalex.radarplott.math.Gerade2D;
 import com.gerwalex.radarplott.math.Punkt2D;
+import com.gerwalex.radarplott.math.Vektor2D;
 
 import java.util.Locale;
 
@@ -14,17 +15,16 @@ public class OpponentVessel extends Vessel {
     private final float dist1;
     private final int rwP1;
     private final int startTime;
+    private Vessel absolutVessel;
     private float dist2;
-    private float headingAbsolut;
-    private Vessel manoeverVessel;
     private Vessel me;
     /**
      * Abstand zwischen den Peilungen in Minuten
      */
     private int minutes;
     private Punkt2D relPosition;
+    private Vessel relativVessel;
     private int rwP2;
-    private float speedAbsolut;
 
     /**
      * Erstellt ein Schiff aus Seitenpeilung. Schiff hat Geschwindigkeit 0 und Kurs 0
@@ -49,9 +49,7 @@ public class OpponentVessel extends Vessel {
         Punkt2D mpRelPos = relPosition.add(mpMe);
         Gerade2D kurslinie = new Gerade2D(mpRelPos, secondPosition);
         kurslinie.verschiebeParallell(mp);
-        manoeverVessel =
-                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
-        return manoeverVessel;
+        return new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
     }
 
     /**
@@ -61,7 +59,7 @@ public class OpponentVessel extends Vessel {
      */
     @Bindable
     public float getHeadingAbsolut() {
-        return headingAbsolut;
+        return absolutVessel.heading;
     }
 
     /**
@@ -94,9 +92,10 @@ public class OpponentVessel extends Vessel {
         this.me = me;
         Punkt2D otherPos = me.getPosition(-minutes);
         relPosition = firstPosition.add(otherPos);
-        Gerade2D kurslinieAbsolut = new Gerade2D(relPosition, secondPosition);
-        headingAbsolut = kurslinieAbsolut.getYAxisAngle();
-        speedAbsolut = (float) (relPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+        Vektor2D kurslinieAbsolut = new Vektor2D(relPosition, secondPosition);
+        float heading = kurslinieAbsolut.getYAxisAngle();
+        float speed = (float) (relPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+        absolutVessel = new Vessel(relPosition, heading, speed);
         return relPosition;
     }
 
@@ -112,10 +111,6 @@ public class OpponentVessel extends Vessel {
         return String.format(Locale.getDefault(), "%02d:%02d", (startTime + minutes) / 60, (startTime + minutes) % 60);
     }
 
-    public float getSeitenpeilungCPA(OpponentVessel me) {
-        return getPeilungRechtweisendCPA(me) + me.getHeading();
-    }
-
     /**
      * Speed
      *
@@ -123,7 +118,7 @@ public class OpponentVessel extends Vessel {
      */
     @Bindable
     public float getSpeedAbsolut() {
-        return speedAbsolut;
+        return absolutVessel.speed;
     }
 
     public String getStartTime() {
@@ -132,16 +127,6 @@ public class OpponentVessel extends Vessel {
 
     public int getTime() {
         return startTime + minutes;
-    }
-
-    /**
-     * Ein Entgegenkommer fährt mit einem relativen Kurs zwischen 90 und 270 Grad
-     *
-     * @return true, wennn relativer Kurs zum anderen Schiff zwischen 90 und 270 Grad ist.
-     */
-    public boolean isEntgegenkommer(Vessel me) {
-        getRelPosition(me);
-        return headingAbsolut > 90 && headingAbsolut < 270;
     }
 
     /**
@@ -159,13 +144,13 @@ public class OpponentVessel extends Vessel {
         kurslinie = new Gerade2D(firstPosition, secondPosition);
         heading = kurslinie.getYAxisAngle();
         speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+        relativVessel = new Vessel(secondPosition, heading, speed);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "Vessel{name=" + name + "dist1=" + dist1 + ", dist2=" + dist2 + ", headingRelativ=" + headingAbsolut +
-                ", " + "minutes=" + minutes + ", relPosition=" + relPosition + ", rwP1=" + rwP1 + ", rwP2=" + rwP2 +
-                ", speedRelativ=" + speedAbsolut + '}' + super.toString();
+        return "Vessel{name=" + name + "dist1=" + dist1 + ", dist2=" + dist2 + ", " + "minutes=" + minutes +
+                ", relPosition=" + relPosition + ", rwP1=" + rwP1 + ", rwP2=" + rwP2 + '}' + super.toString();
     }
 }

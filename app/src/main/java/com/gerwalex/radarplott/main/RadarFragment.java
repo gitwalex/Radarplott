@@ -3,6 +3,7 @@ package com.gerwalex.radarplott.main;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -14,8 +15,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
 import com.gerwalex.radarplott.views.RadarBasisView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.LabelFormatter;
 
 public class RadarFragment extends Fragment {
@@ -26,6 +29,7 @@ public class RadarFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mModel = new ViewModelProvider(requireActivity()).get(MainModel.class);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -75,8 +79,25 @@ public class RadarFragment extends Fragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.kurse) {
+            binding.radar.setDrawCourselineTexte(item.isChecked());
+        } else if (id == R.id.position) {
+            binding.radar.setDrawPositionTexte(item.isChecked());
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                return onOptionsItemSelected(item);
+            }
+        });
         OpponentVessel otherVessel = new OpponentVessel(600, 'B', 10, 7);
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
