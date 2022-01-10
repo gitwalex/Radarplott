@@ -10,4 +10,6 @@
     <string name="sm">%.1f sm</string>
     <string name="kurse">Kurse</string>
     <string name="positionen">Positionen</string>
+    <string name="kursFormatted">%03.1f deg, %.1f kn</string>
+    <string name="CPAFormatted">CPA %.1f sm</string>
 </resources>

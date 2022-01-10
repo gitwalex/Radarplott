@@ -137,6 +137,18 @@ public class Vessel extends BaseObservable {
     }
 
     /**
+     * Ein Entgegenkommer wird zwischen 90 und 270 Grad gepeilt
+     *
+     * @param other   Entgegenkommer
+     * @param minutes Zeitpunkt der Position
+     * @return true, wennn Entgegenkommer
+     */
+    public boolean isEntgegenkommer(Vessel other, int minutes) {
+        float plg = getSeitenPeilung(other.getPosition(minutes));
+        return plg > 270 || plg < 90;
+    }
+
+    /**
      * Prueft, ob ein Punkt auf der EigenesSchiff liegt. Toleranz ist 1E6f.
      *
      * @param p Punkt
@@ -144,17 +156,6 @@ public class Vessel extends BaseObservable {
      */
     public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
         return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E4f) < 1;
-    }
-
-    /**
-     * Prueft, ob ein Punkt in Fahrtrichtung liegt.
-     *
-     * @param p zu pruefender Punkt
-     * @return true, wenn der Punkt in Fahrtrichtung liegt. Sonst false.
-     */
-    public final boolean isPunktInFahrtrichtung(Punkt2D p) {
-        float plg = getSeitenPeilung(p);
-        return plg > 270 || plg < 90;
     }
 
     /**
@@ -189,6 +190,17 @@ public class Vessel extends BaseObservable {
         return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
     }
 
+    /**
+     * Prueft, ob ein Punkt in Fahrtrichtung liegt.
+     *
+     * @param p zu pruefender Punkt
+     * @return true, wenn der Punkt in Fahrtrichtung liegt. Sonst false.
+     */
+    public final boolean isPunktInFahrtrichtung(Punkt2D p) {
+        float plg = getSeitenPeilung(p);
+        return plg > 270 || plg < 90;
+    }
+
     @Bindable
     public final void setHeading(float heading) {
         if (this.heading != heading) {
@@ -214,12 +226,6 @@ public class Vessel extends BaseObservable {
     public String toString() {
         return "Vessel{ heading=" + heading + " speed=" + speed + ",startPosition=" + firstPosition + ", aktPosition=" +
                 secondPosition + ", kurslinie=" + kurslinie + "}";
-    }
-
-    public static class IllegalManoeverException extends Exception {
-        public IllegalManoeverException(String msg) {
-            super(msg);
-        }
     }
 }
 

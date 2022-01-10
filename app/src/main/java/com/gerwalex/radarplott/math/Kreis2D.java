@@ -164,7 +164,7 @@ public class Kreis2D {
         float s = (float) Math.sqrt(((p.x - mittelpunkt.x) * (p.x - mittelpunkt.x)) +
                 ((p.y - mittelpunkt.y) * (p.y - mittelpunkt.y)));
         float d = s - radius;
-        return Math.round(d * 1E6f) == 0;
+        return Math.round(d * 1E6f) < 1;
     }
 
     /**
