@@ -100,11 +100,6 @@ public class Gerade2D {
                 rv.equals(gerade2D.rv) && nv.equals(gerade2D.nv);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(a, b, c, m, n, punkt1, punkt2, rv, nv);
-    }
-
     /**
      * Ermittelt den Abstand der Geraden zu einem Punkt P
      *
@@ -250,7 +245,7 @@ public class Gerade2D {
         float r = k.getRadius();
         float m1 = k.getMittelpunkt().x;
         float m2 = k.getMittelpunkt().y;
-        if ((Math.round(b * 1E6)) / 1E6 != 0) {
+        if ((Math.round(b * 1E6f)) / 1E6f != 0) {
             float s = -b * m2 - c;
             float t = (b * b * m1 + s * a) / (a * a + b * b);
             float z1 = r * r * b * b - b * b * m1 * m1 - s * s;
@@ -296,6 +291,11 @@ public class Gerade2D {
         return rv.getYAxisAngle();
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b, c, m, n, punkt1, punkt2, rv, nv);
+    }
+
     /**
      * Prueft, ob ein Punkt auf der Geraden liegt
      *
@@ -303,17 +303,17 @@ public class Gerade2D {
      * @return true, wenn Punkt auf der Geraden liegt
      */
     public boolean isPunktAufGerade(Punkt2D p) {
-        return Math.round(getAbstand(p) * 1E6) == 0.0;
+        return Math.round(getAbstand(p) * 1E6f) == 0.0;
     }
 
     /**
-     * Rundet eine Double auf 6 Stellen (1E6)
+     * Rundet eine Double auf 6 Stellen (1E6f)
      *
      * @param d Wert, der gerundet werden soll
      * @return gerundeter Wert
      */
     private float rundeWert(float d) {
-        return (float) (Math.round(d * 1E6) / 1E6);
+        return Math.round(d * 1E6f) / 1E6f;
     }
 
     /*

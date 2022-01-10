@@ -33,12 +33,10 @@ public class LageTest {
         assertEquals(13.4, other.getSpeed(), 0.1);
         Punkt2D cpa = me.getCPA(other);
         assertEquals(2.0, me.getAbstand(cpa), 0.1);
-        assertEquals(2.0, me.getAbstandCPA(other), 0.1);
         assertEquals(83.1, me.getPeilungRechtweisend(cpa), 0.1);
         assertEquals(83.1, me.getPeilungRechtweisendCPA(other), 0.1);
         Punkt2D bcr = me.getBCR(other);
         assertEquals(2.0, me.getAbstand(bcr), 0.1);
-        assertEquals(2.0, me.getAbstandBCR(other), 0.1);
         assertEquals(17.9, other.getRelativTimeTo(me.getCPA(other)), 0.1);
         assertEquals(17.4, other.getRelativTimeTo(me.getBCR(other)), 0.1);
     }
@@ -62,9 +60,10 @@ public class LageTest {
         Punkt2D bcr = manoever.getBCR(manoeverVessel);
         assertEquals(112.5, manoeverVessel.getHeading(), 0.1); // heading
         assertEquals(10.3, manoeverVessel.getSpeed(), 0.1); // speed
-        assertEquals(3.3, Math.abs(manoever.getAbstand(cpa)), 0.1); // cpa
+        assertEquals(3.3, manoever.getAbstand(cpa), 0.1); // cpa
+        assertEquals(-2.7, manoeverVessel.getTimeTo(cpa), 0.1);
         assertEquals(-3.6, manoever.getAbstand(bcr), 0.1);
-        assertEquals(-3.6, manoever.getAbstandBCR(manoeverVessel), 0.1);
+        assertEquals(-10.7, manoeverVessel.getTimeTo(bcr), 0.1);
     }
 
     @Test
@@ -79,8 +78,9 @@ public class LageTest {
         Punkt2D bcr = manoever.getBCR(manoeverVessel);
         assertEquals(112.5, manoeverVessel.getHeading(), 0.1); // heading
         assertEquals(10.3, manoeverVessel.getSpeed(), 0.1); // speed
-        assertEquals(3.3, Math.abs(manoever.getAbstand(cpa)), 0.1); // cpa
+        assertEquals(3.3, manoever.getAbstand(cpa), 0.1); // cpa
+        assertEquals(-2.7, manoeverVessel.getTimeTo(cpa), 0.1);
         assertEquals(-3.6, manoever.getAbstand(bcr), 0.1);
-        assertEquals(-3.6, manoever.getAbstandBCR(manoeverVessel), 0.1);
+        assertEquals(-10.7, manoeverVessel.getTimeTo(bcr), 0.1);
     }
 }

@@ -164,7 +164,7 @@ public class Kreis2D {
         float s = (float) Math.sqrt(((p.x - mittelpunkt.x) * (p.x - mittelpunkt.x)) +
                 ((p.y - mittelpunkt.y) * (p.y - mittelpunkt.y)));
         float d = s - radius;
-        return Math.round(d * 1E6) == 0;
+        return Math.round(d * 1E6f) == 0;
     }
 
     /**
@@ -182,6 +182,6 @@ public class Kreis2D {
     @Override
     public String toString() {
         return String.format(Locale.getDefault(), "Kreis: Mittelpunkt: %1s, Radius %.4f", mittelpunkt.toString(),
-                Math.round(radius * 1E6) / 1E6);
+                Math.round(radius * 1E6f) / 1E6f);
     }
 }

@@ -284,8 +284,7 @@ public class RadarBasisView extends FrameLayout {
         drawTextView(canvas, startPos, new SpannableString(text));
         text = String.format("%1s %2s", vessel.name, vessel.getSecondTime());
         drawTextView(canvas, aktPos, new SpannableString(text));
-        drawTextView(canvas, cpa,
-                new SpannableString(String.format("CPA %.1f sm", mEigenesSchiff.getAbstandCPA(vessel))));
+        drawTextView(canvas, cpa, new SpannableString(String.format("CPA %.1f sm", mEigenesSchiff.getAbstand(cpa))));
     }
 
     public void drawTextView(Canvas canvas, Punkt2D ankerPos, Spannable text) {

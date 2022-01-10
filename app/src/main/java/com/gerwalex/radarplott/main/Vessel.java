@@ -53,20 +53,8 @@ public class Vessel extends BaseObservable {
     }
 
     public float getAbstand(Punkt2D pkt) {
-        return getAbstand(secondPosition, pkt);
-    }
-
-    private float getAbstand(Punkt2D position, Punkt2D pkt) {
-        float abstand = position.getAbstand(pkt);
-        return isPunktInFahrtrichtung(position) ? abstand : -abstand;
-    }
-
-    public float getAbstandBCR(Vessel other) {
-        return getAbstand(secondPosition, getBCR(other));
-    }
-
-    public double getAbstandCPA(OpponentVessel other) {
-        return getAbstand(secondPosition, getCPA(other));
+        float abstand = secondPosition.getAbstand(pkt);
+        return (!isPunktAufKurslinie(pkt) || isPunktInFahrtrichtung(pkt)) ? abstand : -abstand;
     }
 
     public Punkt2D getBCR(Vessel other) {
@@ -108,16 +96,12 @@ public class Vessel extends BaseObservable {
         return kurslinie;
     }
 
-    public float getPeilungRechtweisendCPA(OpponentVessel other) {
-        return new Gerade2D(secondPosition, getCPA(other)).getYAxisAngle();
+    public float getSeitenPeilung(Punkt2D pkt) {
+        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
     }
 
-    public final float getTimeTo(@NonNull Punkt2D p) {
-        if (!kurslinie.isPunktAufGerade(p)) {
-            throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
-        }
-        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
-        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
+    public float getPeilungRechtweisendCPA(OpponentVessel other) {
+        return new Gerade2D(secondPosition, getCPA(other)).getYAxisAngle();
     }
 
     /**
@@ -134,6 +118,14 @@ public class Vessel extends BaseObservable {
         return secondPosition;
     }
 
+    public final float getTimeTo(@NonNull Punkt2D p) {
+        if (!kurslinie.isPunktAufGerade(p)) {
+            throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
+        }
+        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
+        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
+    }
+
     /**
      * Speed
      *
@@ -145,17 +137,24 @@ public class Vessel extends BaseObservable {
     }
 
     /**
-     * Prueft, ob ein Punkt auf der EigenesSchiff liegt. Toleranz ist 1E6.
+     * Prueft, ob ein Punkt auf der EigenesSchiff liegt. Toleranz ist 1E6f.
      *
      * @param p Punkt
      * @return true, wenn der Punkt auf der EigenesSchiff liegt, ansonsten false.
      */
     public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
-        return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E6) == 0;
+        return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E4f) < 1;
     }
 
-    private float richtung(Punkt2D pkt, float abstand) {
-        return isPunktInFahrtrichtung(pkt) ? abstand : -abstand;
+    /**
+     * Prueft, ob ein Punkt in Fahrtrichtung liegt.
+     *
+     * @param p zu pruefender Punkt
+     * @return true, wenn der Punkt in Fahrtrichtung liegt. Sonst false.
+     */
+    public final boolean isPunktInFahrtrichtung(Punkt2D p) {
+        float plg = getSeitenPeilung(p);
+        return plg > 270 || plg < 90;
     }
 
     /**
@@ -198,27 +197,6 @@ public class Vessel extends BaseObservable {
             kurslinie = new Gerade2D(firstPosition, secondPosition);
             notifyChange();
         }
-    }
-
-    /**
-     * Prueft, ob ein Punkt in Fahrtrichtung liegt.
-     *
-     * @param p zu pruefender Punkt
-     * @return true, wenn der Punkt in Fahrtrichtung liegt. Sonst false.
-     */
-    public final boolean isPunktInFahrtrichtung(Punkt2D p) {
-        if (!isPunktAufKurslinie(p)) {
-            return false;
-        }
-        double wegx = kurslinie.getRichtungsvektor().getEndpunkt().x;
-        double wegy = kurslinie.getRichtungsvektor().getEndpunkt().y;
-        double lambda;
-        if (wegx != 0) {
-            lambda = (p.x - secondPosition.x) / wegx;
-        } else {
-            lambda = (p.y - secondPosition.y) / wegy;
-        }
-        return lambda > 0;
     }
 
     @Bindable
