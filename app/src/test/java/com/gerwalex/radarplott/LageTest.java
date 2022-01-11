@@ -22,7 +22,7 @@ public class LageTest {
     }
 
     @Test
-    public void lageNeu() {
+    public void lage1() {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
@@ -38,6 +38,25 @@ public class LageTest {
         assertEquals(2.0, me.getAbstand(bcr), 0.1);
         assertEquals(17.9, other.getRelativTimeTo(me.getCPA(other)), 0.1);
         assertEquals(17.4, other.getRelativTimeTo(me.getBCR(other)), 0.1);
+    }
+
+    @Test
+    public void lage2() {
+        Vessel me = new Vessel(80, 8);
+        OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
+        other.setSecondSeitenpeilung(12, 12, 4.5);
+        other.getRelPosition(me);
+        assertEquals(149.7, other.getHeadingAbsolut(), 0.1);
+        assertEquals(12.8, other.getSpeedAbsolut(), 0.1);
+        assertEquals(186.4, other.getHeading(), 0.1);
+        assertEquals(12.5, other.getSpeed(), 0.1);
+        Punkt2D cpa = me.getCPA(other);
+        assertEquals(0.4, me.getAbstand(cpa), 0.1);
+        assertEquals(96.4, me.getPeilungRechtweisend(cpa), 0.1);
+        Punkt2D bcr = me.getBCR(other);
+        assertEquals(0.5, me.getAbstand(bcr), 0.1);
+        assertEquals(21.4, other.getRelativTimeTo(me.getCPA(other)), 0.1);
+        assertEquals(20.8, other.getRelativTimeTo(me.getBCR(other)), 0.1);
     }
 
     @Test

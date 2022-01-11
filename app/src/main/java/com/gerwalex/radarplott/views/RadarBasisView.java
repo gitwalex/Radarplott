@@ -31,7 +31,6 @@ import com.gerwalex.radarplott.main.OpponentVessel;
 import com.gerwalex.radarplott.main.Vessel;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
-import com.gerwalex.radarplott.math.Vektor2D;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -150,7 +149,7 @@ public class RadarBasisView extends FrameLayout {
                 float x = e.getX();
                 float y = e.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
-                float angle = new Vektor2D(new Punkt2D(), pkt).getYAxisAngle();
+                float angle = new Punkt2D().getYAxisAngle(pkt);
                 mManoeverVessel = new Vessel((int) angle, me.getSpeed());
                 invalidate();
             }
@@ -437,7 +436,7 @@ public class RadarBasisView extends FrameLayout {
                 float x = event.getX();
                 float y = event.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
-                float angle = new Vektor2D(new Punkt2D(), pkt).getYAxisAngle();
+                float angle = new Punkt2D().getYAxisAngle(pkt);
                 mManoeverVessel = new Vessel((int) angle, me.getSpeed());
                 invalidate();
                 consumed = true;

@@ -7,7 +7,6 @@ import androidx.databinding.Bindable;
 import com.gerwalex.radarplott.math.Gerade2D;
 import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Punkt2D;
-import com.gerwalex.radarplott.math.Vektor2D;
 
 import java.util.Objects;
 
@@ -89,7 +88,7 @@ public class Vessel extends BaseObservable {
         if (secondPosition.equals(pkt)) {
             throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
         }
-        return new Vektor2D(secondPosition, pkt).getYAxisAngle();
+        return secondPosition.getYAxisAngle(pkt);
     }
 
     public int getHeadingFormatted() {

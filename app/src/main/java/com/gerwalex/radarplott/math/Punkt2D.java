@@ -112,6 +112,16 @@ public class Punkt2D {
                 (float) (y + distanz * Math.cos(Math.toRadians(winkel))));
     }
 
+    /**
+     * Ermittelt den Winkel zwischen dem Vektor zwischen dem Punkt2D (von) und dem übergebenen Punkt2D pkt (nach).
+     *
+     * @param pkt Punkt
+     * @return Winkel zur Y-Achse
+     */
+    public float getYAxisAngle(Punkt2D pkt) {
+        return new Vektor2D(this, pkt).getYAxisAngle();
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(x, y);

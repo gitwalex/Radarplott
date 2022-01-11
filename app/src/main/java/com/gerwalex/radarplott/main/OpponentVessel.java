@@ -47,8 +47,7 @@ public class OpponentVessel extends Vessel {
         Punkt2D mp = getPosition(minutes);
         Punkt2D mpMe = manoever.getPosition(this.minutes);
         Punkt2D mpRelPos = relPosition.add(mpMe);
-        Gerade2D kurslinie = new Gerade2D(mpRelPos, secondPosition);
-        kurslinie.verschiebeParallell(mp);
+        Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
         return new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
     }
 
