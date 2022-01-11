@@ -3,13 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/kurse"
+        android:id="@+id/zeigeKurse"
         android:checkable="true"
         android:title="@string/kurse"
         app:actionViewClass="android.widget.CheckedTextView" />
     <item
-        android:id="@+id/positionen"
+        android:id="@+id/zeigePositionen"
         android:checkable="true"
         android:title="@string/positionen"
         app:actionViewClass="android.widget.CheckedTextView" />
+    <item
+        android:id="@+id/zeigeKurslinie"
+        android:checkable="true"
+        android:title="@string/HDL"
+        app:actionViewClass="android.widget.CheckedTextView" />
+
 </menu>

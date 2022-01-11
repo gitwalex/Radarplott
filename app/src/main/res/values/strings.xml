@@ -12,5 +12,15 @@
     <string name="positionen">Positionen</string>
     <string name="kursFormatted">%03.1f deg, %.1f kn</string>
     <string name="CPAFormatted">CPA %.1f sm</string>
-    <string name="Kr">Kurs relativ</string>
+    <!--    -->
+    <string name="rKurs">Kurs relativ %03.1f deg</string>
+    <string name="rFdW">FdW relativ %.1f kn</string>
+    <string name="Kurs">Kurs %03.1f deg</string>
+    <string name="FdW">FdW %.1f kn</string>
+    <string name="AbstandCPA">Abstand CPA %.1f sm</string>
+    <string name="TimeToCPA">Zeit bis CPA %.1f min</string>
+    <string name="rwPeilungCPA">Peilung CPA rw %03.1f deg </string>
+    <string name="AbstandBCR">Abstand BCR %.1f sm</string>
+    <string name="TimeToBCR">Zeit bis BCR %.1f min</string>
+    <string name="HDL">HDL</string>
 </resources>

@@ -22,15 +22,14 @@ import android.widget.TextView;
 import androidx.annotation.ColorRes;
 import androidx.annotation.Nullable;
 import androidx.core.widget.TextViewCompat;
-import androidx.databinding.Observable;
 import androidx.databinding.ObservableInt;
 
 import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.main.OpponentVessel;
-import com.gerwalex.radarplott.main.Vessel;
 import com.gerwalex.radarplott.math.Kreis2D;
+import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Punkt2D;
+import com.gerwalex.radarplott.math.Vessel;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -66,23 +65,18 @@ public class RadarBasisView extends FrameLayout {
     private final List<OpponentVessel> vesselList = new ArrayList<>();
     private final Paint vesselPositionStyle = new Paint();
     public ObservableInt maxTime = new ObservableInt(0);
-    public Observable.OnPropertyChangedCallback vesselObserver = new Observable.OnPropertyChangedCallback() {
-        @Override
-        public void onPropertyChanged(Observable sender, int propertyId) {
-            invalidate();
-        }
-    };
     private Bitmap bm;
+    private boolean drawCourseline = true;
     private boolean drawCourselineText = true;
     private boolean drawPositionText = true;
     private boolean longPressed;
     private Vessel mManoeverVessel;
-    private OnVesselClickListener mOnClickListener;
     private ScaleGestureDetector mScaleDetector;
     private Vessel me;
     private int minutes;
     private boolean northupOrientierung = true;
     private Kreis2D outerRing;
+    private RadarObserver radarObserver;
     private float scale;
     private int sm;
     private int startTime;
@@ -128,10 +122,11 @@ public class RadarBasisView extends FrameLayout {
                 float y = e.getY();
                 Punkt2D pkt = new Punkt2D((x - width), (height - y));
                 Kreis2D k = new Kreis2D(pkt, 40f);
-                if (mOnClickListener != null) {
-                    for (Vessel vesssel : vesselList) {
-                        if (k.liegtImKreis(vesssel.getSecondPosition())) {
-                            mOnClickListener.onVesselClick(vesssel);
+                if (radarObserver != null) {
+                    for (OpponentVessel opponent : vesselList) {
+                        Vessel vessel = opponent.getRelativeVessel();
+                        if (k.liegtImKreis(vessel.getSecondPosition())) {
+                            radarObserver.onVesselClick(vessel);
                         }
                     }
                 }
@@ -160,7 +155,7 @@ public class RadarBasisView extends FrameLayout {
         path.addCircle(pos.x * sm, -pos.y * sm, markerRadius, Path.Direction.CW);
     }
 
-    public void addVessel(OpponentVessel vessel) {
+    public void addOpponent(OpponentVessel vessel) {
         vesselList.add(vessel);
         startTime = Math.min(vessel.getTime(), 24 * 60);
     }
@@ -255,11 +250,12 @@ public class RadarBasisView extends FrameLayout {
     }
 
     @SuppressLint("DefaultLocale")
-    private void drawPosition(Canvas canvas, OpponentVessel vessel, int color) {
+    private void drawPosition(Canvas canvas, OpponentVessel opponent, int color) {
         if (me != null) {
             relCourseline.reset();
             vesselPositionStyle.setColor(color);
-            Punkt2D relPos = vessel.getRelPosition(me);
+            Vessel vessel = opponent.getRelativeVessel();
+            Punkt2D relPos = opponent.getRelPosition();
             Punkt2D startPos = vessel.getFirstPosition();
             Punkt2D aktPos = vessel.getSecondPosition();
             drawLine(relCourseline, relPos, aktPos);
@@ -272,9 +268,9 @@ public class RadarBasisView extends FrameLayout {
                 maxTime.set((int) Math.max(vessel.getTimeTo(dest), maxTime.get()));
                 addCircle(relCourseline, nextPos);
                 if (minutes != 0) {
-                    int time = vessel.getTime() + minutes;
+                    int time = opponent.getTime() + minutes;
                     drawTextView(canvas, nextPos,
-                            new SpannableString(String.format("%1s %02d:%02d", vessel.name, time / 60, time % 60)));
+                            new SpannableString(String.format("%1s %02d:%02d", opponent.name, time / 60, time % 60)));
                 }
             }
             canvas.drawPath(relCourseline, vesselPositionStyle);
@@ -282,15 +278,16 @@ public class RadarBasisView extends FrameLayout {
         }
     }
 
-    private void drawPositionTexte(Canvas canvas, OpponentVessel vessel, int color) {
+    private void drawPositionTexte(Canvas canvas, OpponentVessel opponent, int color) {
         textStyle.setColor(color);
         textStyle.setTextSize(extraSmallTextSize);
+        Vessel vessel = opponent.getRelativeVessel();
         Punkt2D startPos = vessel.getFirstPosition();
         Punkt2D aktPos = vessel.getSecondPosition();
         Punkt2D cpa = me.getCPA(vessel);
-        String text = String.format("%1s %2s", vessel.name, vessel.getStartTime());
+        String text = String.format("%1s %2s", opponent.name, opponent.getStartTime());
         drawTextView(canvas, startPos, new SpannableString(text));
-        text = String.format("%1s %2s", vessel.name, vessel.getSecondTime());
+        text = String.format("%1s %2s", opponent.name, opponent.getSecondTime());
         drawTextView(canvas, aktPos, new SpannableString(text));
         drawTextView(canvas, cpa,
                 new SpannableString(getContext().getString(R.string.CPAFormatted, me.getAbstand(cpa))));
@@ -358,33 +355,24 @@ public class RadarBasisView extends FrameLayout {
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (me != null) {
-            me.removeOnPropertyChangedCallback(vesselObserver);
-        }
-    }
-
-    @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         symbolPath.reset();
         canvas.save();
-        if (!northupOrientierung && me != null) {
-            canvas.rotate(me.getHeading());
-        }
         canvas.drawBitmap(bm, 0, 0, radarLineStyle);
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
         if (me != null) {
-            drawCourseline(canvas, me, ownVesselColor);
-        }
-        if (mManoeverVessel != null) {
-            drawCourseline(canvas, mManoeverVessel, ownVesselColor);
+            if (drawCourseline) {
+                drawCourseline(canvas, me, ownVesselColor);
+            }
+            if (mManoeverVessel != null && mManoeverVessel.getHeading() != me.getHeading()) {
+                drawCourseline(canvas, mManoeverVessel, ownVesselColor);
+            }
         }
         for (int i = 0; i < vesselList.size(); i++) {
             OpponentVessel vessel = vesselList.get(i);
             int color = colors[i];
-            drawCourseline(canvas, vessel, color);
+            drawCourseline(canvas, vessel.getRelativeVessel(), color);
             drawPosition(canvas, vessel, color);
             if (drawPositionText) {
                 drawPositionTexte(canvas, vessel, color);
@@ -396,6 +384,9 @@ public class RadarBasisView extends FrameLayout {
         }
         canvas.drawPath(symbolPath, textStyle);
         canvas.restore();
+        if (!northupOrientierung && me != null) {
+            canvas.rotate(me.getHeading());
+        }
     }
 
     @Override
@@ -436,8 +427,11 @@ public class RadarBasisView extends FrameLayout {
                 float x = event.getX();
                 float y = event.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
-                float angle = new Punkt2D().getYAxisAngle(pkt);
-                mManoeverVessel = new Vessel((int) angle, me.getSpeed());
+                int angle = (int) new Punkt2D().getYAxisAngle(pkt);
+                mManoeverVessel = new Vessel(angle, me.getSpeed());
+                if (radarObserver != null) {
+                    radarObserver.onHeadingChanged(me, angle, minutes);
+                }
                 invalidate();
                 consumed = true;
             } else if (action == MotionEvent.ACTION_UP) {
@@ -457,6 +451,10 @@ public class RadarBasisView extends FrameLayout {
         invalidate();
     }
 
+    public void setDrawCourseline(boolean draw) {
+        drawCourseline = draw;
+    }
+
     public void setDrawCourselineTexte(boolean draw) {
         drawCourselineText = draw;
         invalidate();
@@ -467,18 +465,14 @@ public class RadarBasisView extends FrameLayout {
         invalidate();
     }
 
-    public void setOnVessselClickListener(OnVesselClickListener listener) {
-        mOnClickListener = listener;
-    }
-
     public void setOwnVessel(Vessel vessel) {
-        if (me != null) {
-            me.removeOnPropertyChangedCallback(vesselObserver);
-        }
         me = vessel;
-        me.addOnPropertyChangedCallback(vesselObserver);
         maxTime.set(0);
         invalidate();
+    }
+
+    public void setRadarObserver(RadarObserver listener) {
+        radarObserver = listener;
     }
 
     public boolean toggleNorthUpOrientierung() {
@@ -509,7 +503,11 @@ public class RadarBasisView extends FrameLayout {
         public abstract void addSymbol(Path path, Punkt2D mp, float sm);
     }
 
-    public interface OnVesselClickListener {
+    public interface RadarObserver {
+        void onHeadingChanged(Vessel me, int heading, int minutes);
+
+        void onSpeedChanged(Vessel me, int speed, int minutes);
+
         void onVesselClick(Vessel vessel);
     }
 

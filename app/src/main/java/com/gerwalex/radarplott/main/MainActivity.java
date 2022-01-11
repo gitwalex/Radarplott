@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.ActivityMainBinding;
+import com.gerwalex.radarplott.math.Vessel;
 
 import java.util.Objects;
 

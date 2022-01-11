@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="opponent"
+            type="com.gerwalex.radarplott.math.OpponentVessel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/content_padding">
+
+        <TextView
+            android:id="@+id/rKurs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/rKurs(opponent.headingRelativ)}" />
+
+        <TextView
+            android:id="@+id/fFdW"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/rFdW(opponent.speedRelativ)}" />
+
+        <TextView
+            android:id="@+id/Kurs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/Kurs(opponent.headingAbsolut)}" />
+
+        <TextView
+            android:id="@+id/FdW"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/FdW(opponent.speedAbsolut)}" />
+
+        <TextView
+            android:id="@+id/abstandCPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/AbstandCPA(opponent.abstandCPA)}" />
+
+        <TextView
+            android:id="@+id/timeToCPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/TimeToCPA(opponent.timeToCPA)}" />
+
+        <TextView
+            android:id="@+id/rwPeilungCPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/rwPeilungCPA(opponent.peilungRechtweisendCPA)}" />
+
+        <TextView
+            android:id="@+id/abstandBCR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/AbstandBCR(opponent.abstandBCR)}" />
+
+        <TextView
+            android:id="@+id/timeToBCR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/TimeToBCR(opponent.timeToBCR)}" />
+
+
+    </LinearLayout>
+</layout>

@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +16,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
+import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.LabelFormatter;
@@ -37,7 +38,16 @@ public class RadarFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = RadarViewBinding.inflate(inflater, container, false);
-        binding.radar.setOnVessselClickListener(new RadarBasisView.OnVesselClickListener() {
+        binding.radar.setRadarObserver(new RadarBasisView.RadarObserver() {
+            @Override
+            public void onHeadingChanged(Vessel me, int heading, int minutes) {
+                mModel.manoever.setValue(new Vessel(heading, me.getSpeed()));
+            }
+
+            @Override
+            public void onSpeedChanged(Vessel me, int speed, int minutes) {
+            }
+
             @Override
             public void onVesselClick(Vessel vessel) {
                 mModel.clickedVessel.setValue(vessel);
@@ -63,28 +73,18 @@ public class RadarFragment extends Fragment {
                 return String.format("%02d:%02d", time / 60, time % 60);
             }
         });
-        binding.kurs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                binding.radar.setDrawCourselineTexte(isChecked);
-            }
-        });
-        binding.position.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                binding.radar.setDrawPositionTexte(isChecked);
-            }
-        });
         return binding.getRoot();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.kurse) {
+        if (id == R.id.zeigeKurse) {
             binding.radar.setDrawCourselineTexte(item.isChecked());
-        } else if (id == R.id.position) {
+        } else if (id == R.id.zeigePositionen) {
             binding.radar.setDrawPositionTexte(item.isChecked());
+        } else if (id == R.id.zeigeKurslinie) {
+            binding.radar.setDrawCourseline(item.isChecked());
         }
         return super.onOptionsItemSelected(item);
     }
@@ -98,13 +98,20 @@ public class RadarFragment extends Fragment {
                 return onOptionsItemSelected(item);
             }
         });
-        OpponentVessel otherVessel = new OpponentVessel(600, 'B', 10, 7);
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
-            public void onChanged(Vessel vessel) {
-                binding.radar.setOwnVessel(vessel);
+            public void onChanged(Vessel me) {
+                binding.radar.setOwnVessel(me);
+                OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
                 otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
-                binding.radar.addVessel(otherVessel);
+                mModel.addOpponent.setValue(otherVessel);
+                mModel.currentOpponent.setValue(otherVessel);
+            }
+        });
+        mModel.addOpponent.observe(getViewLifecycleOwner(), new Observer<OpponentVessel>() {
+            @Override
+            public void onChanged(OpponentVessel opponent) {
+                binding.radar.addOpponent(opponent);
             }
         });
     }

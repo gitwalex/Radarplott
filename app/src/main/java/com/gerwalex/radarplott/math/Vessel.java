@@ -1,12 +1,11 @@
-package com.gerwalex.radarplott.main;
+package com.gerwalex.radarplott.math;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+import androidx.databinding.library.baseAdapters.BR;
 
-import com.gerwalex.radarplott.math.Gerade2D;
-import com.gerwalex.radarplott.math.Kreis2D;
-import com.gerwalex.radarplott.math.Punkt2D;
+import com.gerwalex.radarplott.main.IllegalManoeverException;
 
 import java.util.Objects;
 
@@ -14,6 +13,7 @@ public class Vessel extends BaseObservable {
     protected Punkt2D firstPosition, secondPosition;
     protected float heading;
     protected Gerade2D kurslinie;
+    protected int minutes;
     protected float speed;
 
     protected Vessel() {
@@ -21,15 +21,26 @@ public class Vessel extends BaseObservable {
     }
 
     public Vessel(Punkt2D position, float heading, float speed) {
-        this.heading = heading % 360;
-        this.speed = speed;
-        secondPosition = position;
-        firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
-        kurslinie = new Gerade2D(firstPosition, secondPosition);
+        this(position, heading, speed, 6);
     }
 
     public Vessel(int heading, float speed) {
         this(new Punkt2D(), heading, speed);
+    }
+
+    public Vessel(Punkt2D firstPosition, Punkt2D secondPosition, int minutes) {
+        this.minutes = minutes;
+        this.firstPosition = firstPosition;
+        this.secondPosition = secondPosition;
+        kurslinie = new Gerade2D(firstPosition, secondPosition);
+        heading = kurslinie.getYAxisAngle();
+        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+    }
+
+    public Vessel(Punkt2D position, float heading, float speed, int minutes) {
+        this(position.getPunkt2D(heading, -(speed / minutes)), position, minutes);
+        this.heading = heading % 360;
+        this.speed = speed;
     }
 
     public float checkForValidKurs(Float newKurs) throws IllegalManoeverException {
@@ -69,11 +80,6 @@ public class Vessel extends BaseObservable {
         return firstPosition;
     }
 
-    public void setFirstPosition(Punkt2D firstPosition) {
-        this.firstPosition = firstPosition;
-        kurslinie = new Gerade2D(firstPosition, secondPosition);
-    }
-
     /**
      * Heading
      *
@@ -84,11 +90,8 @@ public class Vessel extends BaseObservable {
         return heading;
     }
 
-    public float getPeilungRechtweisend(Punkt2D pkt) {
-        if (secondPosition.equals(pkt)) {
-            throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
-        }
-        return secondPosition.getYAxisAngle(pkt);
+    public float getSeitenPeilung(Punkt2D pkt) {
+        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
     }
 
     public int getHeadingFormatted() {
@@ -99,8 +102,11 @@ public class Vessel extends BaseObservable {
         return kurslinie;
     }
 
-    public float getSeitenPeilung(Punkt2D pkt) {
-        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
+    public float getPeilungRechtweisend(Punkt2D pkt) {
+        if (secondPosition.equals(pkt)) {
+            throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
+        }
+        return secondPosition.getYAxisAngle(pkt);
     }
 
     /**
@@ -135,6 +141,58 @@ public class Vessel extends BaseObservable {
         return speed;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
+    }
+
+    @Bindable
+    public final void setHeading(float heading) {
+        if (this.heading != heading) {
+            this.heading = heading;
+            firstPosition = secondPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
+            kurslinie = new Gerade2D(firstPosition, secondPosition);
+            notifyPropertyChanged(BR.heading);
+        }
+    }
+
+    /**
+     * Berechnet die Zeit bis ein bestimmter Abstand zu einem anderen Schiff erreicht ist
+     *
+     * @param abstand abstand in sm
+     * @return null, wenn dieser Abstand nicht erreichbar ist, ansonsten ein Array mit einem oder zwei Punkten. Dabei
+     * ist in float[0] die kuerzere, in float[1] die gleiche (wenn es nur einen Punkt gibt) oder die groessere Zeit
+     * enthalten.
+     */
+    public float[] getTimeToAbstand(Vessel other, float abstand) {
+        float[] time = null;
+        Kreis2D k = new Kreis2D(secondPosition, abstand);
+        Punkt2D[] sc = other.kurslinie.getSchnittpunkt(k);
+        if (sc != null) {
+            time = new float[2];
+            float t1 = getTimeTo(sc[0]);
+            float t2 = getTimeTo(sc[1]);
+            if (t1 > t2) {
+                time[0] = t2;
+                time[1] = t1;
+            } else {
+                time[0] = t1;
+                time[1] = t2;
+            }
+        }
+        return time;
+    }
+
+    @Bindable
+    public final void setSpeed(float speed) {
+        if (this.speed != speed) {
+            this.speed = speed;
+            firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
+            kurslinie = new Gerade2D(firstPosition, secondPosition);
+            notifyPropertyChanged(BR.speed);
+        }
+    }
+
     /**
      * Ein Entgegenkommer wird zwischen 90 und 270 Grad gepeilt
      *
@@ -155,58 +213,6 @@ public class Vessel extends BaseObservable {
      */
     public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
         return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E4f) < 1;
-    }
-
-    /**
-     * Berechnet die Zeit bis ein bestimmter Abstand zu einem anderen Schiff erreicht ist
-     *
-     * @param abstand abstand in sm
-     * @return null, wenn dieser Abstand nicht erreichbar ist, ansonsten ein Array mit einem oder zwei Punkten. Dabei
-     * ist in float[0] die kuerzere, in float[1] die gleiche (wenn es nur einen Punkt gibt) oder die groessere Zeit
-     * enthalten.
-     */
-    public float[] getTimeToAbstand(OpponentVessel other, float abstand) {
-        float[] time = null;
-        Kreis2D k = new Kreis2D(secondPosition, abstand);
-        Punkt2D[] sc = other.kurslinie.getSchnittpunkt(k);
-        if (sc != null) {
-            time = new float[2];
-            float t1 = getTimeTo(sc[0]);
-            float t2 = getTimeTo(sc[1]);
-            if (t1 > t2) {
-                time[0] = t2;
-                time[1] = t1;
-            } else {
-                time[0] = t1;
-                time[1] = t2;
-            }
-        }
-        return time;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
-    }
-
-    @Bindable
-    public final void setHeading(float heading) {
-        if (this.heading != heading) {
-            this.heading = heading;
-            firstPosition = secondPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
-            kurslinie = new Gerade2D(firstPosition, secondPosition);
-            notifyChange();
-        }
-    }
-
-    @Bindable
-    public final void setSpeed(float speed) {
-        if (this.speed != speed) {
-            this.speed = speed;
-            firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
-            kurslinie = new Gerade2D(firstPosition, secondPosition);
-            notifyChange();
-        }
     }
 
     /**

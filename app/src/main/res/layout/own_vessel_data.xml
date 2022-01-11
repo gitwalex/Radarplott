@@ -6,7 +6,7 @@
 
         <variable
             name="vessel"
-            type="com.gerwalex.radarplott.main.Vessel" />
+            type="com.gerwalex.radarplott.math.Vessel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
