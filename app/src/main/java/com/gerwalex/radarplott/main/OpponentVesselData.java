@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.OpponentBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
-import com.gerwalex.radarplott.math.Vessel;
 
 public class OpponentVesselData extends Fragment {
 
@@ -37,15 +36,6 @@ public class OpponentVesselData extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mModel.manoever.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
-            @Override
-            public void onChanged(Vessel me) {
-                OpponentVessel opponent = mModel.currentOpponent.getValue();
-                if (opponent != null) {
-                    opponent.notifyChange();
-                }
-            }
-        });
         mModel.currentOpponent.observe(getViewLifecycleOwner(), new Observer<OpponentVessel>() {
             @Override
             public void onChanged(OpponentVessel opponent) {

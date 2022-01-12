@@ -38,7 +38,7 @@ public class OwnVessel extends Fragment {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                 OwnVesselDataBinding dlg = OwnVesselDataBinding.inflate(LayoutInflater.from(requireContext()));
-                dlg.setVessel(binding.getOwnVessel());
+                dlg.setVessel(binding.getMe());
                 builder.setView(dlg.getRoot());
                 builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -57,7 +57,7 @@ public class OwnVessel extends Fragment {
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel vessel) {
-                binding.setOwnVessel(vessel);
+                binding.setMe(vessel);
             }
         });
     }

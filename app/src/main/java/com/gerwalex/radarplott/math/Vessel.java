@@ -76,6 +76,7 @@ public class Vessel extends BaseObservable {
         return other.getKurslinie().getLotpunkt(secondPosition);
     }
 
+    @Bindable
     public final Punkt2D getFirstPosition() {
         return firstPosition;
     }
@@ -90,16 +91,19 @@ public class Vessel extends BaseObservable {
         return heading;
     }
 
-    public float getSeitenPeilung(Punkt2D pkt) {
-        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
-    }
-
+    @Bindable
     public int getHeadingFormatted() {
         return Math.round((heading + 0.5f) * 10) / 10;
     }
 
+    @Bindable
     public final Gerade2D getKurslinie() {
         return kurslinie;
+    }
+
+    @Bindable
+    public final Punkt2D getSecondPosition() {
+        return secondPosition;
     }
 
     public float getPeilungRechtweisend(Punkt2D pkt) {
@@ -119,8 +123,8 @@ public class Vessel extends BaseObservable {
         return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
     }
 
-    public final Punkt2D getSecondPosition() {
-        return secondPosition;
+    public float getSeitenPeilung(Punkt2D pkt) {
+        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
     }
 
     public final float getTimeTo(@NonNull Punkt2D p) {

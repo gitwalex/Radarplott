@@ -6,7 +6,7 @@
     <data>
 
         <variable
-            name="ownVessel"
+            name="me"
             type="com.gerwalex.radarplott.math.Vessel" />
 
     </data>
@@ -21,7 +21,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/ownVesselText"
+                android:id="@+id/meText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/ownVesselData"
@@ -34,16 +34,16 @@
                 android:id="@+id/heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{@string/rwK(ownVessel.headingFormatted)}"
+                android:text="@{@string/rwK(me.heading)}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ownVesselText"
+                app:layout_constraintTop_toBottomOf="@id/meText"
                 tools:text="rwP" />
 
             <TextView
                 android:id="@+id/speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{@string/fdw(ownVessel.speed)}"
+                android:text="@{@string/fdw(me.speed)}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heading"
                 tools:text="kn" />

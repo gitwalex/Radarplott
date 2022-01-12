@@ -20,8 +20,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.TextViewCompat;
+import androidx.databinding.Observable;
 import androidx.databinding.ObservableInt;
 
 import com.gerwalex.radarplott.BuildConfig;
@@ -55,6 +57,12 @@ public class RadarBasisView extends FrameLayout {
     private final GestureDetector gestureDetector;
     private final float markerRadius = 20f;
     private final int ownVesselColor;
+    private final Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
+        @Override
+        public void onPropertyChanged(Observable sender, int propertyId) {
+            invalidate();
+        }
+    };
     // Variablen zum Zeichnen
     private final Paint radarLineStyle = new Paint();
     private final Path relCourseline = new Path();
@@ -355,6 +363,14 @@ public class RadarBasisView extends FrameLayout {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (me != null) {
+            me.removeOnPropertyChangedCallback(ownVesselObserver);
+        }
+    }
+
+    @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         symbolPath.reset();
@@ -465,8 +481,12 @@ public class RadarBasisView extends FrameLayout {
         invalidate();
     }
 
-    public void setOwnVessel(Vessel vessel) {
+    public void setOwnVessel(@NonNull Vessel vessel) {
+        if (me != null) {
+            me.removeOnPropertyChangedCallback(ownVesselObserver);
+        }
         me = vessel;
+        me.addOnPropertyChangedCallback(ownVesselObserver);
         maxTime.set(0);
         invalidate();
     }

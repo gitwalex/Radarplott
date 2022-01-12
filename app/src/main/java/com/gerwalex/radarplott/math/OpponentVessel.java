@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+import androidx.databinding.Observable;
 
 import com.gerwalex.radarplott.main.IllegalManoeverException;
 
@@ -38,19 +39,27 @@ public class OpponentVessel extends BaseObservable {
     public OpponentVessel(@NonNull Vessel me, int time, @NonNull Character name, int peilungRechtweisend,
                           double distance) {
         this.name = name.toString();
+        me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                notifyChange();
+            }
+        });
         this.me = me;
         startTime = time;
         dist1 = (float) distance;
         rwP1 = peilungRechtweisend;
     }
 
-    public Vessel createManoever(Vessel manoever, int minutes) {
+    public Vessel createManoever(Vessel me, int minutes) {
         Punkt2D secondPosition = relativVessel.getSecondPosition();
         Punkt2D mp = relativVessel.getPosition(minutes);
-        Punkt2D mpMe = manoever.getPosition(this.minutes);
+        Punkt2D mpMe = me.getPosition(this.minutes);
         Punkt2D mpRelPos = relPosition.add(mpMe);
         Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
-        return new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
+        manoeverVessel =
+                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
+        return manoeverVessel;
     }
 
     @Bindable
