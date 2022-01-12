@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="FloatValueEditViewStyle">
+        <attr name="decimalPlaces" format="integer" />
+    </declare-styleable>
+
+    <style name="FloatValueEditView" parent="Widget.AppCompat.EditText">
+        <item name="decimalPlaces">1</item>
+    </style>
+
+
+</resources>

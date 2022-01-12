@@ -303,7 +303,7 @@ public class Gerade2D {
      * @return true, wenn Punkt auf der Geraden liegt
      */
     public boolean isPunktAufGerade(Punkt2D p) {
-        return Math.round(getAbstand(p) * 1E6f) == 0.0;
+        return Math.abs(Math.round(getAbstand(p) * 1E6f)) < 1f;
     }
 
     /**

@@ -92,6 +92,11 @@ public class Vessel extends BaseObservable {
     }
 
     @Bindable
+    public final Punkt2D getSecondPosition() {
+        return secondPosition;
+    }
+
+    @Bindable
     public int getHeadingFormatted() {
         return Math.round((heading + 0.5f) * 10) / 10;
     }
@@ -99,11 +104,6 @@ public class Vessel extends BaseObservable {
     @Bindable
     public final Gerade2D getKurslinie() {
         return kurslinie;
-    }
-
-    @Bindable
-    public final Punkt2D getSecondPosition() {
-        return secondPosition;
     }
 
     public float getPeilungRechtweisend(Punkt2D pkt) {
@@ -129,7 +129,7 @@ public class Vessel extends BaseObservable {
 
     public final float getTimeTo(@NonNull Punkt2D p) {
         if (!kurslinie.isPunktAufGerade(p)) {
-            throw new IllegalArgumentException("Punkt nicht auf Kurslinie");
+            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
         }
         float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
         return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;

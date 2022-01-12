@@ -19,6 +19,7 @@
     <string name="FdW">FdW %.1f kn</string>
     <string name="AbstandCPA">Abstand CPA %.1f sm</string>
     <string name="TimeToCPA">Zeit bis CPA %.1f min</string>
+    <string name="DistanceToCPA">Distanz CPA %.1f sm</string>
     <string name="rwPeilungCPA">Peilung CPA rw %03.1f deg </string>
     <string name="AbstandBCR">Abstand BCR %.1f sm</string>
     <string name="TimeToBCR">Zeit bis BCR %.1f min</string>
