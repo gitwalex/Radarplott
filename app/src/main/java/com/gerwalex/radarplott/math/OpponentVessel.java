@@ -14,13 +14,7 @@ public class OpponentVessel extends BaseObservable {
     private final float dist1;
     private final int rwP1;
     private final int startTime;
-    private Vessel absolutVessel;
-    private Punkt2D bcr;
-    private Punkt2D bcrManoever;
-    private Punkt2D cpa;
-    private Punkt2D cpaManoever;
     private float dist2;
-    private Vessel manoeverVessel;
     private int minutes;
     private Punkt2D relPosition;
     private Vessel relativVessel;
@@ -42,17 +36,16 @@ public class OpponentVessel extends BaseObservable {
         rwP1 = peilungRechtweisend;
     }
 
-    public Vessel createManoever(Vessel me, int minutes) {
+    public Vessel createManoever(Vessel me, Vessel manoever, int minutes) {
         Punkt2D secondPosition = relativVessel.getSecondPosition();
         Punkt2D mp = relativVessel.getPosition(minutes);
-        Punkt2D mpMe = me.getPosition(this.minutes);
+        Punkt2D mpMe = manoever.getPosition(relativVessel.minutes);
+        Punkt2D otherPos = me.getPosition(-relativVessel.minutes);
+        relPosition = relativVessel.firstPosition.add(otherPos);
         Punkt2D mpRelPos = relPosition.add(mpMe);
         Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
-        manoeverVessel =
+        Vessel manoeverVessel =
                 new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
-        cpaManoever = me.getCPA(manoeverVessel);
-        bcrManoever = me.getBCR(manoeverVessel);
-        notifyChange();
         return manoeverVessel;
     }
 
@@ -76,6 +69,14 @@ public class OpponentVessel extends BaseObservable {
             throws IllegalManoeverException {
         Float heading = null;
         return relativVessel.checkForValidKurs(heading);
+    }
+
+    public Lage getLage(Vessel me) {
+        return new Lage(me, relativVessel);
+    }
+
+    public Lage getManoever(Vessel me, int minutes, int heading, float speed) {
+        return new Lage(getLage(me), minutes, heading, speed);
     }
 
     @Bindable
@@ -111,6 +112,6 @@ public class OpponentVessel extends BaseObservable {
         minutes = time - startTime;
         Punkt2D firstPosition = new Punkt2D().getPunkt2D(rwP1, dist1);
         Punkt2D secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
-        relativVessel = new Vessel(firstPosition, secondPosition, time - startTime);
+        relativVessel = new Vessel(firstPosition, secondPosition, minutes);
     }
 }

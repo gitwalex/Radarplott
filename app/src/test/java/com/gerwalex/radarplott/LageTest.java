@@ -26,7 +26,7 @@ public class LageTest {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
-        Lage lage = Lage.getLage(me, other.getRelativeVessel());
+        Lage lage = new Lage(me, other.getRelativeVessel());
         assertEquals(141.5, lage.getHeadingAbsolut(), 0.1);
         assertEquals(15.3, lage.getSpeedAbsolut(), 0.1);
         assertEquals(173.1, lage.getHeadingRelativ(), 0.1);
@@ -43,7 +43,7 @@ public class LageTest {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 12, 4.5);
-        Lage lage = Lage.getLage(me, other.getRelativeVessel());
+        Lage lage = new Lage(me, other.getRelativeVessel());
         assertEquals(149.7, lage.getHeadingAbsolut(), 0.1);
         assertEquals(12.8, lage.getSpeedAbsolut(), 0.1);
         assertEquals(186.4, lage.getHeadingRelativ(), 0.1);
@@ -56,12 +56,40 @@ public class LageTest {
     }
 
     @Test
+    public void manoeverLage() {
+        Vessel me = new Vessel(80, 8);
+        OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
+        other.setSecondSeitenpeilung(12, 20, 4.5);
+        Lage manoever = other.getManoever(me, 6, 180, 8);
+        assertEquals(112.5, manoever.getHeadingRelativ(), 0.1); // heading
+        assertEquals(10.3, manoever.getSpeedRelativ(), 0.1); // speed
+        assertEquals(3.3, manoever.getAbstandCPA(), 0.1); // cpa
+        assertEquals(-2.7, manoever.getTimeToCPA(), 0.1);
+        assertEquals(-3.6, manoever.getAbstandBCR(), 0.1);
+        assertEquals(-10.7, manoever.getTimeToBCR(), 0.1);
+    }
+
+    @Test
+    public void manoeverLage1() {
+        Vessel me = new Vessel(80, 8);
+        OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
+        other.setSecondSeitenpeilung(12, 20, 4.5);
+        Lage manoever = new Lage(me, other.getRelativeVessel(), 6, 180, 8);
+        assertEquals(112.5, manoever.getHeadingRelativ(), 0.1); // heading
+        assertEquals(10.3, manoever.getSpeedRelativ(), 0.1); // speed
+        assertEquals(3.3, manoever.getAbstandCPA(), 0.1); // cpa
+        assertEquals(-2.7, manoever.getTimeToCPA(), 0.1);
+        assertEquals(-3.6, manoever.getAbstandBCR(), 0.1);
+        assertEquals(-10.7, manoever.getTimeToBCR(), 0.1);
+    }
+
+    @Test
     public void manoeverSimplified() {
         Vessel me = new Vessel(80, 8);
         Vessel manoever = new Vessel(180, 8);
         OpponentVessel other = new OpponentVessel(0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
-        Vessel manoeverVessel = other.createManoever(manoever, 6);
+        Vessel manoeverVessel = other.createManoever(me, manoever, 6);
         Punkt2D cpa = manoever.getCPA(manoeverVessel);
         Punkt2D bcr = manoever.getBCR(manoeverVessel);
         assertEquals(112.5, manoeverVessel.getHeading(), 0.1); // heading

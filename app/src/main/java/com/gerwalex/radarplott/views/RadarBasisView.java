@@ -264,7 +264,7 @@ public class RadarBasisView extends FrameLayout {
             relCourseline.reset();
             vesselPositionStyle.setColor(color);
             Vessel vessel = opponent.getRelativeVessel();
-            Lage lage = Lage.getLage(me, opponent.getRelativeVessel());
+            Lage lage = new Lage(me, opponent.getRelativeVessel());
             Punkt2D relPos = lage.getRelPos();
             Punkt2D startPos = vessel.getFirstPosition();
             Punkt2D aktPos = vessel.getSecondPosition();
@@ -396,8 +396,8 @@ public class RadarBasisView extends FrameLayout {
                 drawPositionTexte(canvas, vessel, color);
             }
             if (mManoeverVessel != null) {
-                Vessel v = vessel.createManoever(mManoeverVessel, minutes);
-                drawCourseline(canvas, v, color);
+                //                Vessel v = vessel.createManoever(mManoeverVessel, minutes);
+                //                drawCourseline(canvas, v, color);
             }
         }
         canvas.drawPath(symbolPath, textStyle);
@@ -446,7 +446,6 @@ public class RadarBasisView extends FrameLayout {
                 float y = event.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
                 int angle = (int) new Punkt2D().getYAxisAngle(pkt);
-                mManoeverVessel = new Vessel(angle, me.getSpeed());
                 if (radarObserver != null) {
                     radarObserver.onHeadingChanged(me, angle, minutes);
                 }

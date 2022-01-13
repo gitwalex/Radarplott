@@ -4,23 +4,59 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
 public class Lage extends BaseObservable {
+    public final Vessel me;
+    private final Vessel absolutVessel;
     private final Punkt2D bcr;
     private final Punkt2D cpa;
-    private final Vessel me;
-    private final Vessel originalVessel;
-    private final Vessel other;
     private final Punkt2D relPos;
+    private final Vessel relativVessel;
 
-    public static Lage getLage(Vessel me, Vessel relativeVessel) {
-        return new Lage(me, relativeVessel);
+    public Lage(Lage lage, int minutes, int heading, float speed) {
+        this.absolutVessel = lage.absolutVessel;
+        Vessel manoever = new Vessel(heading, speed);
+        Punkt2D secondPosition = lage.relativVessel.getSecondPosition();
+        Punkt2D mp = lage.relativVessel.getPosition(minutes);
+        Punkt2D mpMe = manoever.getPosition(lage.relativVessel.minutes);
+        Punkt2D otherPos = lage.me.getPosition(-lage.relativVessel.minutes);
+        relPos = lage.relativVessel.firstPosition.add(otherPos);
+        Punkt2D mpRelPos = relPos.add(mpMe);
+        Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
+        relativVessel = new Vessel(mp, kurslinie.getYAxisAngle(),
+                mpRelPos.getAbstand(secondPosition) * 60 / lage.relativVessel.minutes);
+        this.me = manoever;
+        cpa = me.getCPA(relativVessel);
+        bcr = me.getBCR(relativVessel);
     }
 
-    public Lage(Vessel me, Vessel relativVessel) {
+    public Lage(Vessel me, Vessel relativVessel, int minutes, int heading, float speed) {
         this.me = me;
-        this.originalVessel = relativVessel;
+        Vessel manoever = new Vessel(heading, speed);
+        Punkt2D secondPosition = relativVessel.getSecondPosition();
+        Punkt2D mp = relativVessel.getPosition(minutes);
+        Punkt2D mpMe = manoever.getPosition(relativVessel.minutes);
         Punkt2D otherPos = me.getPosition(-relativVessel.minutes);
         relPos = relativVessel.firstPosition.add(otherPos);
-        other = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
+        Punkt2D mpRelPos = relPos.add(mpMe);
+        Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
+        this.absolutVessel = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
+        this.relativVessel = new Vessel(mp, kurslinie.getYAxisAngle(),
+                mpRelPos.getAbstand(secondPosition) * 60 / relativVessel.minutes);
+        cpa = manoever.getCPA(relativVessel);
+        bcr = manoever.getBCR(relativVessel);
+    }
+
+    /**
+     * Lage zum Beginn
+     *
+     * @param me            me
+     * @param relativVessel relativVessel
+     */
+    public Lage(Vessel me, Vessel relativVessel) {
+        this.me = me;
+        this.relativVessel = relativVessel;
+        Punkt2D otherPos = me.getPosition(-relativVessel.minutes);
+        relPos = relativVessel.firstPosition.add(otherPos);
+        absolutVessel = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
         cpa = me.getCPA(relativVessel);
         bcr = me.getBCR(relativVessel);
     }
@@ -37,18 +73,18 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getDistanceToCPA() {
-        int dauer = (int) originalVessel.getTimeTo(cpa);
+        int dauer = (int) relativVessel.getTimeTo(cpa);
         return me.speed / 60f * dauer;
     }
 
     @Bindable
     public float getHeadingAbsolut() {
-        return other.heading;
+        return absolutVessel.heading;
     }
 
     @Bindable
     public float getHeadingRelativ() {
-        return originalVessel.heading;
+        return relativVessel.heading;
     }
 
     @Bindable
@@ -62,21 +98,21 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getSpeedAbsolut() {
-        return other.speed;
+        return absolutVessel.speed;
     }
 
     @Bindable
     public float getSpeedRelativ() {
-        return originalVessel.speed;
+        return relativVessel.speed;
     }
 
     @Bindable
     public float getTimeToBCR() {
-        return originalVessel.getTimeTo(bcr);
+        return relativVessel.getTimeTo(bcr);
     }
 
     @Bindable
     public float getTimeToCPA() {
-        return originalVessel.getTimeTo(cpa);
+        return relativVessel.getTimeTo(cpa);
     }
 }
