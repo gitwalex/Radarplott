@@ -42,7 +42,6 @@ public class RadarFragment extends Fragment {
         binding.radar.setRadarObserver(new RadarBasisView.RadarObserver() {
             @Override
             public void onHeadingChanged(Vessel me, int heading, int minutes) {
-                mModel.manoever.setValue(new Vessel(heading, me.getSpeed()));
             }
 
             @Override
@@ -103,7 +102,7 @@ public class RadarFragment extends Fragment {
             @Override
             public void onChanged(Vessel me) {
                 binding.radar.setOwnVessel(me);
-                OpponentVessel otherVessel = new OpponentVessel(600, 'B', 10, 7);
+                OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
                 otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
                 mModel.addOpponent.setValue(otherVessel);
                 mModel.currentLage.setValue(new Lage(me, otherVessel.getRelativeVessel()));

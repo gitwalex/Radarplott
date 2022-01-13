@@ -37,7 +37,7 @@ public class OpponentManoeverData extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mModel.currentLage.observe(getViewLifecycleOwner(), new Observer<Lage>() {
+        mModel.currentManoever.observe(getViewLifecycleOwner(), new Observer<Lage>() {
             @Override
             public void onChanged(Lage lage) {
                 binding.setLage(lage);

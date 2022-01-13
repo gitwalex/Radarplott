@@ -12,6 +12,8 @@ public class MainModel extends ViewModel {
     public final MutableLiveData<OpponentVessel> addOpponent = new MutableLiveData<>();
     public final MutableLiveData<Vessel> clickedVessel = new MutableLiveData<>();
     public final MutableLiveData<Lage> currentLage = new MutableLiveData<>();
+    public final MutableLiveData<Lage> currentManoever = new MutableLiveData<>();
+
     public final MutableLiveData<Vessel> manoever = new MutableLiveData<>();
     public final MutableLiveData<Vessel> ownVessel = new MutableLiveData<>();
 

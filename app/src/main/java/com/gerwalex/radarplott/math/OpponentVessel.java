@@ -12,9 +12,11 @@ import java.util.Locale;
 public class OpponentVessel extends BaseObservable {
     public final String name;
     private final float dist1;
+    private final Vessel me;
     private final int rwP1;
     private final int startTime;
     private float dist2;
+    private Lage lage;
     private int minutes;
     private Punkt2D relPosition;
     private Vessel relativVessel;
@@ -29,7 +31,8 @@ public class OpponentVessel extends BaseObservable {
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(int time, @NonNull Character name, int peilungRechtweisend, double distance) {
+    public OpponentVessel(Vessel me, int time, @NonNull Character name, int peilungRechtweisend, double distance) {
+        this.me = me;
         this.name = name.toString();
         startTime = time;
         dist1 = (float) distance;
@@ -72,7 +75,10 @@ public class OpponentVessel extends BaseObservable {
     }
 
     public Lage getLage(Vessel me) {
-        return new Lage(me, relativVessel);
+        if (lage == null) {
+            lage = new Lage(me, relativVessel);
+        }
+        return lage;
     }
 
     public Lage getManoever(Vessel me, int minutes, int heading, float speed) {

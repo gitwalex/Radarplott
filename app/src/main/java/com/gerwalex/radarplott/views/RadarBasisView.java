@@ -79,8 +79,8 @@ public class RadarBasisView extends FrameLayout {
     private boolean drawCourselineText = true;
     private boolean drawPositionText = true;
     private boolean longPressed;
-    private Vessel mManoeverVessel;
     private ScaleGestureDetector mScaleDetector;
+    private Integer manoeverAngle;
     private Vessel me;
     private int minutes;
     private boolean northupOrientierung = true;
@@ -153,8 +153,10 @@ public class RadarBasisView extends FrameLayout {
                 float x = e.getX();
                 float y = e.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
-                float angle = new Punkt2D().getYAxisAngle(pkt);
-                mManoeverVessel = new Vessel((int) angle, me.getSpeed());
+                manoeverAngle = (int) new Punkt2D().getYAxisAngle(pkt);
+                if (radarObserver != null) {
+                    radarObserver.onHeadingChanged(me, manoeverAngle, minutes);
+                }
                 invalidate();
             }
         });
@@ -383,8 +385,8 @@ public class RadarBasisView extends FrameLayout {
             if (drawCourseline) {
                 drawCourseline(canvas, me, ownVesselColor);
             }
-            if (mManoeverVessel != null && mManoeverVessel.getHeading() != me.getHeading()) {
-                drawCourseline(canvas, mManoeverVessel, ownVesselColor);
+            if (manoeverAngle != null && manoeverAngle != me.getHeading()) {
+                //                drawCourseline(canvas, mManoeverVessel, ownVesselColor);
             }
         }
         for (int i = 0; i < vesselList.size(); i++) {
@@ -395,7 +397,7 @@ public class RadarBasisView extends FrameLayout {
             if (drawPositionText) {
                 drawPositionTexte(canvas, vessel, color);
             }
-            if (mManoeverVessel != null) {
+            if (manoeverAngle != null) {
                 //                Vessel v = vessel.createManoever(mManoeverVessel, minutes);
                 //                drawCourseline(canvas, v, color);
             }
@@ -445,9 +447,9 @@ public class RadarBasisView extends FrameLayout {
                 float x = event.getX();
                 float y = event.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
-                int angle = (int) new Punkt2D().getYAxisAngle(pkt);
+                manoeverAngle = (int) new Punkt2D().getYAxisAngle(pkt);
                 if (radarObserver != null) {
-                    radarObserver.onHeadingChanged(me, angle, minutes);
+                    radarObserver.onHeadingChanged(me, manoeverAngle, minutes);
                 }
                 invalidate();
                 consumed = true;

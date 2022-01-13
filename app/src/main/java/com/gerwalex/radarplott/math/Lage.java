@@ -4,7 +4,13 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
 public class Lage extends BaseObservable {
+    public final float abstandBCR;
+    public final float abstandCPA;
+    public final float distanceToCPA;
     public final Vessel me;
+    public final float peilungRechtweisendCPA;
+    public final float timeToBCR;
+    public final float timeToCPA;
     private final Vessel absolutVessel;
     private final Punkt2D bcr;
     private final Punkt2D cpa;
@@ -23,26 +29,15 @@ public class Lage extends BaseObservable {
         Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
         relativVessel = new Vessel(mp, kurslinie.getYAxisAngle(),
                 mpRelPos.getAbstand(secondPosition) * 60 / lage.relativVessel.minutes);
-        this.me = manoever;
-        cpa = me.getCPA(relativVessel);
-        bcr = me.getBCR(relativVessel);
-    }
-
-    public Lage(Vessel me, Vessel relativVessel, int minutes, int heading, float speed) {
-        this.me = me;
-        Vessel manoever = new Vessel(heading, speed);
-        Punkt2D secondPosition = relativVessel.getSecondPosition();
-        Punkt2D mp = relativVessel.getPosition(minutes);
-        Punkt2D mpMe = manoever.getPosition(relativVessel.minutes);
-        Punkt2D otherPos = me.getPosition(-relativVessel.minutes);
-        relPos = relativVessel.firstPosition.add(otherPos);
-        Punkt2D mpRelPos = relPos.add(mpMe);
-        Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
-        this.absolutVessel = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
-        this.relativVessel = new Vessel(mp, kurslinie.getYAxisAngle(),
-                mpRelPos.getAbstand(secondPosition) * 60 / relativVessel.minutes);
+        this.me = lage.me;
         cpa = manoever.getCPA(relativVessel);
+        abstandCPA = manoever.getAbstand(cpa);
+        timeToCPA = relativVessel.getTimeTo(cpa);
+        distanceToCPA = manoever.speed / 60f * timeToCPA;
+        peilungRechtweisendCPA = manoever.getPeilungRechtweisend(cpa);
         bcr = manoever.getBCR(relativVessel);
+        abstandBCR = manoever.getAbstand(bcr);
+        timeToBCR = relativVessel.getTimeTo(bcr);
     }
 
     /**
@@ -58,23 +53,28 @@ public class Lage extends BaseObservable {
         relPos = relativVessel.firstPosition.add(otherPos);
         absolutVessel = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
         cpa = me.getCPA(relativVessel);
+        abstandCPA = me.getAbstand(cpa);
+        timeToCPA = relativVessel.getTimeTo(cpa);
+        distanceToCPA = relativVessel.speed / 60f * timeToCPA;
+        peilungRechtweisendCPA = me.getPeilungRechtweisend(cpa);
         bcr = me.getBCR(relativVessel);
+        abstandBCR = me.getAbstand(bcr);
+        timeToBCR = relativVessel.getTimeTo(bcr);
     }
 
     @Bindable
     public float getAbstandBCR() {
-        return me.getAbstand(bcr);
+        return abstandBCR;
     }
 
     @Bindable
     public float getAbstandCPA() {
-        return me.getAbstand(cpa);
+        return abstandCPA;
     }
 
     @Bindable
     public float getDistanceToCPA() {
-        int dauer = (int) relativVessel.getTimeTo(cpa);
-        return me.speed / 60f * dauer;
+        return distanceToCPA;
     }
 
     @Bindable
@@ -89,7 +89,7 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public double getPeilungRechtweisendCPA() {
-        return me.getPeilungRechtweisend(cpa);
+        return peilungRechtweisendCPA;
     }
 
     public Punkt2D getRelPos() {
@@ -108,11 +108,11 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getTimeToBCR() {
-        return relativVessel.getTimeTo(bcr);
+        return timeToBCR;
     }
 
     @Bindable
     public float getTimeToCPA() {
-        return relativVessel.getTimeTo(cpa);
+        return timeToCPA;
     }
 }
