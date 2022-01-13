@@ -30,6 +30,14 @@
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/currentManoever"
+                android:name="com.gerwalex.radarplott.main.OpponentManoeverData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/currentOpponent" />
+
+            <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/ownVessel"
                 android:name="com.gerwalex.radarplott.main.OwnVessel"
                 android:layout_width="wrap_content"

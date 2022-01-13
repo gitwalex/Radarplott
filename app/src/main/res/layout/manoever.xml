@@ -5,8 +5,8 @@
     <data>
 
         <variable
-            name="lage"
-            type="com.gerwalex.radarplott.math.Lage" />
+            name="opponent"
+            type="com.gerwalex.radarplott.math.OpponentVessel" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -19,7 +19,6 @@
             android:layout_height="wrap_content"
             app:contentPadding="@dimen/content_padding">
 
-
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -30,61 +29,50 @@
                     android:id="@+id/rKurs"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/rKurs(lage.headingRelativ)}" />
+                    android:text="@{@string/rKurs(opponent.headingManoever)}" />
 
                 <TextView
                     android:id="@+id/rFdW"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/rFdW(lage.speedRelativ)}" />
+                    android:text="@{@string/rFdW(opponent.speedManoever)}" />
 
-                <TextView
-                    android:id="@+id/Kurs"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{@string/Kurs(lage.headingAbsolut)}" />
-
-                <TextView
-                    android:id="@+id/FdW"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{@string/FdW(lage.speedAbsolut)}" />
 
                 <TextView
                     android:id="@+id/abstandBCR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/AbstandBCR(lage.abstandBCR)}" />
+                    android:text="@{@string/AbstandBCR(opponent.abstandManoeverBCR)}" />
 
                 <TextView
                     android:id="@+id/timeToBCR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/TimeToBCR(lage.timeToBCR)}" />
+                    android:text="@{@string/TimeToBCR(opponent.timeToManoeverBCR)}" />
 
                 <TextView
                     android:id="@+id/abstandCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/AbstandCPA(lage.abstandCPA)}" />
+                    android:text="@{@string/AbstandCPA(opponent.abstandManoeverCPA)}" />
 
                 <TextView
                     android:id="@+id/timeToCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/TimeToCPA(lage.timeToCPA)}" />
+                    android:text="@{@string/TimeToCPA(opponent.timeToManoeverCPA)}" />
 
                 <TextView
                     android:id="@+id/distanceToCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/DistanceToCPA(lage.DistanceToCPA)}" />
+                    android:text="@{@string/DistanceToCPA(opponent.DistanceToManoeverCPA)}" />
 
                 <TextView
                     android:id="@+id/rwPeilungCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/rwPeilungCPA(lage.peilungRechtweisendCPA)}" />
+                    android:text="@{@string/rwPeilungCPA(opponent.peilungRechtweisendManoeverCPA)}" />
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.cardview.widget.CardView>
     </androidx.core.widget.NestedScrollView>

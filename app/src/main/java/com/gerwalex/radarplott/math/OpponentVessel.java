@@ -18,7 +18,9 @@ public class OpponentVessel extends BaseObservable {
     private final int startTime;
     private Vessel absolutVessel;
     private Punkt2D bcr;
+    private Punkt2D bcrManoever;
     private Punkt2D cpa;
+    private Punkt2D cpaManoever;
     private float dist2;
     private Vessel manoeverVessel;
     private int minutes;
@@ -59,6 +61,9 @@ public class OpponentVessel extends BaseObservable {
         Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
         manoeverVessel =
                 new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
+        cpaManoever = me.getCPA(manoeverVessel);
+        bcrManoever = me.getBCR(manoeverVessel);
+        notifyChange();
         return manoeverVessel;
     }
 
@@ -73,8 +78,36 @@ public class OpponentVessel extends BaseObservable {
     }
 
     @Bindable
+    public float getAbstandManoeverBCR() {
+        return me.getAbstand(bcrManoever);
+    }
+
+    @Bindable
+    public float getAbstandManoeverCPA() {
+        return me.getAbstand(cpaManoever);
+    }
+
+    @Bindable
+    public float getDistanceToCPA() {
+        int dauer = (int) relativVessel.getTimeTo(cpa);
+        return me.speed / 60f * dauer;
+    }
+
+    @Bindable
+    public float getDistanceToManoeverCPA() {
+        return 0;
+        //        int dauer = (int) manoeverVessel.getTimeTo(cpaManoever);
+        //        return me.speed / 60f * dauer;
+    }
+
+    @Bindable
     public float getHeadingAbsolut() {
         return absolutVessel.heading;
+    }
+
+    @Bindable
+    public float getHeadingManoever() {
+        return manoeverVessel.heading;
     }
 
     @Bindable
@@ -104,6 +137,10 @@ public class OpponentVessel extends BaseObservable {
         return relativVessel.checkForValidKurs(heading);
     }
 
+    public Vessel getManoever() {
+        return manoeverVessel;
+    }
+
     @Bindable
     public int getMinutes() {
         return minutes;
@@ -112,6 +149,11 @@ public class OpponentVessel extends BaseObservable {
     @Bindable
     public double getPeilungRechtweisendCPA() {
         return me.getPeilungRechtweisend(cpa);
+    }
+
+    @Bindable
+    public double getPeilungRechtweisendManoeverCPA() {
+        return me.getPeilungRechtweisend(cpaManoever);
     }
 
     public final Punkt2D getRelPosition() {
@@ -137,6 +179,11 @@ public class OpponentVessel extends BaseObservable {
     }
 
     @Bindable
+    public float getSpeedManoever() {
+        return manoeverVessel.speed;
+    }
+
+    @Bindable
     public float getSpeedRelativ() {
         return relativVessel.speed;
     }
@@ -159,6 +206,17 @@ public class OpponentVessel extends BaseObservable {
     @Bindable
     public float getTimeToCPA() {
         return relativVessel.getTimeTo(cpa);
+    }
+
+    @Bindable
+    public float getTimeToManoeverBCR() {
+        return manoeverVessel.getTimeTo(bcrManoever);
+    }
+
+    @Bindable
+    public float getTimeToManoeverCPA() {
+        return 0;
+        //        return manoeverVessel.getTimeTo(cpaManoever);
     }
 
     /**
