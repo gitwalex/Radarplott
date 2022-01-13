@@ -12,7 +12,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.OpponentBinding;
-import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Lage;
 
 public class OpponentVesselData extends Fragment {
 
@@ -36,10 +36,10 @@ public class OpponentVesselData extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mModel.currentOpponent.observe(getViewLifecycleOwner(), new Observer<OpponentVessel>() {
+        mModel.currentLage.observe(getViewLifecycleOwner(), new Observer<Lage>() {
             @Override
-            public void onChanged(OpponentVessel opponent) {
-                binding.setOpponent(opponent);
+            public void onChanged(Lage lage) {
+                binding.setLage(lage);
             }
         });
     }

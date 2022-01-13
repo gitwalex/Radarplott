@@ -7,13 +7,22 @@ public class Lage extends BaseObservable {
     private final Punkt2D bcr;
     private final Punkt2D cpa;
     private final Vessel me;
+    private final Vessel originalVessel;
     private final Vessel other;
+    private final Punkt2D relPos;
 
-    public Lage(Vessel me, Vessel other) {
+    public static Lage getLage(Vessel me, Vessel relativeVessel) {
+        return new Lage(me, relativeVessel);
+    }
+
+    public Lage(Vessel me, Vessel relativVessel) {
         this.me = me;
-        this.other = other;
-        cpa = me.getCPA(other);
-        bcr = me.getBCR(other);
+        this.originalVessel = relativVessel;
+        Punkt2D otherPos = me.getPosition(-relativVessel.minutes);
+        relPos = relativVessel.firstPosition.add(otherPos);
+        other = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
+        cpa = me.getCPA(relativVessel);
+        bcr = me.getBCR(relativVessel);
     }
 
     @Bindable
@@ -28,7 +37,7 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getDistanceToCPA() {
-        int dauer = (int) other.getTimeTo(cpa);
+        int dauer = (int) originalVessel.getTimeTo(cpa);
         return me.speed / 60f * dauer;
     }
 
@@ -38,8 +47,17 @@ public class Lage extends BaseObservable {
     }
 
     @Bindable
+    public float getHeadingRelativ() {
+        return originalVessel.heading;
+    }
+
+    @Bindable
     public double getPeilungRechtweisendCPA() {
         return me.getPeilungRechtweisend(cpa);
+    }
+
+    public Punkt2D getRelPos() {
+        return relPos;
     }
 
     @Bindable
@@ -49,16 +67,16 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getSpeedRelativ() {
-        return other.speed;
+        return originalVessel.speed;
     }
 
     @Bindable
     public float getTimeToBCR() {
-        return other.getTimeTo(bcr);
+        return originalVessel.getTimeTo(bcr);
     }
 
     @Bindable
     public float getTimeToCPA() {
-        return other.getTimeTo(cpa);
+        return originalVessel.getTimeTo(cpa);
     }
 }

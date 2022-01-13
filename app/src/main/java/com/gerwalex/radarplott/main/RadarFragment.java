@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
+import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
@@ -102,10 +103,10 @@ public class RadarFragment extends Fragment {
             @Override
             public void onChanged(Vessel me) {
                 binding.radar.setOwnVessel(me);
-                OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
+                OpponentVessel otherVessel = new OpponentVessel(600, 'B', 10, 7);
                 otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
                 mModel.addOpponent.setValue(otherVessel);
-                mModel.currentOpponent.setValue(otherVessel);
+                mModel.currentLage.setValue(Lage.getLage(me, otherVessel.getRelativeVessel()));
             }
         });
         mModel.addOpponent.observe(getViewLifecycleOwner(), new Observer<OpponentVessel>() {

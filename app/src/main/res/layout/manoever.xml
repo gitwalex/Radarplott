@@ -5,8 +5,8 @@
     <data>
 
         <variable
-            name="opponent"
-            type="com.gerwalex.radarplott.math.OpponentVessel" />
+            name="lage"
+            type="com.gerwalex.radarplott.math.Lage" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -29,50 +29,50 @@
                     android:id="@+id/rKurs"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/rKurs(opponent.headingManoever)}" />
+                    android:text="@{@string/rKurs(lage.headingAbsolut)}" />
 
                 <TextView
                     android:id="@+id/rFdW"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/rFdW(opponent.speedManoever)}" />
+                    android:text="@{@string/rFdW(lage.speedAbsolut)}" />
 
 
                 <TextView
                     android:id="@+id/abstandBCR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/AbstandBCR(opponent.abstandManoeverBCR)}" />
+                    android:text="@{@string/AbstandBCR(lage.abstandBCR)}" />
 
                 <TextView
                     android:id="@+id/timeToBCR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/TimeToBCR(opponent.timeToManoeverBCR)}" />
+                    android:text="@{@string/TimeToBCR(lage.timeToBCR)}" />
 
                 <TextView
                     android:id="@+id/abstandCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/AbstandCPA(opponent.abstandManoeverCPA)}" />
+                    android:text="@{@string/AbstandCPA(lage.abstandCPA)}" />
 
                 <TextView
                     android:id="@+id/timeToCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/TimeToCPA(opponent.timeToManoeverCPA)}" />
+                    android:text="@{@string/TimeToCPA(lage.timeToCPA)}" />
 
                 <TextView
                     android:id="@+id/distanceToCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/DistanceToCPA(opponent.DistanceToManoeverCPA)}" />
+                    android:text="@{@string/DistanceToCPA(lage.DistanceToCPA)}" />
 
                 <TextView
                     android:id="@+id/rwPeilungCPA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{@string/rwPeilungCPA(opponent.peilungRechtweisendManoeverCPA)}" />
+                    android:text="@{@string/rwPeilungCPA(lage.peilungRechtweisendCPA)}" />
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.cardview.widget.CardView>
     </androidx.core.widget.NestedScrollView>

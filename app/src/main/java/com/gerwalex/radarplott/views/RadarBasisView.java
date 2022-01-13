@@ -29,6 +29,7 @@ import androidx.databinding.ObservableInt;
 import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.math.Kreis2D;
+import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.math.Vessel;
@@ -263,7 +264,8 @@ public class RadarBasisView extends FrameLayout {
             relCourseline.reset();
             vesselPositionStyle.setColor(color);
             Vessel vessel = opponent.getRelativeVessel();
-            Punkt2D relPos = opponent.getRelPosition();
+            Lage lage = Lage.getLage(me, opponent.getRelativeVessel());
+            Punkt2D relPos = lage.getRelPos();
             Punkt2D startPos = vessel.getFirstPosition();
             Punkt2D aktPos = vessel.getSecondPosition();
             drawLine(relCourseline, relPos, aktPos);

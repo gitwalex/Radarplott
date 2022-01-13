@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
-import androidx.databinding.Observable;
 
 import com.gerwalex.radarplott.main.IllegalManoeverException;
 
@@ -13,7 +12,6 @@ import java.util.Locale;
 public class OpponentVessel extends BaseObservable {
     public final String name;
     private final float dist1;
-    private final Vessel me;
     private final int rwP1;
     private final int startTime;
     private Vessel absolutVessel;
@@ -31,23 +29,14 @@ public class OpponentVessel extends BaseObservable {
     /**
      * Erstellt ein Schiff aus Seitenpeilung. Schiff hat Geschwindigkeit 0 und Kurs 0
      *
-     * @param me
      * @param time                Uhrzeit in Minuten nach Mitternacht
      * @param name                Name
      * @param peilungRechtweisend Rechtweisende Peilung
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(@NonNull Vessel me, int time, @NonNull Character name, int peilungRechtweisend,
-                          double distance) {
+    public OpponentVessel(int time, @NonNull Character name, int peilungRechtweisend, double distance) {
         this.name = name.toString();
-        me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                notifyChange();
-            }
-        });
-        this.me = me;
         startTime = time;
         dist1 = (float) distance;
         rwP1 = peilungRechtweisend;
@@ -65,54 +54,6 @@ public class OpponentVessel extends BaseObservable {
         bcrManoever = me.getBCR(manoeverVessel);
         notifyChange();
         return manoeverVessel;
-    }
-
-    @Bindable
-    public float getAbstandBCR() {
-        return me.getAbstand(bcr);
-    }
-
-    @Bindable
-    public float getAbstandCPA() {
-        return me.getAbstand(cpa);
-    }
-
-    @Bindable
-    public float getAbstandManoeverBCR() {
-        return me.getAbstand(bcrManoever);
-    }
-
-    @Bindable
-    public float getAbstandManoeverCPA() {
-        return me.getAbstand(cpaManoever);
-    }
-
-    @Bindable
-    public float getDistanceToCPA() {
-        int dauer = (int) relativVessel.getTimeTo(cpa);
-        return me.speed / 60f * dauer;
-    }
-
-    @Bindable
-    public float getDistanceToManoeverCPA() {
-        return 0;
-        //        int dauer = (int) manoeverVessel.getTimeTo(cpaManoever);
-        //        return me.speed / 60f * dauer;
-    }
-
-    @Bindable
-    public float getHeadingAbsolut() {
-        return absolutVessel.heading;
-    }
-
-    @Bindable
-    public float getHeadingManoever() {
-        return manoeverVessel.heading;
-    }
-
-    @Bindable
-    public float getHeadingRelativ() {
-        return relativVessel.heading;
     }
 
     /**
@@ -137,32 +78,6 @@ public class OpponentVessel extends BaseObservable {
         return relativVessel.checkForValidKurs(heading);
     }
 
-    public Vessel getManoever() {
-        return manoeverVessel;
-    }
-
-    @Bindable
-    public int getMinutes() {
-        return minutes;
-    }
-
-    @Bindable
-    public double getPeilungRechtweisendCPA() {
-        return me.getPeilungRechtweisend(cpa);
-    }
-
-    @Bindable
-    public double getPeilungRechtweisendManoeverCPA() {
-        return me.getPeilungRechtweisend(cpaManoever);
-    }
-
-    public final Punkt2D getRelPosition() {
-        Punkt2D otherPos = me.getPosition(-minutes);
-        relPosition = relativVessel.firstPosition.add(otherPos);
-        absolutVessel = new Vessel(relPosition, relativVessel.secondPosition, minutes);
-        return relPosition;
-    }
-
     @Bindable
     public Vessel getRelativeVessel() {
         return relativVessel;
@@ -174,21 +89,6 @@ public class OpponentVessel extends BaseObservable {
     }
 
     @Bindable
-    public float getSpeedAbsolut() {
-        return absolutVessel.speed;
-    }
-
-    @Bindable
-    public float getSpeedManoever() {
-        return manoeverVessel.speed;
-    }
-
-    @Bindable
-    public float getSpeedRelativ() {
-        return relativVessel.speed;
-    }
-
-    @Bindable
     public String getStartTime() {
         return String.format(Locale.getDefault(), "%02d:%02d", startTime / 60, startTime % 60);
     }
@@ -196,27 +96,6 @@ public class OpponentVessel extends BaseObservable {
     @Bindable
     public int getTime() {
         return startTime + minutes;
-    }
-
-    @Bindable
-    public float getTimeToBCR() {
-        return relativVessel.getTimeTo(bcr);
-    }
-
-    @Bindable
-    public float getTimeToCPA() {
-        return relativVessel.getTimeTo(cpa);
-    }
-
-    @Bindable
-    public float getTimeToManoeverBCR() {
-        return manoeverVessel.getTimeTo(bcrManoever);
-    }
-
-    @Bindable
-    public float getTimeToManoeverCPA() {
-        return 0;
-        //        return manoeverVessel.getTimeTo(cpaManoever);
     }
 
     /**
@@ -233,10 +112,5 @@ public class OpponentVessel extends BaseObservable {
         Punkt2D firstPosition = new Punkt2D().getPunkt2D(rwP1, dist1);
         Punkt2D secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         relativVessel = new Vessel(firstPosition, secondPosition, time - startTime);
-        cpa = me.getCPA(relativVessel);
-        bcr = me.getBCR(relativVessel);
-        Punkt2D otherPos = me.getPosition(-minutes);
-        relPosition = relativVessel.firstPosition.add(otherPos);
-        absolutVessel = new Vessel(relPosition, relativVessel.secondPosition, minutes);
     }
 }
