@@ -28,6 +28,15 @@ public class Vessel extends BaseObservable {
         this(new Punkt2D(), heading, speed);
     }
 
+    public Vessel(Punkt2D position, Vektor2D richtung, int minutes) {
+        this.minutes = minutes;
+        this.firstPosition = position.add(richtung.negate());
+        this.secondPosition = position;
+        kurslinie = new Gerade2D(firstPosition, secondPosition);
+        heading = kurslinie.getYAxisAngle();
+        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+    }
+
     public Vessel(Punkt2D firstPosition, Punkt2D secondPosition, int minutes) {
         this.minutes = minutes;
         this.firstPosition = firstPosition;
@@ -91,9 +100,14 @@ public class Vessel extends BaseObservable {
         return heading;
     }
 
-    @Bindable
-    public final Punkt2D getSecondPosition() {
-        return secondPosition;
+    /**
+     * Liefert den Richtungsvektor. Länge des Vektor ist die Strecke, die in minutes zurückgelegt wird.
+     *
+     * @param minutes Minuten
+     * @return Richtungsvektor
+     */
+    public final Vektor2D getRichtungsvektor(int minutes) {
+        return kurslinie.getRichtungsvektor(minutes / 60f * speed);
     }
 
     @Bindable
@@ -123,16 +137,21 @@ public class Vessel extends BaseObservable {
         return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
     }
 
-    public float getSeitenPeilung(Punkt2D pkt) {
-        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
-    }
-
     public final float getTimeTo(@NonNull Punkt2D p) {
         if (!kurslinie.isPunktAufGerade(p)) {
             throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
         }
         float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
         return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
+    }
+
+    @Bindable
+    public final Punkt2D getSecondPosition() {
+        return secondPosition;
+    }
+
+    public float getSeitenPeilung(Punkt2D pkt) {
+        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
     }
 
     /**

@@ -60,7 +60,8 @@ public class LageTest {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(me, 0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
-        Lage manoever = other.getManoever(me, 6, 180, 8);
+        Vessel v = new Vessel(180, 8);
+        Lage manoever = other.getManoever(me, 6, v);
         assertEquals(112.5, manoever.getHeadingRelativ(), 0.1); // heading
         assertEquals(10.3, manoever.getSpeedRelativ(), 0.1); // speed
         assertEquals(3.3, manoever.getAbstandCPA(), 0.1); // cpa
@@ -74,7 +75,8 @@ public class LageTest {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(me, 0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
-        Lage manoever = other.getManoever(me, 6, 110, 8);
+        Vessel v = new Vessel(110, 8);
+        Lage manoever = other.getManoever(me, 6, v);
         assertEquals(167.9, manoever.getHeadingRelativ(), 0.1); // heading
         assertEquals(9.4, manoever.getSpeedRelativ(), 0.1); // speed
         assertEquals(2.3, manoever.getAbstandCPA(), 0.1); // cpa
@@ -89,7 +91,8 @@ public class LageTest {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(me, 0, 'B', 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
-        Lage manoever = other.getManoever(me, 12, 110, 8);
+        Vessel v = new Vessel(110, 8);
+        Lage manoever = other.getManoever(me, 12, v);
         assertEquals(167.9, manoever.getHeadingRelativ(), 0.1); // heading
         assertEquals(9.4, manoever.getSpeedRelativ(), 0.1); // speed
         assertEquals(2.1, manoever.getAbstandCPA(), 0.1); // cpa

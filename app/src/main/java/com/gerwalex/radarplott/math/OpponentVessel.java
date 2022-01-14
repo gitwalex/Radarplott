@@ -81,8 +81,8 @@ public class OpponentVessel extends BaseObservable {
         return lage;
     }
 
-    public Lage getManoever(Vessel me, int minutes, int heading, float speed) {
-        return new Lage(getLage(me), minutes, heading, speed);
+    public Lage getManoever(Vessel me, int minutes, Vessel manoever) {
+        return new Lage(getLage(me), manoever, minutes);
     }
 
     @Bindable

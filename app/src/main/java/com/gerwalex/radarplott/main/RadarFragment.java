@@ -18,6 +18,7 @@ import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
 import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
 import com.google.android.material.navigation.NavigationView;
@@ -42,10 +43,20 @@ public class RadarFragment extends Fragment {
         binding.radar.setRadarObserver(new RadarBasisView.RadarObserver() {
             @Override
             public void onHeadingChanged(Vessel me, int heading, int minutes) {
+                onManoever(me, new Vessel(new Punkt2D(), heading, me.getSpeed()), minutes);
+            }
+
+            @Override
+            public void onManoever(Vessel me, Vessel manoverVessel, int minutes) {
+                Lage lage = mModel.currentLage.getValue();
+                if (lage != null) {
+                    mModel.currentManoever.setValue(new Lage(lage, manoverVessel, minutes));
+                }
             }
 
             @Override
             public void onSpeedChanged(Vessel me, int speed, int minutes) {
+                onManoever(me, new Vessel(new Punkt2D(), me.getHeading(), speed), minutes);
             }
 
             @Override

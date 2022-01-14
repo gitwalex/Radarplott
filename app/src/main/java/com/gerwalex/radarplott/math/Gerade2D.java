@@ -209,6 +209,16 @@ public class Gerade2D {
     }
 
     /**
+     * Richtungsvektor der Geraden als Einheitsvektor (Vektorlaenge = 1)
+     *
+     * @param laenge Länge des Vektors
+     * @return liefert den Richtungsvektor als Einheitsvektor zurueck
+     */
+    public Vektor2D getRichtungsvektor(float laenge) {
+        return new Vektor2D(new Punkt2D(rv.x * laenge, rv.y * laenge));
+    }
+
+    /**
      * Schnittpunkt zweier Geraden
      *
      * @param g Gerade, mit der ein Schnittpunkt ermittelt werden soll
@@ -303,7 +313,7 @@ public class Gerade2D {
      * @return true, wenn Punkt auf der Geraden liegt
      */
     public boolean isPunktAufGerade(Punkt2D p) {
-        return Math.abs(Math.round(getAbstand(p) * 1E6f)) < 1f;
+        return Math.abs(Math.round(getAbstand(p) * 1E4f)) < 1f;
     }
 
     /**
