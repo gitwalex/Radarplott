@@ -44,11 +44,11 @@ import java.util.List;
  * @author Alexander Winkler
  */
 public class RadarBasisView extends FrameLayout {
-    public static float RADARRINGE = 8;
     private static final float sektorlinienlaenge = 40.0f;
     private static final int textPadding = 30;
     private static final int thickPath = 3;
     private static final int thinPath = 2;
+    public static float RADARRINGE = 8;
     protected final Path courseline = new Path();
     protected final Paint courslineStyle = new Paint();
     private final long clickTime = -1;
@@ -154,6 +154,9 @@ public class RadarBasisView extends FrameLayout {
                 float y = e.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
                 manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
+                for (OpponentVessel opponent : opponentVesselList) {
+                    opponent.createManoeverLage(manoverVessel, minutes);
+                }
                 if (radarObserver != null) {
                     radarObserver.onManoever(me, manoverVessel, minutes);
                 }
@@ -398,7 +401,7 @@ public class RadarBasisView extends FrameLayout {
                 drawPositionTexte(canvas, opponent, color);
             }
             if (manoverVessel != null) {
-                Lage lage = opponent.getManoever(me, minutes, manoverVessel);
+                Lage lage = opponent.getManoeverLage();
                 drawCourseline(canvas, lage.getRelativVessel(), color);
             }
         }
@@ -451,6 +454,9 @@ public class RadarBasisView extends FrameLayout {
                 if (radarObserver != null) {
                     radarObserver.onManoever(me, manoverVessel, minutes);
                 }
+                for (OpponentVessel opponent : opponentVesselList) {
+                    opponent.createManoeverLage(manoverVessel, minutes);
+                }
                 invalidate();
                 consumed = true;
             } else if (action == MotionEvent.ACTION_UP) {
@@ -467,6 +473,12 @@ public class RadarBasisView extends FrameLayout {
 
     public void setCurrentTime(int minutes) {
         this.minutes = minutes;
+        if (manoverVessel != null) {
+            manoverVessel = new Vessel((int) manoverVessel.getHeading(), manoverVessel.getSpeed());
+            for (OpponentVessel opponent : opponentVesselList) {
+                opponent.createManoeverLage(manoverVessel, minutes);
+            }
+        }
         invalidate();
     }
 

@@ -32,7 +32,7 @@ public class Lage extends BaseObservable {
         Log.d("gerwalex", ": " + mp1);
         Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
         this.relativVessel =
-                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / relativ.minutes);
+                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / minutes);
         cpa = manoever.getCPA(relativVessel);
         abstandCPA = manoever.getAbstand(cpa);
         timeToCPA = relativVessel.getTimeTo(cpa);

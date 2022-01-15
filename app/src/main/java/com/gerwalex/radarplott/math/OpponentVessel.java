@@ -4,19 +4,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+import androidx.databinding.Observable;
+import androidx.lifecycle.MutableLiveData;
 
 import com.gerwalex.radarplott.main.IllegalManoeverException;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class OpponentVessel extends BaseObservable {
+    public final MutableLiveData<Lage> lage = new MutableLiveData<>();
     public final String name;
     private final float dist1;
     private final Vessel me;
     private final int rwP1;
     private final int startTime;
+    public MutableLiveData<Lage> manoeverLage;
     private float dist2;
-    private Lage lage;
     private int minutes;
     private Punkt2D relPosition;
     private Vessel relativVessel;
@@ -39,17 +43,8 @@ public class OpponentVessel extends BaseObservable {
         rwP1 = peilungRechtweisend;
     }
 
-    public Vessel createManoever(Vessel me, Vessel manoever, int minutes) {
-        Punkt2D secondPosition = relativVessel.getSecondPosition();
-        Punkt2D mp = relativVessel.getPosition(minutes);
-        Punkt2D mpMe = manoever.getPosition(relativVessel.minutes);
-        Punkt2D otherPos = me.getPosition(-relativVessel.minutes);
-        relPosition = relativVessel.firstPosition.add(otherPos);
-        Punkt2D mpRelPos = relPosition.add(mpMe);
-        Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
-        Vessel manoeverVessel =
-                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / this.minutes);
-        return manoeverVessel;
+    public void createManoeverLage(Vessel manoever, int minutes) {
+        manoeverLage.setValue(new Lage(getLage(), manoever, minutes));
     }
 
     /**
@@ -74,15 +69,14 @@ public class OpponentVessel extends BaseObservable {
         return relativVessel.checkForValidKurs(heading);
     }
 
-    public Lage getLage(Vessel me) {
-        if (lage == null) {
-            lage = new Lage(me, relativVessel);
-        }
-        return lage;
+    @NonNull
+    public Lage getLage() {
+        return Objects.requireNonNull(lage.getValue());
     }
 
-    public Lage getManoever(Vessel me, int minutes, Vessel manoever) {
-        return new Lage(getLage(me), manoever, minutes);
+    @NonNull
+    public Lage getManoeverLage() {
+        return Objects.requireNonNull(manoeverLage.getValue());
     }
 
     @Bindable
@@ -112,12 +106,19 @@ public class OpponentVessel extends BaseObservable {
      * @param rwP      zweite Rechtweisende Peilung
      * @param distance distance bei der zweiten Peilung
      */
-    public void setSecondSeitenpeilung(int time, int rwP, double distance) {
+    public void setSecondSeitenpeilung(Vessel me, int time, int rwP, double distance) {
         dist2 = (float) distance;
         rwP2 = rwP;
         minutes = time - startTime;
         Punkt2D firstPosition = new Punkt2D().getPunkt2D(rwP1, dist1);
         Punkt2D secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         relativVessel = new Vessel(firstPosition, secondPosition, minutes);
+        lage.setValue(new Lage(me, relativVessel));
+        me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                lage.setValue(new Lage(me, relativVessel));
+            }
+        });
     }
 }

@@ -7,23 +7,20 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.databinding.ManoeverBinding;
 import com.gerwalex.radarplott.math.Lage;
 
-public class OpponentManoeverData extends Fragment {
+public class OpponentManoeverData extends OpponentVesselData {
+    private ManoeverBinding binding;
 
-    private @NonNull
-    ManoeverBinding binding;
-    private MainModel mModel;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mModel = new ViewModelProvider(requireActivity()).get(MainModel.class);
+    public static OpponentManoeverData newInstance(@NonNull String name) {
+        Bundle args = new Bundle();
+        args.putString(OpponentName, name);
+        OpponentManoeverData fragment = new OpponentManoeverData();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Nullable
@@ -36,8 +33,7 @@ public class OpponentManoeverData extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mModel.currentManoever.observe(getViewLifecycleOwner(), new Observer<Lage>() {
+        mOpponent.manoeverLage.observe(getViewLifecycleOwner(), new Observer<Lage>() {
             @Override
             public void onChanged(Lage lage) {
                 binding.setLage(lage);

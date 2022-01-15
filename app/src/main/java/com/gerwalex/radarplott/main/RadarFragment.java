@@ -114,7 +114,7 @@ public class RadarFragment extends Fragment {
             public void onChanged(Vessel me) {
                 binding.radar.setOwnVessel(me);
                 OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
-                otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
+                otherVessel.setSecondSeitenpeilung(me, 612, 20, 4.5);
                 mModel.addOpponent.setValue(otherVessel);
                 mModel.currentLage.setValue(new Lage(me, otherVessel.getRelativeVessel()));
             }
