@@ -57,7 +57,6 @@ public class RadarBasisView extends FrameLayout {
     private final float extraSmallTextSize;
     private final GestureDetector gestureDetector;
     private final float markerRadius = 20f;
-    private final List<OpponentVessel> opponentVesselList = new ArrayList<>();
     private final int ownVesselColor;
     private final Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
         @Override
@@ -84,6 +83,7 @@ public class RadarBasisView extends FrameLayout {
     private Vessel me;
     private int minutes;
     private boolean northupOrientierung = true;
+    private List<OpponentVessel> opponentVesselList = new ArrayList<>();
     private Kreis2D outerRing;
     private RadarObserver radarObserver;
     private float scale;
@@ -167,11 +167,6 @@ public class RadarBasisView extends FrameLayout {
 
     public void addCircle(Path path, Punkt2D pos) {
         path.addCircle(pos.x * sm, -pos.y * sm, markerRadius, Path.Direction.CW);
-    }
-
-    public void addOpponent(OpponentVessel vessel) {
-        opponentVesselList.add(vessel);
-        startTime = Math.min(vessel.getTime(), 24 * 60);
     }
 
     private void createRadarBitmap2(int w, int h) {
@@ -493,6 +488,11 @@ public class RadarBasisView extends FrameLayout {
 
     public void setDrawPositionTexte(boolean draw) {
         drawPositionText = draw;
+        invalidate();
+    }
+
+    public void setOpponents(List<OpponentVessel> opponents) {
+        opponentVesselList = opponents;
         invalidate();
     }
 

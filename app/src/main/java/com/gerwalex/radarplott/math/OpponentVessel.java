@@ -19,10 +19,9 @@ public class OpponentVessel extends BaseObservable {
     private final Vessel me;
     private final int rwP1;
     private final int startTime;
-    public MutableLiveData<Lage> manoeverLage;
+    public MutableLiveData<Lage> manoeverLage = new MutableLiveData<>();
     private float dist2;
     private int minutes;
-    private Punkt2D relPosition;
     private Vessel relativVessel;
     private int rwP2;
 
@@ -35,8 +34,9 @@ public class OpponentVessel extends BaseObservable {
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(Vessel me, int time, @NonNull Character name, int peilungRechtweisend, double distance) {
-        this.me = me;
+    public OpponentVessel(@NonNull Vessel me, int time, @NonNull Character name, int peilungRechtweisend,
+                          double distance) {
+        this.me = Objects.requireNonNull(me);
         this.name = name.toString();
         startTime = time;
         dist1 = (float) distance;
@@ -106,7 +106,7 @@ public class OpponentVessel extends BaseObservable {
      * @param rwP      zweite Rechtweisende Peilung
      * @param distance distance bei der zweiten Peilung
      */
-    public void setSecondSeitenpeilung(Vessel me, int time, int rwP, double distance) {
+    public void setSecondSeitenpeilung(int time, int rwP, double distance) {
         dist2 = (float) distance;
         rwP2 = rwP;
         minutes = time - startTime;

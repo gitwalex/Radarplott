@@ -16,13 +16,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
-import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.LabelFormatter;
+
+import java.util.List;
 
 public class RadarFragment extends Fragment {
     private RadarViewBinding binding;
@@ -48,10 +48,6 @@ public class RadarFragment extends Fragment {
 
             @Override
             public void onManoever(Vessel me, Vessel manoverVessel, int minutes) {
-                Lage lage = mModel.currentLage.getValue();
-                if (lage != null) {
-                    mModel.currentManoever.setValue(new Lage(lage, manoverVessel, minutes));
-                }
             }
 
             @Override
@@ -103,26 +99,16 @@ public class RadarFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        binding.navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                return onOptionsItemSelected(item);
+            public void onChanged(List<OpponentVessel> opponents) {
+                binding.radar.setOpponents(opponents);
             }
         });
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
             @Override
             public void onChanged(Vessel me) {
                 binding.radar.setOwnVessel(me);
-                OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
-                otherVessel.setSecondSeitenpeilung(me, 612, 20, 4.5);
-                mModel.addOpponent.setValue(otherVessel);
-                mModel.currentLage.setValue(new Lage(me, otherVessel.getRelativeVessel()));
-            }
-        });
-        mModel.addOpponent.observe(getViewLifecycleOwner(), new Observer<OpponentVessel>() {
-            @Override
-            public void onChanged(OpponentVessel opponent) {
-                binding.radar.addOpponent(opponent);
             }
         });
     }

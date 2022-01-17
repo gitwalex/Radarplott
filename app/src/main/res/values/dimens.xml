@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="cardviewborder">1dp</dimen>
     <dimen name="content_padding">4dp</dimen>
     <dimen name="largeText">16sp</dimen>
     <dimen name="mediumText">14sp</dimen>

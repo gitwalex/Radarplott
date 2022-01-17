@@ -3,34 +3,31 @@ package com.gerwalex.radarplott.main;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Vessel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class MainModel extends ViewModel {
 
     public final MutableLiveData<OpponentVessel> addOpponent = new MutableLiveData<>();
     public final MutableLiveData<Vessel> clickedVessel = new MutableLiveData<>();
-    public final MutableLiveData<Lage> currentLage = new MutableLiveData<>();
-    public final MutableLiveData<Lage> currentManoever = new MutableLiveData<>();
-
-    public final MutableLiveData<Vessel> manoever = new MutableLiveData<>();
+    public final MutableLiveData<List<OpponentVessel>> opponentVesselList = new MutableLiveData<>(new ArrayList<>());
     public final MutableLiveData<Vessel> ownVessel = new MutableLiveData<>();
-    private final Map<String, OpponentVessel> opponentVesselList = new HashMap<>();
 
     public MainModel() {
         Vessel me = new Vessel(80, 8);
         ownVessel.setValue(me);
+        OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
+        otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
+        addOpponentVessel(otherVessel);
     }
 
     public void addOpponentVessel(OpponentVessel opponent) {
-        opponentVesselList.put(opponent.name, opponent);
-    }
-
-    public OpponentVessel getOpponent(String name) {
-        return opponentVesselList.get(name);
+        List<OpponentVessel> opponents = Objects.requireNonNull(opponentVesselList.getValue());
+        opponents.add(opponent);
+        opponentVesselList.setValue(opponents);
     }
 }
