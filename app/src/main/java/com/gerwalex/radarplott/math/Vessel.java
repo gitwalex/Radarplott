@@ -52,6 +52,10 @@ public class Vessel extends BaseObservable {
         this.speed = speed;
     }
 
+    public final Punkt2D addRichtungsvektor(Punkt2D pkt, int minutes) {
+        return pkt.add(kurslinie.getRichtungsvektor(minutes / 60f * speed));
+    }
+
     public float checkForValidKurs(Float newKurs) throws IllegalManoeverException {
         if (newKurs != null) {
             return newKurs;
@@ -81,6 +85,12 @@ public class Vessel extends BaseObservable {
         return kurslinie.getSchnittpunkt(other.getKurslinie());
     }
 
+    /**
+     * Liefert den CPA zwischen Vessel und Other.
+     *
+     * @param other Vessel
+     * @return CPA
+     */
     public Punkt2D getCPA(Vessel other) {
         return other.getKurslinie().getLotpunkt(secondPosition);
     }

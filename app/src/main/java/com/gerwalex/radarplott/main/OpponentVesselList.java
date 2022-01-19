@@ -96,7 +96,7 @@ public class OpponentVesselList extends Fragment {
                     holder.binding.setManoever(lage);
                 }
             });
-            holder.binding.setLage(opponent.getLage());
+            holder.binding.setLage(opponent.getLageAktuell());
         }
 
         @NonNull

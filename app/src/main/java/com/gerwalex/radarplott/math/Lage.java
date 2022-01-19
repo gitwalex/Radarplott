@@ -1,7 +1,5 @@
 package com.gerwalex.radarplott.math;
 
-import android.util.Log;
-
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
@@ -23,29 +21,19 @@ public class Lage extends BaseObservable {
         this.me = lage.me;
         this.absolutVessel = lage.absolutVessel;
         Vessel relativ = lage.relativVessel;
-        Punkt2D secondPosition = relativ.getSecondPosition();
         Punkt2D mp = relativ.getPosition(minutes);
-        Punkt2D mpMe = manoever.getPosition(relativ.minutes);
-        relPos = relativ.firstPosition.add(me.getRichtungsvektor(-relativ.minutes));
-        Punkt2D mpRelPos = relPos.add(mpMe);
-        Punkt2D mp1 = mp.add(me.getRichtungsvektor(-relativ.minutes));
-        Log.d("gerwalex", ": " + mp1);
-        Vektor2D kurslinie = new Vektor2D(mpRelPos, secondPosition);
-        this.relativVessel =
-                new Vessel(mp, kurslinie.getYAxisAngle(), mpRelPos.getAbstand(secondPosition) * 60 / minutes);
+        relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(minutes + relativ.minutes));
+        this.relativVessel = new Vessel(relPos, mp, relativ.minutes);
         cpa = manoever.getCPA(relativVessel);
-        abstandCPA = manoever.getAbstand(cpa);
+        abstandCPA = Math.abs(manoever.getAbstand(cpa));
         timeToCPA = relativVessel.getTimeTo(cpa);
         distanceToCPA = manoever.speed / 60f * timeToCPA;
         peilungRechtweisendCPA = manoever.getPeilungRechtweisend(cpa);
         bcr = manoever.getBCR(relativVessel);
-        abstandBCR = manoever.getAbstand(bcr);
+        abstandBCR = Math.abs(manoever.getAbstand(bcr));
         timeToBCR = relativVessel.getTimeTo(bcr);
     }
 
-    public Lage(Lage lage, int minutes, int heading, float speed) {
-        this(lage, new Vessel(heading, speed), minutes);
-    }
 
     /**
      * Lage zum Beginn

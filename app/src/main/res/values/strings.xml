@@ -13,6 +13,11 @@
     <string name="kursFormatted">%03.1f deg, %.1f kn</string>
     <string name="CPAFormatted">CPA %.1f sm</string>
     <!--    -->
+    <string name="formattedHeading">%03.0f deg</string>
+    <string name="formattedFdW">%.1f kn</string>
+    <string name="formattedSm">%.1f sm</string>
+    <string name="formattedMinutes">%.1f min</string>
+    <!---->
     <string name="rKurs">Kurs relativ %03.1f deg</string>
     <string name="rFdW">FdW relativ %.1f kn</string>
     <string name="Kurs">Kurs %03.1f deg</string>

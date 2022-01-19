@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class OpponentVessel extends BaseObservable {
-    public final MutableLiveData<Lage> lage = new MutableLiveData<>();
+    public final MutableLiveData<Lage> lageAktuell = new MutableLiveData<>();
     public final String name;
     private final float dist1;
     private final Vessel me;
@@ -21,6 +21,11 @@ public class OpponentVessel extends BaseObservable {
     private final int startTime;
     public MutableLiveData<Lage> manoeverLage = new MutableLiveData<>();
     private float dist2;
+    private Lage lage;
+    private Lage manoever;
+    /**
+     * Zeitunterschied zwischen den einzelnen Peilungen
+     */
     private int minutes;
     private Vessel relativVessel;
     private int rwP2;
@@ -28,23 +33,28 @@ public class OpponentVessel extends BaseObservable {
     /**
      * Erstellt ein Schiff aus Seitenpeilung. Schiff hat Geschwindigkeit 0 und Kurs 0
      *
-     * @param time                Uhrzeit in Minuten nach Mitternacht
+     * @param startTime           Uhrzeit in Minuten nach Mitternacht
      * @param name                Name
      * @param peilungRechtweisend Rechtweisende Peilung
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(@NonNull Vessel me, int time, @NonNull Character name, int peilungRechtweisend,
+    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull Character name, int peilungRechtweisend,
                           double distance) {
         this.me = Objects.requireNonNull(me);
         this.name = name.toString();
-        startTime = time;
+        this.startTime = startTime;
         dist1 = (float) distance;
         rwP1 = peilungRechtweisend;
     }
 
-    public void createManoeverLage(Vessel manoever, int minutes) {
-        manoeverLage.setValue(new Lage(getLage(), manoever, minutes));
+    public void createManoeverLage(Vessel other, int minutes) {
+        manoever = new Lage(getLageAktuell(), other, minutes);
+        manoeverLage.postValue(manoever);
+    }
+
+    private String getFormatedTime(int minutes) {
+        return String.format(Locale.getDefault(), "%02d:%02d", minutes / 60, minutes % 60);
     }
 
     /**
@@ -70,13 +80,13 @@ public class OpponentVessel extends BaseObservable {
     }
 
     @NonNull
-    public Lage getLage() {
-        return Objects.requireNonNull(lage.getValue());
+    public Lage getLageAktuell() {
+        return Objects.requireNonNull(lage);
     }
 
     @NonNull
     public Lage getManoeverLage() {
-        return Objects.requireNonNull(manoeverLage.getValue());
+        return Objects.requireNonNull(manoever);
     }
 
     @Bindable
@@ -86,12 +96,12 @@ public class OpponentVessel extends BaseObservable {
 
     @Bindable
     public String getSecondTime() {
-        return String.format(Locale.getDefault(), "%02d:%02d", (startTime + minutes) / 60, (startTime + minutes) % 60);
+        return getFormatedTime(startTime + minutes);
     }
 
     @Bindable
     public String getStartTime() {
-        return String.format(Locale.getDefault(), "%02d:%02d", startTime / 60, startTime % 60);
+        return getFormatedTime(startTime);
     }
 
     @Bindable
@@ -113,11 +123,13 @@ public class OpponentVessel extends BaseObservable {
         Punkt2D firstPosition = new Punkt2D().getPunkt2D(rwP1, dist1);
         Punkt2D secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         relativVessel = new Vessel(firstPosition, secondPosition, minutes);
-        lage.setValue(new Lage(me, relativVessel));
+        lage = new Lage(me, relativVessel);
+        lageAktuell.postValue(lage);
         me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                lage.setValue(new Lage(me, relativVessel));
+                lage = new Lage(me, relativVessel);
+                lageAktuell.postValue(lage);
             }
         });
     }
