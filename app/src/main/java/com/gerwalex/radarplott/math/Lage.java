@@ -27,13 +27,12 @@ public class Lage extends BaseObservable {
         cpa = manoever.getCPA(relativVessel);
         abstandCPA = Math.abs(manoever.getAbstand(cpa));
         timeToCPA = relativVessel.getTimeTo(cpa);
-        distanceToCPA = manoever.speed / 60f * timeToCPA;
+        distanceToCPA = manoever.getSpeed() / 60f * timeToCPA;
         peilungRechtweisendCPA = manoever.getPeilungRechtweisend(cpa);
         bcr = manoever.getBCR(relativVessel);
         abstandBCR = Math.abs(manoever.getAbstand(bcr));
         timeToBCR = relativVessel.getTimeTo(bcr);
     }
-
 
     /**
      * Lage zum Beginn
@@ -49,7 +48,7 @@ public class Lage extends BaseObservable {
         cpa = me.getCPA(relativVessel);
         abstandCPA = me.getAbstand(cpa);
         timeToCPA = relativVessel.getTimeTo(cpa);
-        distanceToCPA = relativVessel.speed / 60f * timeToCPA;
+        distanceToCPA = relativVessel.getSpeed() / 60f * timeToCPA;
         peilungRechtweisendCPA = me.getPeilungRechtweisend(cpa);
         bcr = me.getBCR(relativVessel);
         abstandBCR = me.getAbstand(bcr);
@@ -73,12 +72,12 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getHeadingAbsolut() {
-        return absolutVessel.heading;
+        return absolutVessel.getHeading();
     }
 
     @Bindable
     public float getHeadingRelativ() {
-        return relativVessel.heading;
+        return relativVessel.getHeading();
     }
 
     @Bindable
@@ -96,12 +95,12 @@ public class Lage extends BaseObservable {
 
     @Bindable
     public float getSpeedAbsolut() {
-        return absolutVessel.speed;
+        return absolutVessel.getSpeed();
     }
 
     @Bindable
     public float getSpeedRelativ() {
-        return relativVessel.speed;
+        return relativVessel.getSpeed();
     }
 
     @Bindable

@@ -37,6 +37,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Zeichnet ein quadratisches Radarbild.
@@ -396,7 +397,7 @@ public class RadarBasisView extends FrameLayout {
                 drawPositionTexte(canvas, opponent, color);
             }
             if (manoverVessel != null) {
-                Lage lage = opponent.getManoeverLage();
+                Lage lage = Objects.requireNonNull(opponent.manoever.get());
                 drawCourseline(canvas, lage.getRelativVessel(), color);
             }
         }

@@ -23,8 +23,9 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/lage"
+                android:id="@+id/lage_card"
                 android:layout_width="wrap_content"
+                app:strokeWidth="@dimen/cardviewborder"
                 android:layout_height="wrap_content"
                 app:contentPadding="@dimen/content_padding"
                 app:layout_constraintStart_toStartOf="parent"
@@ -107,12 +108,12 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/manover"
+                android:id="@+id/manover_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:contentPadding="@dimen/content_padding"
-                app:layout_constraintStart_toEndOf="@id/lage"
+                app:layout_constraintStart_toEndOf="@id/lage_card"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.appcompat.widget.LinearLayoutCompat

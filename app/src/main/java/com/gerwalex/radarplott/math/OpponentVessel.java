@@ -5,7 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.Observable;
-import androidx.lifecycle.MutableLiveData;
+import androidx.databinding.ObservableField;
 
 import com.gerwalex.radarplott.main.IllegalManoeverException;
 
@@ -13,16 +13,14 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class OpponentVessel extends BaseObservable {
-    public final MutableLiveData<Lage> lageAktuell = new MutableLiveData<>();
+    public final ObservableField<Lage> lage = new ObservableField<>();
+    public final ObservableField<Lage> manoever = new ObservableField<>();
     public final String name;
     private final float dist1;
     private final Vessel me;
     private final int rwP1;
     private final int startTime;
-    public MutableLiveData<Lage> manoeverLage = new MutableLiveData<>();
     private float dist2;
-    private Lage lage;
-    private Lage manoever;
     /**
      * Zeitunterschied zwischen den einzelnen Peilungen
      */
@@ -49,8 +47,7 @@ public class OpponentVessel extends BaseObservable {
     }
 
     public void createManoeverLage(Vessel other, int minutes) {
-        manoever = new Lage(getLageAktuell(), other, minutes);
-        manoeverLage.postValue(manoever);
+        manoever.set(new Lage(Objects.requireNonNull(lage.get()), other, minutes));
     }
 
     private String getFormatedTime(int minutes) {
@@ -77,16 +74,6 @@ public class OpponentVessel extends BaseObservable {
             throws IllegalManoeverException {
         Float heading = null;
         return relativVessel.checkForValidKurs(heading);
-    }
-
-    @NonNull
-    public Lage getLageAktuell() {
-        return Objects.requireNonNull(lage);
-    }
-
-    @NonNull
-    public Lage getManoeverLage() {
-        return Objects.requireNonNull(manoever);
     }
 
     @Bindable
@@ -123,13 +110,12 @@ public class OpponentVessel extends BaseObservable {
         Punkt2D firstPosition = new Punkt2D().getPunkt2D(rwP1, dist1);
         Punkt2D secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         relativVessel = new Vessel(firstPosition, secondPosition, minutes);
-        lage = new Lage(me, relativVessel);
-        lageAktuell.postValue(lage);
+        lage.set(new Lage(me, relativVessel));
+        lage.set(new Lage(me, relativVessel));
         me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                lage = new Lage(me, relativVessel);
-                lageAktuell.postValue(lage);
+                lage.set(new Lage(me, relativVessel));
             }
         });
     }

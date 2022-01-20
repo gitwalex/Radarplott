@@ -1,5 +1,6 @@
 package com.gerwalex.radarplott.main;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -15,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OpponentBinding;
 import com.gerwalex.radarplott.databinding.RecyclerviewBinding;
-import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.google.android.material.card.MaterialCardView;
 
@@ -46,7 +47,7 @@ public class OpponentVesselList extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        adapter = new Adapter<>();
+        adapter = new Adapter<>(requireContext());
         binding.recyclerview.setAdapter(adapter);
         mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
             @Override
@@ -56,22 +57,14 @@ public class OpponentVesselList extends Fragment {
         });
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        public final OpponentBinding binding;
-
-        public ViewHolder(@NonNull OpponentBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
-    }
-
-    public class Adapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<ViewHolder> {
+    public static class Adapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<ViewHolder> {
+        private final int[] colors;
         private final LayoutInflater inflater;
         private List<OpponentVessel> opponentList;
 
-        public Adapter() {
-            inflater = LayoutInflater.from(requireContext());
+        public Adapter(Context context) {
+            inflater = LayoutInflater.from(context);
+            colors = context.getResources().getIntArray(R.array.vesselcolors);
         }
 
         @Override
@@ -82,21 +75,19 @@ public class OpponentVesselList extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             int pos = holder.getAdapterPosition();
-            MaterialCardView b = holder.binding.lage;
+            MaterialCardView b = holder.binding.lageCard;
             b.setStrokeColor(colors[pos]);
-            b.setStrokeWidth((int) getResources().getDimension(R.dimen.cardviewborder));
             OpponentVessel opponent = opponentList.get(position);
-            opponent.manoeverLage.observe(getViewLifecycleOwner(), new Observer<Lage>() {
+            opponent.manoever.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
                 @Override
-                public void onChanged(Lage lage) {
-                    MaterialCardView b = holder.binding.manover;
+                public void onPropertyChanged(Observable sender, int propertyId) {
+                    MaterialCardView b = holder.binding.manoverCard;
                     b.setStrokeColor(colors[pos]);
-                    b.setStrokeWidth((int) getResources().getDimension(R.dimen.cardviewborder));
-                    holder.binding.manover.setVisibility(View.VISIBLE);
-                    holder.binding.setManoever(lage);
+                    holder.binding.manoverCard.setVisibility(View.VISIBLE);
+                    holder.binding.setManoever(opponent.manoever.get());
                 }
             });
-            holder.binding.setLage(opponent.getLageAktuell());
+            holder.binding.setLage(opponent.lage.get());
         }
 
         @NonNull
@@ -108,6 +99,16 @@ public class OpponentVesselList extends Fragment {
         public void setOpponents(@NonNull List<OpponentVessel> opponents) {
             this.opponentList = Objects.requireNonNull(opponents);
             notifyDataSetChanged();
+        }
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        public final OpponentBinding binding;
+
+        public ViewHolder(@NonNull OpponentBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }
