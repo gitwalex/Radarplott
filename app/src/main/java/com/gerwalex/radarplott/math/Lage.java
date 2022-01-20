@@ -22,15 +22,16 @@ public class Lage extends BaseObservable {
         this.absolutVessel = lage.absolutVessel;
         Vessel relativ = lage.relativVessel;
         Punkt2D mp = relativ.getPosition(minutes);
-        relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(minutes + relativ.minutes));
-        this.relativVessel = new Vessel(relPos, mp, relativ.minutes);
+        relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(relativ.minutes));
+        Vessel rv = new Vessel(relPos, absolutVessel.secondPosition, relativ.minutes);
+        this.relativVessel = new Vessel(mp, rv.getHeading(), rv.getSpeed());
         cpa = manoever.getCPA(relativVessel);
         abstandCPA = Math.abs(manoever.getAbstand(cpa));
         timeToCPA = relativVessel.getTimeTo(cpa);
         distanceToCPA = manoever.getSpeed() / 60f * timeToCPA;
         peilungRechtweisendCPA = manoever.getPeilungRechtweisend(cpa);
         bcr = manoever.getBCR(relativVessel);
-        abstandBCR = Math.abs(manoever.getAbstand(bcr));
+        abstandBCR = manoever.getAbstand(bcr);
         timeToBCR = relativVessel.getTimeTo(bcr);
     }
 
@@ -44,6 +45,27 @@ public class Lage extends BaseObservable {
         this.me = me;
         this.relativVessel = relativVessel;
         relPos = relativVessel.firstPosition.add(me.getRichtungsvektor(-relativVessel.minutes));
+        absolutVessel = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
+        cpa = me.getCPA(relativVessel);
+        abstandCPA = me.getAbstand(cpa);
+        timeToCPA = relativVessel.getTimeTo(cpa);
+        distanceToCPA = relativVessel.getSpeed() / 60f * timeToCPA;
+        peilungRechtweisendCPA = me.getPeilungRechtweisend(cpa);
+        bcr = me.getBCR(relativVessel);
+        abstandBCR = me.getAbstand(bcr);
+        timeToBCR = relativVessel.getTimeTo(bcr);
+    }
+
+    /**
+     * Lage zum Beginn
+     *
+     * @param me            me
+     * @param relativVessel relativVessel
+     */
+    public Lage(Vessel me, Vessel relativVessel, int minutes) {
+        this.me = me;
+        this.relativVessel = relativVessel;
+        relPos = relativVessel.firstPosition.add(me.getRichtungsvektor(minutes - relativVessel.minutes));
         absolutVessel = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
         cpa = me.getCPA(relativVessel);
         abstandCPA = me.getAbstand(cpa);

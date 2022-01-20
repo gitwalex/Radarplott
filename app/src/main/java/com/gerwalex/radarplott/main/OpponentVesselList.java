@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -18,7 +17,6 @@ import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OpponentBinding;
 import com.gerwalex.radarplott.databinding.RecyclerviewBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
-import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 import java.util.Objects;
@@ -75,19 +73,12 @@ public class OpponentVesselList extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             int pos = holder.getAdapterPosition();
-            MaterialCardView b = holder.binding.lageCard;
-            b.setStrokeColor(colors[pos]);
+            holder.binding.lageCard.setStrokeColor(colors[pos]);
             OpponentVessel opponent = opponentList.get(position);
-            opponent.manoever.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-                @Override
-                public void onPropertyChanged(Observable sender, int propertyId) {
-                    MaterialCardView b = holder.binding.manoverCard;
-                    b.setStrokeColor(colors[pos]);
-                    holder.binding.manoverCard.setVisibility(View.VISIBLE);
-                    holder.binding.setManoever(opponent.manoever.get());
-                }
-            });
-            holder.binding.setLage(opponent.lage.get());
+            holder.binding.manoverCard.setStrokeColor(colors[pos]);
+            holder.binding.manoverCard.setVisibility(View.VISIBLE);
+            holder.binding.setManoever(opponent.getManoever());
+            holder.binding.setLage(opponent.getLage());
         }
 
         @NonNull
