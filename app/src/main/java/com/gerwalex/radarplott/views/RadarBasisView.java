@@ -213,6 +213,14 @@ public class RadarBasisView extends FrameLayout {
         }
     }
 
+    private void drawCPA(Canvas canvas, Vessel vessel, int color) {
+        courseline.reset();
+        courslineStyle.setColor(color);
+        // CPA zeichnen
+        drawLine(courseline, me.getSecondPosition(), me.getCPA(vessel));
+        canvas.drawPath(courseline, courslineStyle);
+    }
+
     public void drawCenteredText(Canvas canvas, Punkt2D ankerPos, String text) {
         Rect result = getTextRect(textStyle, text);
         canvas.drawText(text, ankerPos.x * sm - result.width() / 2f, -ankerPos.y * sm + result.height() / 2f,
@@ -230,11 +238,6 @@ public class RadarBasisView extends FrameLayout {
             } else {
                 drawLine(courseline, dest, endPos);
             }
-            Punkt2D cpa = me.getCPA(vessel);
-            Punkt2D pos = me.getSecondPosition();
-            if (!pos.equals(cpa) && vessel.isPunktInFahrtrichtung(cpa)) {
-                drawLine(courseline, me.getSecondPosition(), cpa);
-            }
             if (drawCourselineText) {
                 textStyle.setColor(color);
                 textStyle.setTextSize(extraSmallTextSize);
@@ -243,6 +246,7 @@ public class RadarBasisView extends FrameLayout {
                 canvas.drawTextOnPath(text, courseline, 0, -10, textStyle);
                 textStyle.setColor(textColor);
             }
+            drawLine(courseline, me.getSecondPosition(), me.getCPA(vessel));
             canvas.drawPath(courseline, courslineStyle);
         }
     }
@@ -257,6 +261,30 @@ public class RadarBasisView extends FrameLayout {
     public void drawLine(Path path, Punkt2D from, Punkt2D to) {
         path.moveTo(from.x * sm, -from.y * sm);
         path.lineTo(to.x * sm, -to.y * sm);
+    }
+
+    private void drawManoeverline(Canvas canvas, Vessel vessel, int color) {
+        Punkt2D[] dest = getEndsOfKursline(vessel);
+        if (dest != null) {
+            courseline.reset();
+            courslineStyle.setColor(color);
+            // Kurslinie zeichnen
+            if (vessel.getHeading() <= 180) {
+                drawLine(courseline, dest[0], dest[1]);
+            } else {
+                drawLine(courseline, dest[1], dest[0]);
+            }
+            if (drawCourselineText) {
+                textStyle.setColor(color);
+                textStyle.setTextSize(extraSmallTextSize);
+                textStyle.setTextAlign(Paint.Align.RIGHT);
+                String text = getContext().getString(R.string.kursFormatted, vessel.getHeading(), vessel.getSpeed());
+                canvas.drawTextOnPath(text, courseline, 0, -10, textStyle);
+                textStyle.setColor(textColor);
+            }
+            drawLine(courseline, me.getSecondPosition(), me.getCPA(vessel));
+            canvas.drawPath(courseline, courslineStyle);
+        }
     }
 
     @SuppressLint("DefaultLocale")
@@ -322,7 +350,7 @@ public class RadarBasisView extends FrameLayout {
     }
 
     /**
-     * Hilfsmethode zum berechnen des Endpunktes einer Kurslinie auuf einem Radarring
+     * Ermmittlung des Endpunktes einer Kurslinie in Fahrtrichtung  auf dem aeusseren Radarring
      *
      * @param vessel Vessel
      * @return endpunkt, null, wenn der Schnittpunkt nicht in Fahrtrichtung liegt (Dann ist Schiff ausserhalb
@@ -330,11 +358,33 @@ public class RadarBasisView extends FrameLayout {
      */
     @Nullable
     protected Punkt2D getEndOfKurslinie(Vessel vessel) {
+        Punkt2D[] sc = getEndsOfKursline(vessel);
+        return sc == null ? null : sc[1];
+    }
+
+    /**
+     * Berechnet die Endpunkte eine Kurslinie auf dem aeusseren Radarring.
+     *
+     * @param vessel Vessel
+     * @return Endpunkte. Null, wenn Kurslinie ausserhalb des Radar liegt. Ansonsten in Punkt2D[0] der Punkt auf dem
+     * Radarring, der entgegen der Fahrtrichtung liegt. In Punkt2D[1] der Punkt, der in Fahrtrichtung auf dem
+     * Radarring liegt.
+     */
+
+    protected Punkt2D[] getEndsOfKursline(Vessel vessel) {
+        Punkt2D[] result = null;
         Punkt2D[] sc = vessel.getKurslinie().getSchnittpunkt(outerRing);
         if (sc != null) {
-            return vessel.isPunktInFahrtrichtung(sc[0]) ? sc[0] : sc[1];
+            result = new Punkt2D[2];
+            if (vessel.isPunktInFahrtrichtung(sc[0])) {
+                result[0] = sc[1];
+                result[1] = sc[0];
+            } else {
+                result[0] = sc[0];
+                result[1] = sc[1];
+            }
         }
-        return null;
+        return result;
     }
 
     public int getStarttimeInMinutes() {
@@ -397,8 +447,8 @@ public class RadarBasisView extends FrameLayout {
                 drawPositionTexte(canvas, opponent, color);
             }
             if (manoverVessel != null) {
-                Lage lage = Objects.requireNonNull(opponent.getManoever());
-                drawCourseline(canvas, lage.getRelativVessel(), color);
+                Lage lage = Objects.requireNonNull(opponent.manoever.get());
+                drawManoeverline(canvas, lage.getRelativVessel(), color);
             }
         }
         canvas.drawPath(symbolPath, textStyle);

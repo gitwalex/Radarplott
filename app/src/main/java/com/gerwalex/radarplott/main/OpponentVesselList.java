@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -75,10 +76,15 @@ public class OpponentVesselList extends Fragment {
             int pos = holder.getAdapterPosition();
             holder.binding.lageCard.setStrokeColor(colors[pos]);
             OpponentVessel opponent = opponentList.get(position);
-            holder.binding.manoverCard.setStrokeColor(colors[pos]);
-            holder.binding.manoverCard.setVisibility(View.VISIBLE);
-            holder.binding.setManoever(opponent.getManoever());
-            holder.binding.setLage(opponent.getLage());
+            holder.binding.setLage(opponent.lage.get());
+            opponent.manoever.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+                @Override
+                public void onPropertyChanged(Observable sender, int propertyId) {
+                    holder.binding.manoverCard.setStrokeColor(colors[pos]);
+                    holder.binding.manoverCard.setVisibility(View.VISIBLE);
+                    holder.binding.setManoever(opponent.manoever.get());
+                }
+            });
         }
 
         @NonNull
