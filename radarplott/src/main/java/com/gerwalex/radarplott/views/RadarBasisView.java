@@ -59,12 +59,6 @@ public class RadarBasisView extends FrameLayout {
     private final GestureDetector gestureDetector;
     private final float markerRadius = 20f;
     private final int ownVesselColor;
-    private final Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
-        @Override
-        public void onPropertyChanged(Observable sender, int propertyId) {
-            invalidate();
-        }
-    };
     // Variablen zum Zeichnen
     private final Paint radarLineStyle = new Paint();
     private final Path relCourseline = new Path();
@@ -85,6 +79,17 @@ public class RadarBasisView extends FrameLayout {
     private int minutes;
     private boolean northupOrientierung = true;
     private List<OpponentVessel> opponentVesselList = new ArrayList<>();
+    private final Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
+        @Override
+        public void onPropertyChanged(Observable sender, int propertyId) {
+            if (manoverVessel != null) {
+                for (OpponentVessel opponent : opponentVesselList) {
+                    opponent.createManoeverLage(manoverVessel, minutes);
+                }
+            }
+            invalidate();
+        }
+    };
     private Kreis2D outerRing;
     private RadarObserver radarObserver;
     private float scale;
@@ -216,8 +221,20 @@ public class RadarBasisView extends FrameLayout {
     private void drawCPA(Canvas canvas, Vessel vessel, int color) {
         courseline.reset();
         courslineStyle.setColor(color);
-        // CPA zeichnen
-        drawLine(courseline, me.getSecondPosition(), me.getCPA(vessel));
+        textStyle.setColor(color);
+        textStyle.setTextSize(extraSmallTextSize);
+        Punkt2D cpa = me.getCPA(vessel);
+        if (me.getPeilungRechtweisend(cpa) <= 180) {
+            drawLine(courseline, me.getSecondPosition(), cpa);
+            textStyle.setTextAlign(Paint.Align.LEFT);
+        } else {
+            drawLine(courseline, cpa, me.getSecondPosition());
+            textStyle.setTextAlign(Paint.Align.RIGHT);
+        }
+        if (drawCourselineText) {
+            String text = getContext().getString(R.string.CPAFormatted, me.getAbstand(cpa));
+            canvas.drawTextOnPath(text, courseline, 0, -10, textStyle);
+        }
         canvas.drawPath(courseline, courslineStyle);
     }
 
@@ -268,19 +285,19 @@ public class RadarBasisView extends FrameLayout {
         if (dest != null) {
             courseline.reset();
             courslineStyle.setColor(color);
-            // Kurslinie zeichnen
+            textStyle.setColor(color);
+            textStyle.setTextSize(extraSmallTextSize);
+            // Kurslinie zeichnen und Textausrichtung ermitteln
             if (vessel.getHeading() <= 180) {
                 drawLine(courseline, dest[0], dest[1]);
+                textStyle.setTextAlign(Paint.Align.RIGHT);
             } else {
                 drawLine(courseline, dest[1], dest[0]);
+                textStyle.setTextAlign(Paint.Align.LEFT);
             }
             if (drawCourselineText) {
-                textStyle.setColor(color);
-                textStyle.setTextSize(extraSmallTextSize);
-                textStyle.setTextAlign(Paint.Align.RIGHT);
                 String text = getContext().getString(R.string.kursFormatted, vessel.getHeading(), vessel.getSpeed());
                 canvas.drawTextOnPath(text, courseline, 0, -10, textStyle);
-                textStyle.setColor(textColor);
             }
             drawLine(courseline, me.getSecondPosition(), me.getCPA(vessel));
             canvas.drawPath(courseline, courslineStyle);
@@ -552,9 +569,13 @@ public class RadarBasisView extends FrameLayout {
             me.removeOnPropertyChangedCallback(ownVesselObserver);
         }
         me = vessel;
-        manoverVessel = null;
         me.addOnPropertyChangedCallback(ownVesselObserver);
         maxTime.set(0);
+        if (manoverVessel != null) {
+            for (OpponentVessel opponent : opponentVesselList) {
+                opponent.createManoeverLage(manoverVessel, minutes);
+            }
+        }
         invalidate();
     }
 

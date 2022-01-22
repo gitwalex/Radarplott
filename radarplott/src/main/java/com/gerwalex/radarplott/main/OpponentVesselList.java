@@ -76,7 +76,7 @@ public class OpponentVesselList extends Fragment {
             int pos = holder.getAdapterPosition();
             holder.binding.lageCard.setStrokeColor(colors[pos]);
             OpponentVessel opponent = opponentList.get(position);
-            holder.binding.setLage(opponent.lage.get());
+            holder.binding.setLage(opponent.getLage());
             opponent.manoever.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
                 @Override
                 public void onPropertyChanged(Observable sender, int propertyId) {

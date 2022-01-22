@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Radarplott"
-include ':app'
+include ':radarplott'
