@@ -34,13 +34,13 @@ public class Vessel extends BaseObservable {
         this(new Punkt2D(), heading, speed);
     }
 
-    public Vessel(Punkt2D position, Vektor2D richtung, int minutes) {
+    public Vessel(Punkt2D position, Vektor2D richtung, float minutes) {
         this.minutes = minutes;
         this.firstPosition = position.add(richtung.negate());
         this.secondPosition = position;
         kurslinie = new Kurslinie(firstPosition, secondPosition);
         heading = kurslinie.getYAxisAngle();
-        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / minutes);
     }
 
     public Vessel(Punkt2D firstPosition, Punkt2D secondPosition, float minutes) {
@@ -126,6 +126,21 @@ public class Vessel extends BaseObservable {
         return Math.round((heading + 0.5f) * 10) / 10;
     }
 
+    public float getPeilungRechtweisend(Punkt2D pkt) {
+        if (secondPosition.equals(pkt)) {
+            throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
+        }
+        return secondPosition.getYAxisAngle(pkt);
+    }
+
+    public final float getTimeTo(@NonNull Punkt2D p) {
+        if (!kurslinie.isPunktAufGerade(p)) {
+            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
+        }
+        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
+        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
+    }
+
     /**
      * Liefert die Position nach Minuten
      *
@@ -136,13 +151,6 @@ public class Vessel extends BaseObservable {
         return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
     }
 
-    public float getPeilungRechtweisend(Punkt2D pkt) {
-        if (secondPosition.equals(pkt)) {
-            throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
-        }
-        return secondPosition.getYAxisAngle(pkt);
-    }
-
     /**
      * Liefert den Richtungsvektor. Länge des Vektor ist die Strecke, die in minutes zurückgelegt wird.
      *
@@ -151,14 +159,6 @@ public class Vessel extends BaseObservable {
      */
     public final Vektor2D getRichtungsvektor(float minutes) {
         return kurslinie.getRichtungsvektor(minutes / 60f * speed);
-    }
-
-    public final float getTimeTo(@NonNull Punkt2D p) {
-        if (!kurslinie.isPunktAufGerade(p)) {
-            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
-        }
-        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
-        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
     @Bindable

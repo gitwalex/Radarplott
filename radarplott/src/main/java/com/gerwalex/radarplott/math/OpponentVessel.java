@@ -16,8 +16,8 @@ public class OpponentVessel extends BaseObservable {
     private final Vessel me;
     private final int rwP1;
     private final int startTime;
-    private Lage lage;
     private float dist2;
+    private Lage lage;
     /**
      * Zeitunterschied zwischen den einzelnen Peilungen
      */
@@ -43,11 +43,11 @@ public class OpponentVessel extends BaseObservable {
     }
 
     public void createManoeverLage(Vessel other, int minutes) {
-        manoever.set(new Lage(lage, other, minutes));
+        manoever.set(lage.getLage(other, minutes));
     }
 
     public void createManoeverLage(float abstandCPA, int minutes) {
-        manoever.set(new Lage(lage, abstandCPA, minutes));
+        manoever.set(lage.getLage(abstandCPA, minutes));
     }
 
     private String getFormatedTime(int minutes) {

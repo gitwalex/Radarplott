@@ -1,9 +1,6 @@
 package com.gerwalex.radarplott.math;
 
-import androidx.databinding.BaseObservable;
-import androidx.databinding.Bindable;
-
-public class Lage extends BaseObservable {
+public class Lage {
     public final float abstandBCR;
     public final float abstandCPA;
     public final float distanceToCPA;
@@ -13,67 +10,10 @@ public class Lage extends BaseObservable {
     private final Vessel absolutVessel;
     private final Punkt2D bcr;
     private final Punkt2D cpa;
+    private final float maxCPA;
     private final Vessel me;
     private final Punkt2D relPos;
     private final Vessel relativVessel;
-
-    /**
-     * Lage zum Beginn. Durch Peilungen stehen Kurs und Geschwindigkeit des Opponent fest. Anhand dieses relativen
-     * Kurses wird der absolute(=echte) Kurs/Geschwindigkeit in Abhängigkeit des eigenen Schiffs (me) ermittelt.
-     *
-     * @param me            me
-     * @param relativVessel relativVessel, durch Peilungen ermittelt.
-     */
-
-    public Lage(Lage lage, Vessel manoever, int minutes) {
-        this.me = lage.me;
-        this.absolutVessel = lage.absolutVessel;
-        Vessel relativ = lage.relativVessel;
-        Punkt2D mp = relativ.getPosition(minutes);
-        relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(relativ.minutes));
-        Vessel rv = new Vessel(relPos, absolutVessel.secondPosition, relativ.minutes);
-        this.relativVessel = new Vessel(mp, rv.getHeading(), rv.getSpeed());
-        cpa = manoever.getCPA(relativVessel);
-        abstandCPA = Math.abs(manoever.getAbstand(cpa));
-        timeToCPA = relativVessel.getTimeTo(cpa);
-        distanceToCPA = manoever.getSpeed() / 60f * timeToCPA;
-        peilungRechtweisendCPA = manoever.getPeilungRechtweisend(cpa);
-        bcr = manoever.getBCR(relativVessel);
-        abstandBCR = manoever.getAbstand(bcr);
-        timeToBCR = relativVessel.getTimeTo(bcr);
-    }
-
-    public Lage(Lage lage, float abstandCPA, int minutes) {
-        this.me = lage.me;
-        this.absolutVessel = lage.absolutVessel;
-        Vessel relativ = lage.getRelativVessel();
-        Punkt2D currentPos = relativ.getPosition(minutes);
-        Kreis2D k = new Kreis2D(new Punkt2D(), abstandCPA);
-        Punkt2D[] sp = k.getBeruehrpunkte(currentPos);
-        if (sp == null) {
-            throw new IllegalArgumentException("CPA nicht (mehr) erreichbar");
-        }
-        cpa = lage.me.isSteuerbord(sp[0]) ? sp[0] : sp[1];
-        distanceToCPA = currentPos.getAbstand(cpa);
-        Gerade2D line = new Gerade2D(currentPos, cpa);
-        // Hier ist noch alles falsch
-        k = new Kreis2D(lage.absolutVessel.firstPosition, lage.relPos.getAbstand(lage.relativVessel.firstPosition));
-        Punkt2D[] rel = line.getSchnittpunkt(k);
-        if (rel == null) {
-            throw new IllegalArgumentException("CPA nicht möglich");
-        }
-        relPos = lage.me.isSteuerbord(rel[0]) ? rel[0] : rel[1];
-        relativVessel = new Vessel(relPos, relativ.secondPosition, relativ.minutes);
-        this.abstandCPA = abstandCPA;
-        float heading = lage.absolutVessel.firstPosition.getYAxisAngle(relPos);
-        Vessel manoever = new Vessel(heading, me.getSpeed());
-        // bis hier muss alles korrigiert werden
-        timeToCPA = relativVessel.getTimeTo(cpa);
-        peilungRechtweisendCPA = manoever.getPeilungRechtweisend(cpa);
-        bcr = manoever.getBCR(relativVessel);
-        abstandBCR = manoever.getAbstand(bcr);
-        timeToBCR = relativVessel.getTimeTo(bcr);
-    }
 
     /**
      * Lage zum Beginn. Durch Peilungen stehen Kurs und Geschwindigkeit des Opponent fest. Anhand dieses relativen
@@ -95,34 +35,75 @@ public class Lage extends BaseObservable {
         bcr = me.getBCR(relativVessel);
         abstandBCR = me.getAbstand(bcr);
         timeToBCR = relativVessel.getTimeTo(bcr);
+        maxCPA = me.secondPosition.getAbstand(relativVessel.getSecondPosition());
     }
 
-    @Bindable
     public float getAbstandBCR() {
         return abstandBCR;
     }
 
-    @Bindable
     public float getAbstandCPA() {
         return abstandCPA;
     }
 
-    @Bindable
+    public Punkt2D getBCR() {
+        return bcr;
+    }
+
+    public Punkt2D getCPA() {
+        return cpa;
+    }
+
     public float getDistanceToCPA() {
         return distanceToCPA;
     }
 
-    @Bindable
     public float getHeadingAbsolut() {
         return absolutVessel.getHeading();
     }
 
-    @Bindable
     public float getHeadingRelativ() {
         return relativVessel.getHeading();
     }
 
-    public Lage getManoeverLage(Vessel manoever, int minutes) {
+    public Lage getLage(float abstandCPA, int minutes) {
+        // Ermitteln der potientiellen Tangenten fur gewuenschten CPA-Abstand
+        Kreis2D k = new Kreis2D(new Punkt2D(), abstandCPA);
+        Punkt2D currentPos = relativVessel.getPosition(minutes);
+        Punkt2D[] sp = k.getBeruehrpunkte(currentPos);
+        if (sp == null) {
+            // Keine Tangenten möglich
+            throw new IllegalArgumentException("CPA nicht (mehr) erreichbar");
+        }
+        // ok, jetzt CPA auswählen. Dabei KVR §19 beachten: Ausweichen nur nach Steuerbord.
+        Punkt2D cpa = me.isSteuerbord(sp[0]) ? sp[0] : sp[1];
+        // Jetzt Gerade durch aktuelle Position und CPA legen...
+        Gerade2D cpaGerade = new Gerade2D(currentPos, cpa);
+        // ... und diese Gerade in die Startposition der relativVessel verschieben.
+        Gerade2D line = new Gerade2D(absolutVessel.secondPosition, cpaGerade.getRichtungsvektor());
+        // Ermittlung Manoeverkurs: Jetzt den Schnittpunkte vo manoever mit neuer relativVessel ermitteln
+        k = new Kreis2D(absolutVessel.firstPosition, relPos.getAbstand(relativVessel.firstPosition));
+        Punkt2D[] rel = line.getSchnittpunkt(k);
+        if (rel == null) {
+            throw new IllegalArgumentException("CPA nicht möglich");
+        }
+        // auch hier wieder KVR §19 beachten: Kursänderung nur nach Steuerbord
+        Punkt2D relPos = me.isSteuerbord(rel[0]) ? rel[0] : rel[1];
+        // Jetzt haben wir die Daten für den neuen CPA...
+        Vessel relativVessel = new Vessel(relPos, this.relativVessel.secondPosition, this.relativVessel.minutes);
+        // .. allerdings muss der Weg durch die aktuelle Position laufen.
+        Vessel relativVessel1 = new Vessel(currentPos, relativVessel.getHeading(), relativVessel.getSpeed());
+        float heading = absolutVessel.firstPosition.getYAxisAngle(relPos);
+        Vessel manoever = new Vessel(heading, me.getSpeed());
+        return new Lage(manoever, relativVessel1);
+    }
+
+    /**
+     * @param manoever Vessel
+     * @param minutes
+     * @return neue Lage
+     */
+    public Lage getLage(Vessel manoever, int minutes) {
         Vessel relativ = relativVessel;
         Punkt2D mp = relativ.getPosition(minutes);
         Punkt2D relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(relativ.minutes));
@@ -131,7 +112,10 @@ public class Lage extends BaseObservable {
         return new Lage(manoever, relativVessel);
     }
 
-    @Bindable
+    public float getMaxCPA() {
+        return maxCPA;
+    }
+
     public double getPeilungRechtweisendCPA() {
         return peilungRechtweisendCPA;
     }
@@ -144,22 +128,18 @@ public class Lage extends BaseObservable {
         return relativVessel;
     }
 
-    @Bindable
     public float getSpeedAbsolut() {
         return absolutVessel.getSpeed();
     }
 
-    @Bindable
     public float getSpeedRelativ() {
         return relativVessel.getSpeed();
     }
 
-    @Bindable
     public float getTimeToBCR() {
         return timeToBCR;
     }
 
-    @Bindable
     public float getTimeToCPA() {
         return timeToCPA;
     }
