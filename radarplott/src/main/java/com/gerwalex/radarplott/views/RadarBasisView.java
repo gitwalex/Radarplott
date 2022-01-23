@@ -57,7 +57,10 @@ public class RadarBasisView extends FrameLayout {
     private final int[] colors;
     private final float extraSmallTextSize;
     private final GestureDetector gestureDetector;
+    private final Paint manoeverCourselineStyle = new Paint();
+    private final Path manoeverline = new Path();
     private final float markerRadius = 20f;
+    private final int maxRadarRings;
     private final int ownVesselColor;
     // Variablen zum Zeichnen
     private final Paint radarLineStyle = new Paint();
@@ -76,6 +79,9 @@ public class RadarBasisView extends FrameLayout {
     private ScaleGestureDetector mScaleDetector;
     private Vessel manoverVessel;
     private Vessel me;
+    /**
+     * Mindestanzahl der Radarringe. Wird in @{link {@link RadarBasisView#setOpponents(List)} gesetzt.}
+     */
     private float minRadarRings;
     private int minutes;
     private boolean northupOrientierung = true;
@@ -108,6 +114,8 @@ public class RadarBasisView extends FrameLayout {
 
     public RadarBasisView(Context context, AttributeSet attrs, int style) {
         super(context, attrs, style);
+        minRadarRings = context.getResources().getInteger(R.integer.minRadarRings);
+        maxRadarRings = context.getResources().getInteger(R.integer.maxRadarRings);
         colors = getResources().getIntArray(R.array.vesselcolors);
         ownVesselColor = getResources().getColor(R.color.ownVesselColor);
         radarLineStyle.setTextSize(40);
@@ -118,10 +126,16 @@ public class RadarBasisView extends FrameLayout {
         courslineStyle.setStrokeWidth(thinPath);
         courslineStyle.setAntiAlias(true);
         courslineStyle.setStyle(Paint.Style.STROKE);
+        //
         vesselPositionStyle.setAntiAlias(true);
         vesselPositionStyle.setStyle(Paint.Style.STROKE);
-        vesselPositionStyle.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
+        vesselPositionStyle.setPathEffect(new DashPathEffect(new float[]{5, 10}, 0));
         vesselPositionStyle.setStrokeWidth(thickPath);
+        //
+        manoeverCourselineStyle.setAntiAlias(true);
+        manoeverCourselineStyle.setStyle(Paint.Style.STROKE);
+        manoeverCourselineStyle.setPathEffect(new DashPathEffect(new float[]{20, 10}, 0));
+        manoeverCourselineStyle.setStrokeWidth(thickPath);
         //
         textColor = getResources().getColor(R.color.white);
         textStyle.setColor(textColor);
@@ -174,17 +188,26 @@ public class RadarBasisView extends FrameLayout {
         path.addCircle(pos.x * scaleFactor, -pos.y * scaleFactor, markerRadius, Path.Direction.CW);
     }
 
-    private void createInnerRadarRings() {
+    private void createInnerRadarRings(float radarRings) {
+        textStyle.setTextSize(extraSmallTextSize);
+        textStyle.setColor(textColor);
         int w = getWidth();
         int h = getHeight();
-        float ringSize = 1;
         innerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(innerRadarRing);
         canvas.translate(w / 2f, h / 2f);
-        do {
+        textStyle.setTextAlign(Paint.Align.CENTER);
+        for (int ringSize = 1; ringSize <= radarRings; ringSize++) {
             canvas.drawCircle(0, 0, ringSize * scaleFactor, radarLineStyle);
-            ringSize++;
-        } while (ringSize < outerRing.getRadius());
+            if (ringSize % 2 == 0) {
+                String text = String.valueOf(ringSize);
+                canvas.drawText(text, 0, -(ringSize * scaleFactor) + extraSmallTextSize / 2, textStyle);
+                canvas.drawText(text, 0, ringSize * scaleFactor + extraSmallTextSize / 2, textStyle);
+                //
+                canvas.drawText(text, -(ringSize * scaleFactor), +extraSmallTextSize / 2, textStyle);
+                canvas.drawText(text, (ringSize * scaleFactor), +extraSmallTextSize / 2, textStyle);
+            }
+        }
     }
 
     private void createOuterRadarRing(int w, int h) {
@@ -254,7 +277,8 @@ public class RadarBasisView extends FrameLayout {
     }
 
     private void drawCourseline(Canvas canvas, Vessel vessel, int color) {
-        Punkt2D dest = getEndOfKurslinie(vessel);
+        // keine Geschwindigkeit -> keine Linie
+        Punkt2D dest = getEndOfKursline(vessel);
         if (dest != null) {
             courseline.reset();
             courslineStyle.setColor(color);
@@ -298,24 +322,24 @@ public class RadarBasisView extends FrameLayout {
     private void drawManoeverline(Canvas canvas, Vessel vessel, int color) {
         Punkt2D[] dest = getEndsOfKursline(vessel);
         if (dest != null) {
-            courseline.reset();
-            courslineStyle.setColor(color);
+            manoeverline.reset();
+            manoeverCourselineStyle.setColor(color);
             textStyle.setColor(color);
             textStyle.setTextSize(extraSmallTextSize);
             // Kurslinie zeichnen und Textausrichtung ermitteln
             if (vessel.getHeading() <= 180) {
-                drawLine(courseline, dest[0], dest[1]);
+                drawLine(manoeverline, dest[0], dest[1]);
                 textStyle.setTextAlign(Paint.Align.RIGHT);
             } else {
-                drawLine(courseline, dest[1], dest[0]);
+                drawLine(manoeverline, dest[1], dest[0]);
                 textStyle.setTextAlign(Paint.Align.LEFT);
             }
             if (drawCourselineText) {
                 String text = getContext().getString(R.string.kursFormatted, vessel.getHeading(), vessel.getSpeed());
-                canvas.drawTextOnPath(text, courseline, 0, -10, textStyle);
+                canvas.drawTextOnPath(text, manoeverline, 0, -10, textStyle);
             }
-            drawLine(courseline, me.getSecondPosition(), me.getCPA(vessel));
-            canvas.drawPath(courseline, courslineStyle);
+            drawLine(manoeverline, me.getSecondPosition(), me.getCPA(vessel));
+            canvas.drawPath(manoeverline, manoeverCourselineStyle);
         }
     }
 
@@ -334,7 +358,7 @@ public class RadarBasisView extends FrameLayout {
             drawLine(relCourseline, startPos, relPos);
             Punkt2D nextPos = vessel.getPosition(minutes);
             if (outerRing.liegtImKreis(nextPos)) {
-                Punkt2D dest = getEndOfKurslinie(vessel);
+                Punkt2D dest = getEndOfKursline(vessel);
                 assert dest != null;
                 maxTime.set((int) Math.max(vessel.getTimeTo(dest), maxTime.get()));
                 addCircle(relCourseline, nextPos);
@@ -389,7 +413,7 @@ public class RadarBasisView extends FrameLayout {
      * Raadarbild)
      */
     @Nullable
-    protected Punkt2D getEndOfKurslinie(Vessel vessel) {
+    protected Punkt2D getEndOfKursline(Vessel vessel) {
         Punkt2D[] sc = getEndsOfKursline(vessel);
         return sc == null ? null : sc[1];
     }
@@ -516,7 +540,7 @@ public class RadarBasisView extends FrameLayout {
         createOuterRadarRing(w, h);
         scaleFactor = outerRadarRingRadius / RADARRINGE;
         outerRing = new Kreis2D(new Punkt2D(), outerRadarRingRadius / scaleFactor);
-        createInnerRadarRings();
+        createInnerRadarRings(RADARRINGE);
     }
 
     @Override
@@ -578,7 +602,8 @@ public class RadarBasisView extends FrameLayout {
     public void setOpponents(List<OpponentVessel> opponents) {
         opponentVesselList = opponents;
         for (OpponentVessel v : opponents) {
-            minRadarRings = Math.max(minRadarRings, v.getMinRadarSize());
+            minRadarRings =
+                    Math.max(getContext().getResources().getInteger(R.integer.minRadarRings), v.getMinRadarSize());
         }
         invalidate();
     }
@@ -635,16 +660,20 @@ public class RadarBasisView extends FrameLayout {
         void onVesselClick(Vessel vessel);
     }
 
+    /**
+     * Skaliert das Radarbild. Skalierung nur dann, wenn die Mindestanzahl an Radarringen sichtbar bleibt.
+     */
+
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float factor = detector.getScaleFactor();
             float newScaleFactor = scaleFactor * factor;
             float radarRings = outerRadarRingRadius / newScaleFactor;
-            if (radarRings > minRadarRings) {
+            if (radarRings > minRadarRings && radarRings < maxRadarRings) {
                 scaleFactor = newScaleFactor;
                 outerRing = new Kreis2D(new Punkt2D(), radarRings);
-                createInnerRadarRings();
+                createInnerRadarRings(radarRings);
             }
             invalidate();
             return true;

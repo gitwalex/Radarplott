@@ -78,9 +78,9 @@ public class Lage {
         // ok, jetzt CPA auswählen. Dabei KVR §19 beachten: Ausweichen nur nach Steuerbord.
         Punkt2D cpa = me.isSteuerbord(sp[0]) ? sp[0] : sp[1];
         // Jetzt Gerade durch aktuelle Position und CPA legen...
-        Gerade2D cpaGerade = new Gerade2D(currentPos, cpa);
+        Kurslinie cpaGerade = new Kurslinie(currentPos, cpa);
         // ... und diese Gerade in die Startposition der relativVessel verschieben.
-        Gerade2D line = new Gerade2D(absolutVessel.secondPosition, cpaGerade.getRichtungsvektor());
+        Kurslinie line = new Kurslinie(absolutVessel.secondPosition, cpaGerade.getRichtungsvektor());
         // Ermittlung Manoeverkurs: Jetzt den Schnittpunkte vo manoever mit neuer relativVessel ermitteln
         k = new Kreis2D(absolutVessel.firstPosition, relPos.getAbstand(relativVessel.firstPosition));
         Punkt2D[] rel = line.getSchnittpunkt(k);

@@ -5,8 +5,6 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.library.baseAdapters.BR;
 
-import com.gerwalex.radarplott.main.IllegalManoeverException;
-
 import java.util.Objects;
 
 public class Vessel extends BaseObservable {
@@ -17,30 +15,12 @@ public class Vessel extends BaseObservable {
     private Kurslinie kurslinie;
     private float speed;
 
-    public Vessel(Punkt2D start, Kurslinie kurslinie, float speed) {
-        secondPosition = start;
-        this.kurslinie = kurslinie;
-        this.speed = speed;
-        minutes = 6;
-        heading = kurslinie.getYAxisAngle();
-        firstPosition = getPosition(-minutes);
-    }
-
     public Vessel(Punkt2D position, float heading, float speed) {
         this(position, heading, speed, 6);
     }
 
     public Vessel(float heading, float speed) {
         this(new Punkt2D(), heading, speed);
-    }
-
-    public Vessel(Punkt2D position, Vektor2D richtung, float minutes) {
-        this.minutes = minutes;
-        this.firstPosition = position.add(richtung.negate());
-        this.secondPosition = position;
-        kurslinie = new Kurslinie(firstPosition, secondPosition);
-        heading = kurslinie.getYAxisAngle();
-        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / minutes);
     }
 
     public Vessel(Punkt2D firstPosition, Punkt2D secondPosition, float minutes) {
@@ -58,17 +38,6 @@ public class Vessel extends BaseObservable {
         this.speed = speed;
     }
 
-    public final Punkt2D addRichtungsvektor(Punkt2D pkt, int minutes) {
-        return pkt.add(kurslinie.getRichtungsvektor(minutes / 60f * speed));
-    }
-
-    public float checkForValidKurs(Float newKurs) throws IllegalManoeverException {
-        if (newKurs != null) {
-            return newKurs;
-        }
-        throw new IllegalManoeverException("Kurs nicht erlaubt.");
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -84,7 +53,7 @@ public class Vessel extends BaseObservable {
 
     public float getAbstand(Punkt2D pkt) {
         float abstand = secondPosition.getAbstand(pkt);
-        return (!isPunktAufKurslinie(pkt) || isPunktInFahrtrichtung(pkt)) ? abstand : -abstand;
+        return (!kurslinie.isPunktAufKurslinie(pkt) || isPunktInFahrtrichtung(pkt)) ? abstand : -abstand;
     }
 
     public Punkt2D getBCR(Vessel other) {
@@ -98,7 +67,7 @@ public class Vessel extends BaseObservable {
      * @return CPA
      */
     public Punkt2D getCPA(Vessel other) {
-        return other.getKurslinie().getLotpunkt(secondPosition);
+        return other.getKurslinie().getCPA(secondPosition);
     }
 
     @Bindable
@@ -116,14 +85,17 @@ public class Vessel extends BaseObservable {
         return heading;
     }
 
-    @Bindable
-    public final Kurslinie getKurslinie() {
-        return kurslinie;
+    public final float getTimeTo(@NonNull Punkt2D p) {
+        if (!kurslinie.isPunktAufGerade(p)) {
+            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
+        }
+        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
+        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
     @Bindable
-    public int getHeadingFormatted() {
-        return Math.round((heading + 0.5f) * 10) / 10;
+    public final Kurslinie getKurslinie() {
+        return kurslinie;
     }
 
     public float getPeilungRechtweisend(Punkt2D pkt) {
@@ -131,14 +103,6 @@ public class Vessel extends BaseObservable {
             throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
         }
         return secondPosition.getYAxisAngle(pkt);
-    }
-
-    public final float getTimeTo(@NonNull Punkt2D p) {
-        if (!kurslinie.isPunktAufGerade(p)) {
-            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
-        }
-        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
-        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
     /**
@@ -246,16 +210,6 @@ public class Vessel extends BaseObservable {
     }
 
     /**
-     * Prueft, ob ein Punkt auf der EigenesSchiff liegt. Toleranz ist 1E6f.
-     *
-     * @param p Punkt
-     * @return true, wenn der Punkt auf der EigenesSchiff liegt, ansonsten false.
-     */
-    public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
-        return Math.round(kurslinie.getAbstand(p.x, p.y) * 1E4f) < 1;
-    }
-
-    /**
      * Prueft, ob ein Punkt in Fahrtrichtung liegt.
      *
      * @param p zu pruefender Punkt
@@ -268,7 +222,7 @@ public class Vessel extends BaseObservable {
 
     @Bindable
     public final void setSpeed(float speed) {
-        if (this.speed != speed) {
+        if (speed > 0 && this.speed != speed) {
             this.speed = speed;
             firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
             kurslinie = new Kurslinie(firstPosition, secondPosition);

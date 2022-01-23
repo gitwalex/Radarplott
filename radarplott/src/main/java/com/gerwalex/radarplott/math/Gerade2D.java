@@ -32,7 +32,7 @@ public class Gerade2D {
         /*
          * Festlegung einer Gerade2D durch zwei Punkte
          */
-        this(von, nach, new Vektor2D(von, nach));
+        this(von, new Vektor2D(von, nach));
     }
 
     /**
@@ -42,34 +42,14 @@ public class Gerade2D {
      * @param v   Richtungsvektor der Geraden
      */
     public Gerade2D(Punkt2D von, Vektor2D v) {
-        /*
-         * Festlegung einer Gerade2D durch einen Punkt von und dem
-         * Richtungsvektor v
-         */
-        this(von, new Punkt2D(von.x + v.getEndpunkt().x, von.y + v.getEndpunkt().y), v);
-    }
-
-    /**
-     * Standardkonstruktor fuer eine Gerade, in den jeweiligen Konstruktoren werden die Werte
-     * belegt
-     *
-     * @param von,     nach Punkte, durch die die Gerade laeuft
-     * @param richtung der Geraden
-     */
-    private Gerade2D(Punkt2D von, Punkt2D nach, Vektor2D richtung) {
-        if (von.equals(nach)) {
-            Log.d("gerwalex",
-                    "Fehler bei Gerade(Punkt von, Punkt nach, Vektor richtung), Parameter: " + von + " / " + nach +
-                            " / " + richtung.toString());
-            throw new IllegalArgumentException("Die Basispunkte einer Gerade duerfen nicht identisch sein");
-        }
+        Punkt2D nach = von.add(v);
         float x1 = von.x;
         float y1 = von.y;
         float x2 = nach.x;
         float y2 = nach.y;
         punkt1 = von;
         punkt2 = nach;
-        rv = richtung.getEinheitsvektor();
+        rv = v.getEinheitsvektor();
         float dx = x2 - x1;
         float dy = y2 - y1;
         a = -dy;
@@ -262,10 +242,10 @@ public class Gerade2D {
             float z2 = a * a + b * b;
             float z3 = t * t;
             float z4 = z1 / z2 + z3;
-            float zwischenergebnis = Math.round(z4 * 1000000);
+            float zwischenergebnis = Math.round(z4 * 1E6f);
             if (zwischenergebnis >= 0) {
                 v = new Punkt2D[2];
-                zwischenergebnis = (float) Math.sqrt(zwischenergebnis / 1000000);
+                zwischenergebnis = (float) Math.sqrt(zwischenergebnis / 1E6f);
                 zwischenergebnis = -zwischenergebnis;
                 float x = zwischenergebnis + t;
                 v[0] = new Punkt2D(x, (-c - a * x) / b);
