@@ -46,6 +46,10 @@ public class OpponentVessel extends BaseObservable {
         manoever.set(new Lage(lage, other, minutes));
     }
 
+    public void createManoeverLage(float abstandCPA, int minutes) {
+        manoever.set(new Lage(lage, abstandCPA, minutes));
+    }
+
     private String getFormatedTime(int minutes) {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes / 60, minutes % 60);
     }

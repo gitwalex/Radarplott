@@ -9,12 +9,30 @@ import com.gerwalex.radarplott.math.Vessel;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Objects;
+
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class LageTest {
+
+    @Test
+    public void cpa1() {
+        Vessel me = new Vessel(80, 8);
+        OpponentVessel other = new OpponentVessel(me, 0, 'B', 10, 7.0);
+        other.setSecondSeitenpeilung(12, 20, 4.5);
+        other.createManoeverLage(3.5f, 0);
+        Lage manoever = Objects.requireNonNull(other.manoever.get());
+        assertEquals(3.5, manoever.getAbstandCPA(), 0.1); // cpa
+        assertEquals(23.0, manoever.getTimeToCPA(), 0.1);
+        assertEquals(148.9, manoever.getHeadingRelativ(), 0.1); // heading
+        assertEquals(7.4, manoever.getSpeedRelativ(), 0.1); // speed
+        assertEquals(58.9, manoever.getPeilungRechtweisendCPA(), 0.1);
+        assertEquals(14.2, manoever.getAbstandBCR(), 0.1);
+        assertEquals(134.7, manoever.getTimeToBCR(), 0.1);
+    }
 
     @Before
     public void initialize() {
@@ -78,7 +96,7 @@ public class LageTest {
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(180, 8);
         other.createManoeverLage(v, 6);
-        Lage manoever = other.manoever.get();
+        Lage manoever = Objects.requireNonNull(other.manoever.get());
         assertEquals(112.5, manoever.getHeadingRelativ(), 0.1); // heading
         assertEquals(10.3, manoever.getSpeedRelativ(), 0.1); // speed
         assertEquals(3.3, manoever.getAbstandCPA(), 0.1); // cpa
@@ -94,7 +112,7 @@ public class LageTest {
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(110, 8);
         other.createManoeverLage(v, 6);
-        Lage manoever = other.manoever.get();
+        Lage manoever = Objects.requireNonNull(other.manoever.get());
         assertEquals(167.9, manoever.getHeadingRelativ(), 0.1); // heading
         assertEquals(9.4, manoever.getSpeedRelativ(), 0.1); // speed
         assertEquals(2.3, manoever.getAbstandCPA(), 0.1); // cpa
@@ -111,7 +129,23 @@ public class LageTest {
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(110, 8);
         other.createManoeverLage(v, 12);
-        Lage manoever = other.manoever.get();
+        Lage manoever = Objects.requireNonNull(other.manoever.get());
+        assertEquals(167.9, manoever.getHeadingRelativ(), 0.1); // heading
+        assertEquals(9.4, manoever.getSpeedRelativ(), 0.1); // speed
+        assertEquals(2.1, manoever.getAbstandCPA(), 0.1); // cpa
+        assertEquals(7.2, manoever.getTimeToCPA(), 0.1);
+        assertEquals(77.9, manoever.getPeilungRechtweisendCPA(), 0.1);
+        assertEquals(2.5, manoever.getAbstandBCR(), 0.1);
+        assertEquals(15.9, manoever.getTimeToBCR(), 0.1);
+    }
+
+    @Test
+    public void manoeverLage4() {
+        Vessel me = new Vessel(80, 8);
+        OpponentVessel other = new OpponentVessel(me, 0, 'B', 10, 7.0);
+        other.setSecondSeitenpeilung(12, 20, 4.5);
+        Vessel v = new Vessel(110, 8);
+        Lage manoever = other.getLage().getManoeverLage(v, 12);
         assertEquals(167.9, manoever.getHeadingRelativ(), 0.1); // heading
         assertEquals(9.4, manoever.getSpeedRelativ(), 0.1); // speed
         assertEquals(2.1, manoever.getAbstandCPA(), 0.1); // cpa

@@ -10,7 +10,7 @@ import com.gerwalex.radarplott.main.IllegalManoeverException;
 import java.util.Objects;
 
 public class Vessel extends BaseObservable {
-    protected final int minutes;
+    protected final float minutes;
     protected final Punkt2D secondPosition;
     protected Punkt2D firstPosition;
     private float heading;
@@ -30,7 +30,7 @@ public class Vessel extends BaseObservable {
         this(position, heading, speed, 6);
     }
 
-    public Vessel(int heading, float speed) {
+    public Vessel(float heading, float speed) {
         this(new Punkt2D(), heading, speed);
     }
 
@@ -43,13 +43,13 @@ public class Vessel extends BaseObservable {
         speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
     }
 
-    public Vessel(Punkt2D firstPosition, Punkt2D secondPosition, int minutes) {
+    public Vessel(Punkt2D firstPosition, Punkt2D secondPosition, float minutes) {
         this.minutes = minutes;
         this.firstPosition = firstPosition;
         this.secondPosition = secondPosition;
         kurslinie = new Kurslinie(firstPosition, secondPosition);
         heading = kurslinie.getYAxisAngle();
-        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / (float) minutes);
+        speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / minutes);
     }
 
     public Vessel(Punkt2D position, float heading, float speed, int minutes) {
@@ -127,13 +127,13 @@ public class Vessel extends BaseObservable {
     }
 
     /**
-     * Liefert den Richtungsvektor. Länge des Vektor ist die Strecke, die in minutes zurückgelegt wird.
+     * Liefert die Position nach Minuten
      *
      * @param minutes Minuten
-     * @return Richtungsvektor
+     * @return Position auf Kurslinie
      */
-    public final Vektor2D getRichtungsvektor(int minutes) {
-        return kurslinie.getRichtungsvektor(minutes / 60f * speed);
+    public final Punkt2D getPosition(float minutes) {
+        return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
     }
 
     public float getPeilungRechtweisend(Punkt2D pkt) {
@@ -144,13 +144,13 @@ public class Vessel extends BaseObservable {
     }
 
     /**
-     * Liefert die Position nach Minuten
+     * Liefert den Richtungsvektor. Länge des Vektor ist die Strecke, die in minutes zurückgelegt wird.
      *
      * @param minutes Minuten
-     * @return Position auf Kurslinie
+     * @return Richtungsvektor
      */
-    public final Punkt2D getPosition(int minutes) {
-        return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
+    public final Vektor2D getRichtungsvektor(float minutes) {
+        return kurslinie.getRichtungsvektor(minutes / 60f * speed);
     }
 
     public final float getTimeTo(@NonNull Punkt2D p) {
@@ -185,14 +185,15 @@ public class Vessel extends BaseObservable {
         return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
     }
 
-    @Bindable
-    public final void setHeading(float heading) {
-        if (this.heading != heading) {
-            this.heading = heading;
-            firstPosition = secondPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
-            kurslinie = new Kurslinie(firstPosition, secondPosition);
-            notifyPropertyChanged(BR.heading);
-        }
+    /**
+     * Eine Steuerbordpeilung liegt immer zwischen 0 und 180 Grad
+     *
+     * @param pkt Punkt
+     * @return true, wennn pkt in Steuerbord
+     */
+    public boolean isSteuerbord(Punkt2D pkt) {
+        float plg = getSeitenPeilung(pkt);
+        return plg >= 0 && plg < 180;
     }
 
     /**
@@ -223,12 +224,12 @@ public class Vessel extends BaseObservable {
     }
 
     @Bindable
-    public final void setSpeed(float speed) {
-        if (this.speed != speed) {
-            this.speed = speed;
-            firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
+    public final void setHeading(float heading) {
+        if (this.heading != heading) {
+            this.heading = heading;
+            firstPosition = secondPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
             kurslinie = new Kurslinie(firstPosition, secondPosition);
-            notifyPropertyChanged(BR.speed);
+            notifyPropertyChanged(BR.heading);
         }
     }
 
@@ -263,6 +264,16 @@ public class Vessel extends BaseObservable {
     public final boolean isPunktInFahrtrichtung(Punkt2D p) {
         float plg = getSeitenPeilung(p);
         return plg > 270 || plg < 90;
+    }
+
+    @Bindable
+    public final void setSpeed(float speed) {
+        if (this.speed != speed) {
+            this.speed = speed;
+            firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
+            kurslinie = new Kurslinie(firstPosition, secondPosition);
+            notifyPropertyChanged(BR.speed);
+        }
     }
 
     @NonNull
