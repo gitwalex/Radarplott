@@ -3,6 +3,15 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data>
+
+        <variable
+            name="me"
+            type="com.gerwalex.radarplott.math.Vessel" />
+
+
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -12,6 +21,15 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <include
+            android:id="@+id/ownVessel"
+            layout="@layout/own_vessel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@id/time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:me="@{me}" />
 
 
         <com.google.android.material.slider.Slider

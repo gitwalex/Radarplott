@@ -1,6 +1,8 @@
 package com.gerwalex.radarplott.main;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -15,9 +17,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
+import com.gerwalex.radarplott.databinding.OwnVesselDataBinding;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
-import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
 import com.google.android.material.slider.LabelFormatter;
@@ -41,19 +43,6 @@ public class RadarFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         binding = RadarViewBinding.inflate(inflater, container, false);
         binding.radar.setRadarObserver(new RadarBasisView.RadarObserver() {
-            @Override
-            public void onHeadingChanged(Vessel me, int heading, int minutes) {
-                onManoever(me, new Vessel(new Punkt2D(), heading, me.getSpeed()), minutes);
-            }
-
-            @Override
-            public void onManoever(Vessel me, Vessel manoverVessel, int minutes) {
-            }
-
-            @Override
-            public void onSpeedChanged(Vessel me, int speed, int minutes) {
-                onManoever(me, new Vessel(new Punkt2D(), me.getHeading(), speed), minutes);
-            }
 
             @Override
             public void onVesselClick(Vessel vessel) {
@@ -99,6 +88,21 @@ public class RadarFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.ownVessel.getRoot().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                OwnVesselDataBinding dlg = OwnVesselDataBinding.inflate(LayoutInflater.from(requireContext()));
+                dlg.setVessel(binding.getMe());
+                builder.setView(dlg.getRoot());
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                builder.show();
+            }
+        });
         mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
             @Override
             public void onChanged(List<OpponentVessel> opponents) {
@@ -109,6 +113,7 @@ public class RadarFragment extends Fragment {
             @Override
             public void onChanged(Vessel me) {
                 binding.radar.setOwnVessel(me);
+                binding.setMe(me);
             }
         });
     }

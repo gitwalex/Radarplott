@@ -45,11 +45,11 @@ import java.util.Objects;
  * @author Alexander Winkler
  */
 public class RadarBasisView extends FrameLayout {
+    public static final float RADARRINGE = 8;
     private static final float sektorlinienlaenge = 40.0f;
     private static final int textPadding = 30;
     private static final int thickPath = 3;
     private static final int thinPath = 2;
-    public static float RADARRINGE = 8;
     protected final Path courseline = new Path();
     protected final Paint courslineStyle = new Paint();
     private final long clickTime = -1;
@@ -68,14 +68,15 @@ public class RadarBasisView extends FrameLayout {
     private final Paint textStyle = new TextPaint();
     private final Paint vesselPositionStyle = new Paint();
     public ObservableInt maxTime = new ObservableInt(0);
-    private Bitmap bm;
     private boolean drawCourseline = true;
     private boolean drawCourselineText = true;
     private boolean drawPositionText = true;
+    private Bitmap innerRadarRing;
     private boolean longPressed;
     private ScaleGestureDetector mScaleDetector;
     private Vessel manoverVessel;
     private Vessel me;
+    private float minRadarRings;
     private int minutes;
     private boolean northupOrientierung = true;
     private List<OpponentVessel> opponentVesselList = new ArrayList<>();
@@ -90,10 +91,11 @@ public class RadarBasisView extends FrameLayout {
             invalidate();
         }
     };
+    private Bitmap outerRadarRing;
+    private float outerRadarRingRadius;
     private Kreis2D outerRing;
     private RadarObserver radarObserver;
-    private float scale;
-    private float sm;
+    private float scaleFactor;
     private int startTime;
 
     public RadarBasisView(Context context) {
@@ -158,13 +160,10 @@ public class RadarBasisView extends FrameLayout {
                 int height = getHeight() / 2;
                 float x = e.getX();
                 float y = e.getY();
-                Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
+                Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
                 manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
                 for (OpponentVessel opponent : opponentVesselList) {
                     opponent.createManoeverLage(manoverVessel, minutes);
-                }
-                if (radarObserver != null) {
-                    radarObserver.onManoever(me, manoverVessel, minutes);
                 }
                 invalidate();
             }
@@ -172,31 +171,40 @@ public class RadarBasisView extends FrameLayout {
     }
 
     public void addCircle(Path path, Punkt2D pos) {
-        path.addCircle(pos.x * sm, -pos.y * sm, markerRadius, Path.Direction.CW);
+        path.addCircle(pos.x * scaleFactor, -pos.y * scaleFactor, markerRadius, Path.Direction.CW);
     }
 
-    private void createRadarBitmap2(int w, int h) {
-        int textWidth = getTextRect(textStyle, "000").width();
-        sm = (int) (scale - textWidth * 2) / RADARRINGE;
-        outerRing = new Kreis2D(new Punkt2D(), RADARRINGE);
-        bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bm);
+    private void createInnerRadarRings() {
+        int w = getWidth();
+        int h = getHeight();
+        float ringSize = 1;
+        innerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(innerRadarRing);
         canvas.translate(w / 2f, h / 2f);
-        for (int i = 0; i < RADARRINGE; i++) {
-            // zeichne Radarringe
-            canvas.drawCircle(0, 0, sm * (i + 1), radarLineStyle);
-        }
-        float radius = outerRing.getRadius() * sm;
-        Punkt2D mp = outerRing.getMittelpunkt();
+        do {
+            canvas.drawCircle(0, 0, ringSize * scaleFactor, radarLineStyle);
+            ringSize++;
+        } while (ringSize < outerRing.getRadius());
+    }
+
+    private void createOuterRadarRing(int w, int h) {
+        textStyle.setColor(textColor);
+        Rect textRect = getTextRect(textStyle, "000");
+        outerRadarRingRadius = Math.min(w, h) / 2f - textRect.width() * 2;
+        outerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outerRadarRing);
+        canvas.translate(w / 2f, h / 2f);
+        Punkt2D mp = new Punkt2D();
         for (int i = 0; i < 36; i++) {
-            Punkt2D pkt = mp.getPunkt2D(i * 10, radius + sektorlinienlaenge + smallTextSize);
+            Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge + smallTextSize);
             String text = "000" + i * 10;
-            drawCenteredText(canvas, new Punkt2D(pkt.x / sm, pkt.y / sm), text.substring(text.length() - 3));
+            canvas.drawText(text.substring(text.length() - 3), pkt.x - textRect.width() / 2f,
+                    -pkt.y + textRect.height() / 2f, textStyle);
         }
-        float startsektorlinie2grad = radius - sektorlinienlaenge / 3;
-        float endsektorlinie2grad = radius + sektorlinienlaenge / 3;
-        float startsektorlinie5grad = radius - sektorlinienlaenge / 2;
-        float endsektorlinie5grad = radius + sektorlinienlaenge / 2;
+        float startsektorlinie2grad = outerRadarRingRadius - sektorlinienlaenge / 3;
+        float endsektorlinie2grad = outerRadarRingRadius + sektorlinienlaenge / 3;
+        float startsektorlinie5grad = outerRadarRingRadius - sektorlinienlaenge / 2;
+        float endsektorlinie5grad = outerRadarRingRadius + sektorlinienlaenge / 2;
         for (int winkel = 0; winkel < 180; winkel++) {
             // Festlegen Laenge der sektorlienien auf dem Aussenkreis
             // Alle 2 Grad: halbe sektorlinienlaenge
@@ -204,7 +212,8 @@ public class RadarBasisView extends FrameLayout {
             // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
             // Berechnen der Linien - Abstand 2 Grad
             if (winkel % 10 == 0) {
-                canvas.drawLine(0, -radius - sektorlinienlaenge, 0, radius + sektorlinienlaenge, radarLineStyle);
+                canvas.drawLine(0, -outerRadarRingRadius - sektorlinienlaenge, 0,
+                        outerRadarRingRadius + sektorlinienlaenge, radarLineStyle);
             } else {
                 if (winkel % 5 == 0) {
                     canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, radarLineStyle);
@@ -240,8 +249,8 @@ public class RadarBasisView extends FrameLayout {
 
     public void drawCenteredText(Canvas canvas, Punkt2D ankerPos, String text) {
         Rect result = getTextRect(textStyle, text);
-        canvas.drawText(text, ankerPos.x * sm - result.width() / 2f, -ankerPos.y * sm + result.height() / 2f,
-                textStyle);
+        canvas.drawText(text, ankerPos.x * scaleFactor - result.width() / 2f,
+                -ankerPos.y * scaleFactor + result.height() / 2f, textStyle);
     }
 
     private void drawCourseline(Canvas canvas, Vessel vessel, int color) {
@@ -271,13 +280,19 @@ public class RadarBasisView extends FrameLayout {
     public Punkt2D drawEndText(Canvas canvas, Punkt2D ankerPos, String text, float textSize) {
         textStyle.setTextSize(textSize);
         Rect result = getTextRect(textStyle, text);
-        canvas.drawText(text, ankerPos.x * sm + textPadding, -ankerPos.y * sm + result.height() / 2f, textStyle);
-        return new Punkt2D(ankerPos.x + result.width() / sm, ankerPos.y);
+        canvas.drawText(text, ankerPos.x * scaleFactor + textPadding, -ankerPos.y * scaleFactor + result.height() / 2f,
+                textStyle);
+        return new Punkt2D(ankerPos.x + result.width() / scaleFactor, ankerPos.y);
     }
 
     public void drawLine(Path path, Punkt2D from, Punkt2D to) {
-        path.moveTo(from.x * sm, -from.y * sm);
-        path.lineTo(to.x * sm, -to.y * sm);
+        path.moveTo(from.x * scaleFactor, -from.y * scaleFactor);
+        path.lineTo(to.x * scaleFactor, -to.y * scaleFactor);
+    }
+
+    public void drawLine(Path path, float fromX, float fromY, float toX, float toY) {
+        path.moveTo(fromX, -fromY);
+        path.lineTo(toX, -toY);
     }
 
     private void drawManoeverline(Canvas canvas, Vessel vessel, int color) {
@@ -360,7 +375,7 @@ public class RadarBasisView extends FrameLayout {
         textView.setTextColor(textStyle.getColor());
         textView.layout(0, 0, 600, 500);
         textView.setText(text);
-        canvas.translate(ankerPos.x * sm + textPadding, -ankerPos.y * sm - smallTextSize / 2f);
+        canvas.translate(ankerPos.x * scaleFactor + textPadding, -ankerPos.y * scaleFactor - smallTextSize / 2f);
         canvas.rotate(degrees);
         textView.draw(canvas);
         canvas.restore();
@@ -445,7 +460,8 @@ public class RadarBasisView extends FrameLayout {
         super.onDraw(canvas);
         symbolPath.reset();
         canvas.save();
-        canvas.drawBitmap(bm, 0, 0, radarLineStyle);
+        canvas.drawBitmap(outerRadarRing, 0, 0, radarLineStyle);
+        canvas.drawBitmap(innerRadarRing, 0, 0, radarLineStyle);
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
         if (me != null) {
             if (drawCourseline) {
@@ -497,8 +513,10 @@ public class RadarBasisView extends FrameLayout {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        scale = Math.min(h, w) / 2.0f;
-        createRadarBitmap2(w, h);
+        createOuterRadarRing(w, h);
+        scaleFactor = outerRadarRingRadius / RADARRINGE;
+        outerRing = new Kreis2D(new Punkt2D(), outerRadarRingRadius / scaleFactor);
+        createInnerRadarRings();
     }
 
     @Override
@@ -506,17 +524,15 @@ public class RadarBasisView extends FrameLayout {
         performClick();
         boolean consumed = gestureDetector.onTouchEvent(event);
         if (!consumed) {
+            mScaleDetector.onTouchEvent(event);
             int action = event.getAction();
             if (action == MotionEvent.ACTION_MOVE && longPressed) {
                 int width = getWidth() / 2;
                 int height = getHeight() / 2;
                 float x = event.getX();
                 float y = event.getY();
-                Punkt2D pkt = new Punkt2D((x - width) / sm, (height - y) / sm);
+                Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
                 manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
-                if (radarObserver != null) {
-                    radarObserver.onManoever(me, manoverVessel, minutes);
-                }
                 for (OpponentVessel opponent : opponentVesselList) {
                     opponent.createManoeverLage(manoverVessel, minutes);
                 }
@@ -561,6 +577,9 @@ public class RadarBasisView extends FrameLayout {
 
     public void setOpponents(List<OpponentVessel> opponents) {
         opponentVesselList = opponents;
+        for (OpponentVessel v : opponents) {
+            minRadarRings = Math.max(minRadarRings, v.getMinRadarSize());
+        }
         invalidate();
     }
 
@@ -612,11 +631,6 @@ public class RadarBasisView extends FrameLayout {
     }
 
     public interface RadarObserver {
-        void onHeadingChanged(Vessel me, int heading, int minutes);
-
-        void onManoever(Vessel me, Vessel manoverVessel, int minutes);
-
-        void onSpeedChanged(Vessel me, int speed, int minutes);
 
         void onVesselClick(Vessel vessel);
     }
@@ -624,8 +638,14 @@ public class RadarBasisView extends FrameLayout {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            RADARRINGE *= detector.getScaleFactor();
-            scale = Math.max(Math.min(getWidth() / 2, getHeight() / 2), scale);
+            float factor = detector.getScaleFactor();
+            float newScaleFactor = scaleFactor * factor;
+            float radarRings = outerRadarRingRadius / newScaleFactor;
+            if (radarRings > minRadarRings) {
+                scaleFactor = newScaleFactor;
+                outerRing = new Kreis2D(new Punkt2D(), radarRings);
+                createInnerRadarRings();
+            }
             invalidate();
             return true;
         }

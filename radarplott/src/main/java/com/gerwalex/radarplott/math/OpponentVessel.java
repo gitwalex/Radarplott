@@ -18,6 +18,7 @@ public class OpponentVessel extends BaseObservable {
     private final int startTime;
     private float dist2;
     private Lage lage;
+    private float minRadarSize;
     /**
      * Zeitunterschied zwischen den einzelnen Peilungen
      */
@@ -56,6 +57,10 @@ public class OpponentVessel extends BaseObservable {
 
     public Lage getLage() {
         return lage;
+    }
+
+    public float getMinRadarSize() {
+        return minRadarSize;
     }
 
     @Bindable
@@ -99,5 +104,6 @@ public class OpponentVessel extends BaseObservable {
                 lage = new Lage(me, relativVessel);
             }
         });
+        minRadarSize = Math.max(dist1, dist2);
     }
 }

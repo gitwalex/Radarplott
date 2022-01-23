@@ -20,22 +20,16 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:layout="@layout/radar_view" />
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/ownVessel"
-                android:name="com.gerwalex.radarplott.main.OwnVessel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/opponentList"
                 android:name="com.gerwalex.radarplott.main.OpponentVesselList"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fillViewport="true"
+                android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/ownVessel"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
