@@ -31,8 +31,11 @@ public class Vessel extends BaseObservable {
     }
 
     public Vessel(Punkt2D position, float heading, float speed, int minutes) {
-        this(position.getPunkt2D(heading, -(speed / minutes)), position, minutes);
+        this.minutes = minutes;
         this.speed = speed;
+        secondPosition = position;
+        firstPosition = secondPosition.getPunkt2D(heading, -(speed / minutes));
+        kurslinie = new Kurslinie(position, heading);
     }
 
     @Override
@@ -142,17 +145,17 @@ public class Vessel extends BaseObservable {
         return speed;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(kurslinie, kurslinie, speed, firstPosition, secondPosition);
+    }
+
     public final float getTimeTo(@NonNull Punkt2D p) {
         if (!kurslinie.isPunktAufGerade(p)) {
             throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
         }
         float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
         return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(kurslinie, kurslinie, speed, firstPosition, secondPosition);
     }
 
     /**
@@ -220,7 +223,8 @@ public class Vessel extends BaseObservable {
     public final void setSpeed(float speed) {
         if (this.speed != speed) {
             this.speed = speed;
-            firstPosition = secondPosition.getPunkt2D(kurslinie.getHeading(), -(speed / 6f));
+            kurslinie = new Kurslinie(secondPosition, getHeading());
+            firstPosition = secondPosition.getPunkt2D(kurslinie.getHeading(), -(speed / minutes));
             kurslinie = new Kurslinie(firstPosition, secondPosition);
             notifyPropertyChanged(BR.speed);
         }

@@ -71,7 +71,7 @@ public class Punkt2D {
             return false;
         }
         Punkt2D punkt2D = (Punkt2D) o;
-        return Float.compare(punkt2D.x, x) == 0 && Float.compare(punkt2D.y, y) == 0;
+        return Math.abs(punkt2D.x - x) * 1E4f < 1 && Math.abs(punkt2D.y - y) * 1E4f < 1;
     }
 
     /**
