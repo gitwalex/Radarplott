@@ -11,7 +11,6 @@ public class Vessel extends BaseObservable {
     protected final float minutes;
     protected final Punkt2D secondPosition;
     protected Punkt2D firstPosition;
-    private float heading;
     private Kurslinie kurslinie;
     private float speed;
 
@@ -27,14 +26,12 @@ public class Vessel extends BaseObservable {
         this.minutes = minutes;
         this.firstPosition = firstPosition;
         this.secondPosition = secondPosition;
-        kurslinie = new Kurslinie(firstPosition, secondPosition);
-        heading = kurslinie.getYAxisAngle();
         speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / minutes);
+        kurslinie = new Kurslinie(firstPosition, secondPosition);
     }
 
     public Vessel(Punkt2D position, float heading, float speed, int minutes) {
         this(position.getPunkt2D(heading, -(speed / minutes)), position, minutes);
-        this.heading = heading % 360;
         this.speed = speed;
     }
 
@@ -48,7 +45,7 @@ public class Vessel extends BaseObservable {
         }
         Vessel vessel = (Vessel) o;
         return firstPosition.equals(vessel.firstPosition) && secondPosition.equals(vessel.secondPosition) &&
-                vessel.heading == heading && vessel.speed == speed;
+                vessel.speed == speed;
     }
 
     public float getAbstand(Punkt2D pkt) {
@@ -82,15 +79,16 @@ public class Vessel extends BaseObservable {
      */
     @Bindable
     public final float getHeading() {
-        return heading;
+        return kurslinie.getHeading();
     }
 
-    public final float getTimeTo(@NonNull Punkt2D p) {
-        if (!kurslinie.isPunktAufGerade(p)) {
-            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
+    @Bindable
+    public final void setHeading(float heading) {
+        if (kurslinie.getHeading() != heading) {
+            firstPosition = secondPosition.getPunkt2D(heading % 360, -(speed / 6f));
+            kurslinie = new Kurslinie(firstPosition, heading);
+            notifyPropertyChanged(BR.heading);
         }
-        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
-        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
     @Bindable
@@ -112,7 +110,7 @@ public class Vessel extends BaseObservable {
      * @return Position auf Kurslinie
      */
     public final Punkt2D getPosition(float minutes) {
-        return secondPosition.getPunkt2D(heading, (float) (speed * minutes / 60.0));
+        return secondPosition.getPunkt2D(kurslinie.getHeading(), (float) (speed * minutes / 60.0));
     }
 
     /**
@@ -131,7 +129,7 @@ public class Vessel extends BaseObservable {
     }
 
     public float getSeitenPeilung(Punkt2D pkt) {
-        return (getPeilungRechtweisend(pkt) + 360 - heading) % 360;
+        return (getPeilungRechtweisend(pkt) + 360 - kurslinie.getHeading()) % 360;
     }
 
     /**
@@ -144,20 +142,17 @@ public class Vessel extends BaseObservable {
         return speed;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(heading, kurslinie, kurslinie, speed, firstPosition, secondPosition);
+    public final float getTimeTo(@NonNull Punkt2D p) {
+        if (!kurslinie.isPunktAufGerade(p)) {
+            throw new IllegalArgumentException("Punkt nicht auf Kurslinie:" + p);
+        }
+        float timeToP = (float) (secondPosition.getAbstand(p) / speed * 60.0);
+        return isPunktInFahrtrichtung(p) ? timeToP : -timeToP;
     }
 
-    /**
-     * Eine Steuerbordpeilung liegt immer zwischen 0 und 180 Grad
-     *
-     * @param pkt Punkt
-     * @return true, wennn pkt in Steuerbord
-     */
-    public boolean isSteuerbord(Punkt2D pkt) {
-        float plg = getSeitenPeilung(pkt);
-        return plg >= 0 && plg < 180;
+    @Override
+    public int hashCode() {
+        return Objects.hash(kurslinie, kurslinie, speed, firstPosition, secondPosition);
     }
 
     /**
@@ -187,14 +182,15 @@ public class Vessel extends BaseObservable {
         return time;
     }
 
-    @Bindable
-    public final void setHeading(float heading) {
-        if (this.heading != heading) {
-            this.heading = heading;
-            firstPosition = secondPosition.getPunkt2D(this.heading % 360, -(speed / 6f));
-            kurslinie = new Kurslinie(firstPosition, secondPosition);
-            notifyPropertyChanged(BR.heading);
-        }
+    /**
+     * Eine Steuerbordpeilung liegt immer zwischen 0 und 180 Grad
+     *
+     * @param pkt Punkt
+     * @return true, wennn pkt in Steuerbord
+     */
+    public boolean isSteuerbord(Punkt2D pkt) {
+        float plg = getSeitenPeilung(pkt);
+        return plg >= 0 && plg < 180;
     }
 
     /**
@@ -222,9 +218,9 @@ public class Vessel extends BaseObservable {
 
     @Bindable
     public final void setSpeed(float speed) {
-        if (speed > 0 && this.speed != speed) {
+        if (this.speed != speed) {
             this.speed = speed;
-            firstPosition = secondPosition.getPunkt2D(this.heading, -(speed / 6f));
+            firstPosition = secondPosition.getPunkt2D(kurslinie.getHeading(), -(speed / 6f));
             kurslinie = new Kurslinie(firstPosition, secondPosition);
             notifyPropertyChanged(BR.speed);
         }
@@ -233,8 +229,8 @@ public class Vessel extends BaseObservable {
     @NonNull
     @Override
     public String toString() {
-        return "Vessel{ heading=" + heading + " speed=" + speed + ",startPosition=" + firstPosition + ", aktPosition=" +
-                secondPosition + ", kurslinie=" + kurslinie + "}";
+        return "Vessel{ heading=" + kurslinie.getHeading() + " speed=" + speed + ",startPosition=" + firstPosition +
+                ", " + "aktPosition" + "=" + secondPosition + ", kurslinie=" + kurslinie + "}";
     }
 }
 

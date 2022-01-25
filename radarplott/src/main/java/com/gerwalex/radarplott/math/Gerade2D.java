@@ -195,7 +195,8 @@ public class Gerade2D {
      * @return liefert den Richtungsvektor als Einheitsvektor zurueck
      */
     public Vektor2D getRichtungsvektor(float laenge) {
-        return new Vektor2D(new Punkt2D(rv.x * laenge, rv.y * laenge));
+        Vektor2D v = rv.getEinheitsvektor();
+        return new Vektor2D(new Punkt2D(v.x * laenge, v.y * laenge));
     }
 
     /**

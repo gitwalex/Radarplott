@@ -4,38 +4,34 @@ import androidx.annotation.NonNull;
 
 public class Kurslinie {
 
-    private final Punkt2D first;
-    private final float heading;
-    private final float speed;
-    private Gerade2D line;
+    private final Gerade2D line;
 
     public Kurslinie(Punkt2D first, Punkt2D second) {
         this(first, new Vektor2D(first, second));
     }
 
-    public Kurslinie(float heading, float speed) {
-        this(new Punkt2D(), heading, speed);
+    public Kurslinie(float heading) {
+        this(new Punkt2D(), heading);
     }
 
-    public Kurslinie(Punkt2D first, float heading, float speed) {
-        this(first, heading, speed, 6);
-    }
-
-    public Kurslinie(Punkt2D first, float heading, float speed, float distance) {
-        this(first, new Punkt2D(first.getPunkt2D(heading, distance)));
+    public Kurslinie(Punkt2D first, float heading) {
+        this(first, new Punkt2D(first.getPunkt2D(heading, 6)));
     }
 
     public Kurslinie(Punkt2D first, Vektor2D richtungsvektor) {
-        if (!richtungsvektor.equals(new Vektor2D())) {
-            line = new Gerade2D(first, richtungsvektor);
-        }
-        this.first = first;
-        heading = line.getYAxisAngle();
-        this.speed = speed;
+        line = new Gerade2D(first, richtungsvektor);
     }
 
     public Punkt2D getCPA(@NonNull Punkt2D p) {
         return line.getLotpunkt(p);
+    }
+
+    public float getHeading() {
+        return line.getYAxisAngle();
+    }
+
+    public Punkt2D getPosition(float minutes) {
+        return line.getVon().add(line.getRichtungsvektor(minutes));
     }
 
     public Vektor2D getRichtungsvektor() {
@@ -54,12 +50,8 @@ public class Kurslinie {
         return line.getSchnittpunkt(kurslinie.line);
     }
 
-    public float getYAxisAngle() {
-        return line == null ? 0 : line.getYAxisAngle();
-    }
-
     public boolean isPunktAufGerade(@NonNull Punkt2D p) {
-        return line == null ? p.equals(first) : line.isPunktAufGerade(p);
+        return line.isPunktAufGerade(p);
     }
 
     /**
