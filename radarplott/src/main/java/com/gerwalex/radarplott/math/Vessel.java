@@ -27,7 +27,7 @@ public class Vessel extends BaseObservable {
         this.firstPosition = firstPosition;
         this.secondPosition = secondPosition;
         speed = (float) (firstPosition.getAbstand(secondPosition) * 60.0 / minutes);
-        kurslinie = new Kurslinie(firstPosition, secondPosition);
+        kurslinie = new Kurslinie(secondPosition, new Vektor2D(firstPosition, secondPosition).getYAxisAngle());
     }
 
     public Vessel(Punkt2D position, float heading, float speed, int minutes) {
@@ -100,9 +100,6 @@ public class Vessel extends BaseObservable {
     }
 
     public float getPeilungRechtweisend(Punkt2D pkt) {
-        if (secondPosition.equals(pkt)) {
-            throw new IllegalArgumentException("Punkte dürfen nicht identisch sein");
-        }
         return secondPosition.getYAxisAngle(pkt);
     }
 

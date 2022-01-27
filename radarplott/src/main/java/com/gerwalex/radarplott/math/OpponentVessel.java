@@ -14,7 +14,7 @@ public class OpponentVessel extends BaseObservable {
     public final String name;
     private final float dist1;
     private final Vessel me;
-    private final int rwP1;
+    private final float rwP1;
     private final int startTime;
     private float dist2;
     private Lage lage;
@@ -23,7 +23,7 @@ public class OpponentVessel extends BaseObservable {
      * Zeitunterschied zwischen den einzelnen Peilungen
      */
     private int minutes;
-    private int rwP2;
+    private float rwP2;
 
     /**
      * Erstellt ein Schiff aus Seitenpeilung. Schiff hat Geschwindigkeit 0 und Kurs 0
@@ -34,7 +34,7 @@ public class OpponentVessel extends BaseObservable {
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull Character name, int peilungRechtweisend,
+    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull Character name, float peilungRechtweisend,
                           double distance) {
         this.me = Objects.requireNonNull(me);
         this.name = name.toString();
@@ -90,7 +90,7 @@ public class OpponentVessel extends BaseObservable {
      * @param rwP      zweite Rechtweisende Peilung
      * @param distance distance bei der zweiten Peilung
      */
-    public void setSecondSeitenpeilung(int time, int rwP, double distance) {
+    public void setSecondSeitenpeilung(int time, float rwP, double distance) {
         dist2 = (float) distance;
         rwP2 = rwP;
         minutes = time - startTime;

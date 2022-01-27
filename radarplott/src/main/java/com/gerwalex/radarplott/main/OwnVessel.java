@@ -38,11 +38,14 @@ public class OwnVessel extends Fragment {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                 OwnVesselDataBinding dlg = OwnVesselDataBinding.inflate(LayoutInflater.from(requireContext()));
-                dlg.setVessel(binding.getMe());
+                Vessel me = binding.getMe();
+                dlg.setVessel(me);
                 builder.setView(dlg.getRoot());
                 builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        me.setHeading(dlg.heading.getValue());
+                        me.setSpeed(dlg.speed.getValue());
                     }
                 });
                 builder.show();

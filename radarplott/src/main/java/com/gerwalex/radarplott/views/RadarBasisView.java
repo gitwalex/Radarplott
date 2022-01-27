@@ -16,7 +16,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.widget.FrameLayout;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
@@ -44,7 +44,7 @@ import java.util.Objects;
  *
  * @author Alexander Winkler
  */
-public class RadarBasisView extends FrameLayout {
+public class RadarBasisView extends View {
     public static final float RADARRINGE = 8;
     private static final float sektorlinienlaenge = 40.0f;
     private static final int textPadding = 30;
@@ -189,64 +189,69 @@ public class RadarBasisView extends FrameLayout {
     }
 
     private void createInnerRadarRings(float radarRings) {
-        textStyle.setTextSize(extraSmallTextSize);
-        textStyle.setColor(textColor);
-        int w = getWidth();
-        int h = getHeight();
-        innerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(innerRadarRing);
-        canvas.translate(w / 2f, h / 2f);
-        textStyle.setTextAlign(Paint.Align.CENTER);
-        for (int ringSize = 1; ringSize <= radarRings; ringSize++) {
-            canvas.drawCircle(0, 0, ringSize * scaleFactor, radarLineStyle);
-            if (ringSize % 2 == 0) {
-                String text = String.valueOf(ringSize);
-                canvas.drawText(text, 0, -(ringSize * scaleFactor) + extraSmallTextSize / 2, textStyle);
-                canvas.drawText(text, 0, ringSize * scaleFactor + extraSmallTextSize / 2, textStyle);
-                //
-                canvas.drawText(text, -(ringSize * scaleFactor), +extraSmallTextSize / 2, textStyle);
-                canvas.drawText(text, (ringSize * scaleFactor), +extraSmallTextSize / 2, textStyle);
+        if (getWidth() + getHeight() != 0) {
+            textStyle.setTextSize(extraSmallTextSize);
+            textStyle.setColor(textColor);
+            int w = getWidth();
+            int h = getHeight();
+            innerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(innerRadarRing);
+            canvas.translate(w / 2f, h / 2f);
+            textStyle.setTextAlign(Paint.Align.CENTER);
+            for (int ringSize = 1; ringSize <= radarRings; ringSize++) {
+                canvas.drawCircle(0, 0, ringSize * scaleFactor, radarLineStyle);
+                if (ringSize % 2 == 0) {
+                    String text = String.valueOf(ringSize);
+                    canvas.drawText(text, 0, -(ringSize * scaleFactor) + extraSmallTextSize / 2, textStyle);
+                    canvas.drawText(text, 0, ringSize * scaleFactor + extraSmallTextSize / 2, textStyle);
+                    //
+                    canvas.drawText(text, -(ringSize * scaleFactor), +extraSmallTextSize / 2, textStyle);
+                    canvas.drawText(text, (ringSize * scaleFactor), +extraSmallTextSize / 2, textStyle);
+                }
             }
         }
     }
 
     private void createOuterRadarRing(int w, int h) {
-        textStyle.setColor(textColor);
-        Rect textRect = getTextRect(textStyle, "000");
-        outerRadarRingRadius = Math.min(w, h) / 2f - textRect.width() * 2;
-        outerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(outerRadarRing);
-        canvas.translate(w / 2f, h / 2f);
-        Punkt2D mp = new Punkt2D();
-        for (int i = 0; i < 36; i++) {
-            Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge + smallTextSize);
-            String text = "000" + i * 10;
-            canvas.drawText(text.substring(text.length() - 3), pkt.x - textRect.width() / 2f,
-                    -pkt.y + textRect.height() / 2f, textStyle);
-        }
-        float startsektorlinie2grad = outerRadarRingRadius - sektorlinienlaenge / 3;
-        float endsektorlinie2grad = outerRadarRingRadius + sektorlinienlaenge / 3;
-        float startsektorlinie5grad = outerRadarRingRadius - sektorlinienlaenge / 2;
-        float endsektorlinie5grad = outerRadarRingRadius + sektorlinienlaenge / 2;
-        for (int winkel = 0; winkel < 180; winkel++) {
-            // Festlegen Laenge der sektorlienien auf dem Aussenkreis
-            // Alle 2 Grad: halbe sektorlinienlaenge
-            // Alle 10 Grad: sektorlinienlaenge
-            // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
-            // Berechnen der Linien - Abstand 2 Grad
-            if (winkel % 10 == 0) {
-                canvas.drawLine(0, -outerRadarRingRadius - sektorlinienlaenge, 0,
-                        outerRadarRingRadius + sektorlinienlaenge, radarLineStyle);
-            } else {
-                if (winkel % 5 == 0) {
-                    canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, radarLineStyle);
-                    canvas.drawLine(0, -startsektorlinie5grad, 0, -endsektorlinie5grad, radarLineStyle);
-                } else {
-                    canvas.drawLine(0, startsektorlinie2grad, 0, endsektorlinie2grad, radarLineStyle);
-                    canvas.drawLine(0, -startsektorlinie2grad, 0, -endsektorlinie2grad, radarLineStyle);
-                }
+        if (w * h != 0) {
+            textStyle.setColor(textColor);
+            textStyle.setTextSize(extraSmallTextSize);
+            Rect textRect = getTextRect(textStyle, "000");
+            outerRadarRingRadius = Math.min(w, h) / 2f - textRect.width() * 2;
+            outerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(outerRadarRing);
+            canvas.translate(w / 2f, h / 2f);
+            Punkt2D mp = new Punkt2D();
+            for (int i = 0; i < 36; i++) {
+                Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge + smallTextSize);
+                String text = "000" + i * 10;
+                canvas.drawText(text.substring(text.length() - 3), pkt.x - textRect.width() / 2f,
+                        -pkt.y + textRect.height() / 2f, textStyle);
             }
-            canvas.rotate(1);
+            float startsektorlinie2grad = outerRadarRingRadius - sektorlinienlaenge / 3;
+            float endsektorlinie2grad = outerRadarRingRadius + sektorlinienlaenge / 3;
+            float startsektorlinie5grad = outerRadarRingRadius - sektorlinienlaenge / 2;
+            float endsektorlinie5grad = outerRadarRingRadius + sektorlinienlaenge / 2;
+            for (int winkel = 0; winkel < 180; winkel++) {
+                // Festlegen Laenge der sektorlienien auf dem Aussenkreis
+                // Alle 2 Grad: halbe sektorlinienlaenge
+                // Alle 10 Grad: sektorlinienlaenge
+                // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
+                // Berechnen der Linien - Abstand 2 Grad
+                if (winkel % 10 == 0) {
+                    canvas.drawLine(0, -outerRadarRingRadius - sektorlinienlaenge, 0,
+                            outerRadarRingRadius + sektorlinienlaenge, radarLineStyle);
+                } else {
+                    if (winkel % 5 == 0) {
+                        canvas.drawLine(0, startsektorlinie5grad, 0, endsektorlinie5grad, radarLineStyle);
+                        canvas.drawLine(0, -startsektorlinie5grad, 0, -endsektorlinie5grad, radarLineStyle);
+                    } else {
+                        canvas.drawLine(0, startsektorlinie2grad, 0, endsektorlinie2grad, radarLineStyle);
+                        canvas.drawLine(0, -startsektorlinie2grad, 0, -endsektorlinie2grad, radarLineStyle);
+                    }
+                }
+                canvas.rotate(1);
+            }
         }
     }
 
@@ -453,24 +458,6 @@ public class RadarBasisView extends FrameLayout {
         return result;
     }
 
-    private int measureDimension(int desiredSize, int measureSpec) {
-        int result;
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
-        if (specMode == MeasureSpec.EXACTLY) {
-            result = specSize;
-        } else {
-            result = desiredSize;
-            if (specMode == MeasureSpec.AT_MOST) {
-                result = Math.min(result, specSize);
-            }
-        }
-        if (result < desiredSize) {
-            Log.d("RadarView", "The view is too small, the content might get cut");
-        }
-        return result;
-    }
-
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
@@ -482,9 +469,19 @@ public class RadarBasisView extends FrameLayout {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (outerRadarRing == null || innerRadarRing == null) {
+            Log.d("gerwalex", "RadarView: Size too small");
+            return;
+        }
         symbolPath.reset();
         canvas.save();
+        if (outerRadarRing == null) {
+            createOuterRadarRing(getWidth(), getHeight());
+        }
         canvas.drawBitmap(outerRadarRing, 0, 0, radarLineStyle);
+        if (innerRadarRing == null) {
+            createInnerRadarRings(RADARRINGE);
+        }
         canvas.drawBitmap(innerRadarRing, 0, 0, radarLineStyle);
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
         if (me != null) {
@@ -523,20 +520,17 @@ public class RadarBasisView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.v("Chart onMeasure w", MeasureSpec.toString(widthMeasureSpec));
-        Log.v("Chart onMeasure h", MeasureSpec.toString(heightMeasureSpec));
-        int desiredWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int desiredHeight = MeasureSpec.getSize(heightMeasureSpec);
-        int size = Math.min(measureDimension(desiredWidth, widthMeasureSpec),
-                measureDimension(desiredHeight, heightMeasureSpec));
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int size = 0;
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
+        size = Math.min(width, height);
         setMeasuredDimension(size, size);
-        if (getPaddingLeft() + getPaddingRight() + getPaddingTop() + getPaddingBottom() != 0) {
-            Log.w("gerwalex", "RadarView: Padding ignored ");
-        }
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        Log.d("gerwalex", String.format("RadarView onSizeChanged: %1d, %2d", w, h));
         createOuterRadarRing(w, h);
         scaleFactor = outerRadarRingRadius / RADARRINGE;
         outerRing = new Kreis2D(new Punkt2D(), outerRadarRingRadius / scaleFactor);

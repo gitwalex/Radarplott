@@ -12,6 +12,7 @@
         android:theme="@style/Theme.Radarplott">
         <activity
             android:name=".main.MainActivity"
+            android:windowSoftInputMode="adjustNothing|stateHidden"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

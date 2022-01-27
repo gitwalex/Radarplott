@@ -7,19 +7,11 @@ public class Kurslinie {
     private final Gerade2D line;
 
     public Kurslinie(Punkt2D first, Punkt2D second) {
-        this(first, new Vektor2D(first, second));
-    }
-
-    public Kurslinie(float heading) {
-        this(new Punkt2D(), heading);
+        this(first, new Vektor2D(first, second).getYAxisAngle());
     }
 
     public Kurslinie(Punkt2D first, float heading) {
-        this(first, new Punkt2D(first.getPunkt2D(heading, 6)));
-    }
-
-    public Kurslinie(Punkt2D first, Vektor2D richtungsvektor) {
-        line = new Gerade2D(first, richtungsvektor);
+        line = new Gerade2D(first, new Punkt2D(first.getPunkt2D(heading, 6)));
     }
 
     public Punkt2D getCPA(@NonNull Punkt2D p) {

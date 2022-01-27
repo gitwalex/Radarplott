@@ -80,7 +80,7 @@ public class Lage {
         // Jetzt Gerade durch aktuelle Position und CPA legen...
         Kurslinie cpaGerade = new Kurslinie(currentPos, cpa);
         // ... und diese Gerade in die Startposition der relativVessel verschieben.
-        Kurslinie line = new Kurslinie(absolutVessel.secondPosition, cpaGerade.getRichtungsvektor());
+        Kurslinie line = new Kurslinie(absolutVessel.secondPosition, cpaGerade.getHeading());
         // Ermittlung Manoeverkurs: Jetzt den Schnittpunkte vo manoever mit neuer relativVessel ermitteln
         k = new Kreis2D(absolutVessel.firstPosition, relPos.getAbstand(relativVessel.firstPosition));
         Punkt2D[] rel = line.getSchnittpunkt(k);

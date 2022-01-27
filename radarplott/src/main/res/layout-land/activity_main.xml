@@ -12,23 +12,31 @@
             android:layout_height="match_parent"
             tools:context=".main.MainActivity">
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.50" />
+
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/radar"
                 android:name="com.gerwalex.radarplott.main.RadarFragment"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintEnd_toStartOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
                 tools:layout="@layout/radar_view" />
 
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/opponentList"
                 android:name="com.gerwalex.radarplott.main.OpponentVesselList"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:fillViewport="true"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toTopOf="@id/radar"
+                android:orientation="vertical"
+                app:layout_constraintStart_toEndOf="@id/guideline"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

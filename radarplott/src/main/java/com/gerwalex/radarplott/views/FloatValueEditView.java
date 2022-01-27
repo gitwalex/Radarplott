@@ -56,6 +56,30 @@ public class FloatValueEditView extends AppCompatEditText {
         return value;
     }
 
+    /**
+     * Setzt einen long-Wert als Text. Dieser wird in das entsprechende Currency-Format
+     * umformatiert.
+     *
+     * @param value Wert zur Anzeige
+     */
+    @CallSuper
+    @MainThread
+    public void setValue(float value) {
+        if (!Objects.equals(this.value, value)) {
+            this.value = value;
+            if (!hasFocus()) {
+                String txt;
+                if (decimalPlaces == 0) {
+                    int val = (int) value;
+                    txt = String.valueOf(val);
+                } else {
+                    txt = String.valueOf(value);
+                }
+                setText(txt);
+            }
+        }
+    }
+
     private void init(Context context, AttributeSet attrs) {
         TypedArray a = context.getTheme()
                 .obtainStyledAttributes(attrs, R.styleable.FloatValueEditViewStyle, android.R.attr.editTextStyle,
@@ -76,28 +100,6 @@ public class FloatValueEditView extends AppCompatEditText {
         setEms(7);
         setSelectAllOnFocus(true);
         setCursorVisible(false);
-    }
-
-    /**
-     * Setzt einen long-Wert als Text. Dieser wird in das entsprechende Currency-Format
-     * umformatiert.
-     *
-     * @param value Wert zur Anzeige
-     */
-    @CallSuper
-    @MainThread
-    public void setValue(float value) {
-        if (!Objects.equals(this.value, value)) {
-            this.value = value;
-            String txt;
-            if (decimalPlaces == 0) {
-                int val = (int) value;
-                txt = String.valueOf(val);
-            } else {
-                txt = String.valueOf(value);
-            }
-            setText(txt);
-        }
     }
 
     public void setValueChangeListener(InverseBindingListener listener) {

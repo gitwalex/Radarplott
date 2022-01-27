@@ -19,6 +19,18 @@ import java.util.Objects;
 public class LageTest {
 
     @Test
+    public void boje1() {
+        Vessel me = new Vessel(0, 6);
+        OpponentVessel other = new OpponentVessel(me, 0, 'B', 0, 7.0);
+        other.setSecondSeitenpeilung(60, 0, 1.0);
+        Lage lage = Objects.requireNonNull(other.getLage());
+        assertEquals(180.0, lage.getHeadingRelativ(), 0.1); // heading
+        assertEquals(6.0, lage.getSpeedRelativ(), 0.1); // speed
+        assertEquals(0, lage.getAbstandCPA(), 0.1); // cpa
+        assertEquals(10.0, lage.getTimeToCPA(), 0.1);
+    }
+
+    @Test
     public void cpa1() {
         Vessel me = new Vessel(80, 8);
         OpponentVessel other = new OpponentVessel(me, 0, 'B', 10, 7.0);
