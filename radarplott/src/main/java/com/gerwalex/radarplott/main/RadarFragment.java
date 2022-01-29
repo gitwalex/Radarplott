@@ -1,8 +1,5 @@
 package com.gerwalex.radarplott.main;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -11,18 +8,15 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.databinding.OwnVesselDataBinding;
 import com.gerwalex.radarplott.databinding.RadarViewBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
-import com.google.android.material.slider.LabelFormatter;
 
 import java.util.List;
 
@@ -49,24 +43,10 @@ public class RadarFragment extends Fragment {
                 mModel.clickedVessel.setValue(vessel);
             }
         });
-        binding.radar.maxTime.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        binding.radar.maxTime.observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                binding.time.setValueTo(binding.radar.maxTime.get());
-            }
-        });
-        binding.time.addOnChangeListener((slider, value, fromUser) -> {
-            if (fromUser) {
-                binding.radar.setCurrentTime((int) value);
-            }
-        });
-        binding.time.setLabelFormatter(new LabelFormatter() {
-            @SuppressLint("DefaultLocale")
-            @NonNull
-            @Override
-            public String getFormattedValue(float value) {
-                int time = (int) (value + binding.radar.getStarttimeInMinutes());
-                return String.format("%02d:%02d", time / 60, time % 60);
+            public void onChanged(Integer integer) {
+                mModel.maxTime.setValue(integer);
             }
         });
         return binding.getRoot();
@@ -88,21 +68,6 @@ public class RadarFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        binding.ownVessel.getRoot().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                OwnVesselDataBinding dlg = OwnVesselDataBinding.inflate(LayoutInflater.from(requireContext()));
-                dlg.setVessel(binding.getMe());
-                builder.setView(dlg.getRoot());
-                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                builder.show();
-            }
-        });
         mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
             @Override
             public void onChanged(List<OpponentVessel> opponents) {
@@ -114,6 +79,18 @@ public class RadarFragment extends Fragment {
             public void onChanged(Vessel me) {
                 binding.radar.setOwnVessel(me);
                 binding.setMe(me);
+            }
+        });
+        mModel.currentTime.observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                binding.radar.setCurrentTime(integer);
+            }
+        });
+        binding.radar.maxTime.observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                mModel.maxTime.setValue(integer);
             }
         });
     }

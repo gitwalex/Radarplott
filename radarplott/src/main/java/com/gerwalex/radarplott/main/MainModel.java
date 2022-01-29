@@ -14,13 +14,15 @@ public class MainModel extends ViewModel {
 
     public final MutableLiveData<OpponentVessel> addOpponent = new MutableLiveData<>();
     public final MutableLiveData<Vessel> clickedVessel = new MutableLiveData<>();
+    public final MutableLiveData<Integer> currentTime = new MutableLiveData<>();
+    public final MutableLiveData<Integer> maxTime = new MutableLiveData<>();
     public final MutableLiveData<List<OpponentVessel>> opponentVesselList = new MutableLiveData<>(new ArrayList<>());
     public final MutableLiveData<Vessel> ownVessel = new MutableLiveData<>();
 
     public MainModel() {
         Vessel me = new Vessel(80, 8);
         ownVessel.setValue(me);
-        OpponentVessel otherVessel = new OpponentVessel(me, 600, 'B', 10, 7);
+        OpponentVessel otherVessel = new OpponentVessel(me, 600, "B", 10, 7);
         otherVessel.setSecondSeitenpeilung(612, 20, 4.5);
         addOpponentVessel(otherVessel);
     }

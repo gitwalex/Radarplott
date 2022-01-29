@@ -13,23 +13,38 @@
             tools:context=".main.MainActivity">
 
             <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/radar"
-                android:name="com.gerwalex.radarplott.main.RadarFragment"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                tools:layout="@layout/radar_view" />
-
-
-            <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/opponentList"
                 android:name="com.gerwalex.radarplott.main.OpponentVesselList"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:fillViewport="true"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toTopOf="@id/radar"
+                android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/radar"
+                android:name="com.gerwalex.radarplott.main.RadarFragment"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/ownVessel"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/opponentList"
+                tools:layout="@layout/radar_view" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/ownVessel"
+                android:name="com.gerwalex.radarplott.main.OwnVessel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@id/time"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stepSize="1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

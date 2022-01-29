@@ -28,6 +28,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:layout="@layout/radar_view" />
 
+            <com.google.android.material.slider.Slider
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stepSize="1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@id/guideline" />
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/opponentList"

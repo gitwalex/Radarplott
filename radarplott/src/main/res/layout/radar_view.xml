@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -12,39 +11,12 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.gerwalex.radarplott.views.RadarBasisView
+        android:id="@+id/radar"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
 
-        <com.gerwalex.radarplott.views.RadarBasisView
-            android:id="@+id/radar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/time"
-            app:layout_constraintEnd_toEndOf="@id/time"
-            app:layout_constraintStart_toStartOf="@id/time"
-            app:layout_constraintTop_toTopOf="parent"
-
-            />
-
-        <include
-            android:id="@+id/ownVessel"
-            layout="@layout/own_vessel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/time"
-            app:layout_constraintStart_toStartOf="parent"
-            app:me="@{me}" />
-
-
-        <com.google.android.material.slider.Slider
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:stepSize="1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        />
 
 </layout>
 

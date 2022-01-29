@@ -24,7 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.TextViewCompat;
 import androidx.databinding.Observable;
-import androidx.databinding.ObservableInt;
+import androidx.lifecycle.MutableLiveData;
 
 import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
@@ -50,6 +50,7 @@ public class RadarBasisView extends View {
     private static final int textPadding = 30;
     private static final int thickPath = 3;
     private static final int thinPath = 2;
+    public final MutableLiveData<Integer> maxTime = new MutableLiveData<>(0);
     protected final Path courseline = new Path();
     protected final Paint courslineStyle = new Paint();
     private final long clickTime = -1;
@@ -70,7 +71,6 @@ public class RadarBasisView extends View {
     private final int textColor;
     private final Paint textStyle = new TextPaint();
     private final Paint vesselPositionStyle = new Paint();
-    public ObservableInt maxTime = new ObservableInt(0);
     private boolean drawCourseline = true;
     private boolean drawCourselineText = true;
     private boolean drawPositionText = true;
@@ -216,17 +216,18 @@ public class RadarBasisView extends View {
         if (w * h != 0) {
             textStyle.setColor(textColor);
             textStyle.setTextSize(extraSmallTextSize);
+            textStyle.setTextAlign(Paint.Align.CENTER);
             Rect textRect = getTextRect(textStyle, "000");
-            outerRadarRingRadius = Math.min(w, h) / 2f - textRect.width() * 2;
+            outerRadarRingRadius = (Math.min(w, h) - textRect.width()) / 2f - sektorlinienlaenge - 10;
             outerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(outerRadarRing);
+            canvas.save();
             canvas.translate(w / 2f, h / 2f);
             Punkt2D mp = new Punkt2D();
             for (int i = 0; i < 36; i++) {
-                Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge + smallTextSize);
+                Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge + 10);
                 String text = "000" + i * 10;
-                canvas.drawText(text.substring(text.length() - 3), pkt.x - textRect.width() / 2f,
-                        -pkt.y + textRect.height() / 2f, textStyle);
+                canvas.drawText(text.substring(text.length() - 3), pkt.x, -pkt.y + textRect.height() / 2f, textStyle);
             }
             float startsektorlinie2grad = outerRadarRingRadius - sektorlinienlaenge / 3;
             float endsektorlinie2grad = outerRadarRingRadius + sektorlinienlaenge / 3;
@@ -252,6 +253,7 @@ public class RadarBasisView extends View {
                 }
                 canvas.rotate(1);
             }
+            canvas.restore();
         }
     }
 
@@ -365,7 +367,7 @@ public class RadarBasisView extends View {
             if (outerRing.liegtImKreis(nextPos)) {
                 Punkt2D dest = getEndOfKursline(vessel);
                 assert dest != null;
-                maxTime.set((int) Math.max(vessel.getTimeTo(dest), maxTime.get()));
+                maxTime.setValue((int) Math.max(vessel.getTimeTo(dest), maxTime.getValue()));
                 addCircle(relCourseline, nextPos);
                 if (minutes != 0) {
                     int time = opponent.getTime() + minutes;
@@ -520,21 +522,22 @@ public class RadarBasisView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int size = 0;
-        int width = getMeasuredWidth();
-        int height = getMeasuredHeight();
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
         size = Math.min(width, height);
         setMeasuredDimension(size, size);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        Log.d("gerwalex", String.format("RadarView onSizeChanged: %1d, %2d", w, h));
-        createOuterRadarRing(w, h);
-        scaleFactor = outerRadarRingRadius / RADARRINGE;
-        outerRing = new Kreis2D(new Punkt2D(), outerRadarRingRadius / scaleFactor);
-        createInnerRadarRings(RADARRINGE);
+        if (w != oldw && h != oldh) {
+            Log.d("gerwalex", String.format("RadarView onSizeChanged: %1d, %2d", w, h));
+            createOuterRadarRing(w, h);
+            scaleFactor = outerRadarRingRadius / RADARRINGE;
+            outerRing = new Kreis2D(new Punkt2D(), outerRadarRingRadius / scaleFactor);
+            createInnerRadarRings(RADARRINGE);
+        }
     }
 
     @Override
@@ -608,7 +611,7 @@ public class RadarBasisView extends View {
         }
         me = vessel;
         me.addOnPropertyChangedCallback(ownVesselObserver);
-        maxTime.set(0);
+        maxTime.setValue(0);
         if (manoverVessel != null) {
             for (OpponentVessel opponent : opponentVesselList) {
                 opponent.createManoeverLage(manoverVessel, minutes);

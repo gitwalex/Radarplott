@@ -5,17 +5,18 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.Observable;
 import androidx.databinding.ObservableField;
+import androidx.databinding.library.baseAdapters.BR;
 
 import java.util.Locale;
 import java.util.Objects;
 
 public class OpponentVessel extends BaseObservable {
     public final ObservableField<Lage> manoever = new ObservableField<>();
-    public final String name;
     private final float dist1;
     private final Vessel me;
     private final float rwP1;
     private final int startTime;
+    public String name;
     private float dist2;
     private Lage lage;
     private float minRadarSize;
@@ -34,29 +35,44 @@ public class OpponentVessel extends BaseObservable {
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull Character name, float peilungRechtweisend,
+    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend,
                           double distance) {
         this.me = Objects.requireNonNull(me);
-        this.name = name.toString();
+        this.name = name;
         this.startTime = startTime;
         dist1 = (float) distance;
         rwP1 = peilungRechtweisend;
     }
 
+    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend,
+                          double distance, float time, float rwP2, double distance2) {
+        this(me, startTime, name, peilungRechtweisend, distance);
+        setSecondSeitenpeilung((int) time, rwP2, distance2);
+    }
+
     public void createManoeverLage(Vessel other, int minutes) {
-        manoever.set(lage.getLage(other, minutes));
+        manoever.set(getLage().getLage(other, minutes));
     }
 
     public void createManoeverLage(float abstandCPA, int minutes) {
-        manoever.set(lage.getLage(abstandCPA, minutes));
+        manoever.set(getLage().getLage(abstandCPA, minutes));
+    }
+
+    public float getDist1() {
+        return dist1;
+    }
+
+    public float getDist2() {
+        return dist2;
     }
 
     private String getFormatedTime(int minutes) {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes / 60, minutes % 60);
     }
 
+    @NonNull
     public Lage getLage() {
-        return lage;
+        return Objects.requireNonNull(lage);
     }
 
     public float getMinRadarSize() {
@@ -65,7 +81,15 @@ public class OpponentVessel extends BaseObservable {
 
     @Bindable
     public Vessel getRelativeVessel() {
-        return Objects.requireNonNull(lage).getRelativVessel();
+        return getLage().getRelativVessel();
+    }
+
+    public float getRwP1() {
+        return rwP1;
+    }
+
+    public float getRwP2() {
+        return rwP2;
     }
 
     @Bindable
@@ -90,7 +114,7 @@ public class OpponentVessel extends BaseObservable {
      * @param rwP      zweite Rechtweisende Peilung
      * @param distance distance bei der zweiten Peilung
      */
-    public void setSecondSeitenpeilung(int time, float rwP, double distance) {
+    public final void setSecondSeitenpeilung(int time, float rwP, double distance) {
         dist2 = (float) distance;
         rwP2 = rwP;
         minutes = time - startTime;
@@ -98,10 +122,12 @@ public class OpponentVessel extends BaseObservable {
         Punkt2D secondPosition = new Punkt2D().getPunkt2D(rwP, dist2);
         Vessel relativVessel = new Vessel(firstPosition, secondPosition, minutes);
         lage = new Lage(me, relativVessel);
+        createManoeverLage(me, 0);
         me.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 lage = new Lage(me, relativVessel);
+                notifyPropertyChanged(BR.lage);
             }
         });
         minRadarSize = Math.max(dist1, dist2);

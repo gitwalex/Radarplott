@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="opponent"
+            type="com.gerwalex.radarplott.math.OpponentVessel" />
+
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/lage_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:contentPadding="@dimen/content_padding"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeWidth="@dimen/cardviewborder">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{opponent.name}" />
+
+            <TextView
+                android:id="@+id/Kurs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{@string/Kurs(opponent.lage.headingAbsolut)}" />
+
+            <TextView
+                android:id="@+id/FdW"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{@string/FdW(opponent.lage.speedAbsolut)}" />
+
+
+            <TextView
+                android:id="@+id/man_rKurs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{@string/rKurs(opponent.manoever.headingRelativ)}" />
+
+            <TextView
+                android:id="@+id/man_rFdW"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{@string/rFdW(opponent.manoever.speedRelativ)}" />
+
+
+            <TextView
+                android:id="@+id/man_abstandCPA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{@string/AbstandCPA(opponent.manoever.abstandCPA)}" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.google.android.material.card.MaterialCardView>
+</layout>

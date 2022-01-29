@@ -9,19 +9,19 @@ import android.util.AttributeSet;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.MainThread;
-import androidx.appcompat.widget.AppCompatEditText;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.InverseBindingAdapter;
 import androidx.databinding.InverseBindingListener;
 
 import com.gerwalex.radarplott.R;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Objects;
 
 /**
  * Eingabe eines Float-Wertes.
  */
-public class FloatValueEditView extends AppCompatEditText {
+public class FloatValueEditView extends TextInputEditText {
     private int decimalPlaces;
     private InverseBindingListener mBindingListener;
     private float value;
