@@ -16,12 +16,13 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.TextViewCompat;
 import androidx.databinding.Observable;
 import androidx.lifecycle.MutableLiveData;
@@ -44,7 +45,7 @@ import java.util.Objects;
  *
  * @author Alexander Winkler
  */
-public class RadarBasisView extends View {
+public class RadarBasisView extends FrameLayout {
     public static final float RADARRINGE = 8;
     private static final float sektorlinienlaenge = 40.0f;
     private static final int textPadding = 30;
@@ -117,12 +118,12 @@ public class RadarBasisView extends View {
         minRadarRings = context.getResources().getInteger(R.integer.minRadarRings);
         maxRadarRings = context.getResources().getInteger(R.integer.maxRadarRings);
         colors = getResources().getIntArray(R.array.vesselcolors);
-        ownVesselColor = getResources().getColor(R.color.ownVesselColor);
+        ownVesselColor = ContextCompat.getColor(context, R.color.ownVesselColor);
         radarLineStyle.setTextSize(40);
         radarLineStyle.setFakeBoldText(true);
         radarLineStyle.setAntiAlias(true);
         radarLineStyle.setStyle(Paint.Style.STROKE);
-        radarLineStyle.setColor(getResources().getColor(R.color.colorRadarLinien));
+        radarLineStyle.setColor(ContextCompat.getColor(context, R.color.colorRadarLinien));
         courslineStyle.setStrokeWidth(thinPath);
         courslineStyle.setAntiAlias(true);
         courslineStyle.setStyle(Paint.Style.STROKE);
@@ -137,7 +138,7 @@ public class RadarBasisView extends View {
         manoeverCourselineStyle.setPathEffect(new DashPathEffect(new float[]{20, 10}, 0));
         manoeverCourselineStyle.setStrokeWidth(thickPath);
         //
-        textColor = getResources().getColor(R.color.white);
+        textColor = ContextCompat.getColor(context, R.color.white);
         textStyle.setColor(textColor);
         smallTextSize = getResources().getDimension(R.dimen.mediumText);
         extraSmallTextSize = getResources().getDimension(R.dimen.extraSmallText);
@@ -176,10 +177,9 @@ public class RadarBasisView extends View {
                 float y = e.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
                 manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
-                for (OpponentVessel opponent : opponentVesselList) {
-                    opponent.createManoeverLage(manoverVessel, minutes);
+                if (radarObserver != null) {
+                    radarObserver.onCreateManoever(manoverVessel);
                 }
-                invalidate();
             }
         });
     }
@@ -521,15 +521,6 @@ public class RadarBasisView extends View {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int size = 0;
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        size = Math.min(width, height);
-        setMeasuredDimension(size, size);
-    }
-
-    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (w != oldw && h != oldh) {
             Log.d("gerwalex", String.format("RadarView onSizeChanged: %1d, %2d", w, h));
@@ -554,10 +545,9 @@ public class RadarBasisView extends View {
                 float y = event.getY();
                 Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
                 manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
-                for (OpponentVessel opponent : opponentVesselList) {
-                    opponent.createManoeverLage(manoverVessel, minutes);
+                if (radarObserver != null) {
+                    radarObserver.onCreateManoever(manoverVessel);
                 }
-                invalidate();
                 consumed = true;
             } else if (action == MotionEvent.ACTION_UP) {
                 longPressed = false;
@@ -575,8 +565,8 @@ public class RadarBasisView extends View {
         this.minutes = minutes;
         if (manoverVessel != null) {
             manoverVessel = new Vessel((int) manoverVessel.getHeading(), manoverVessel.getSpeed());
-            for (OpponentVessel opponent : opponentVesselList) {
-                opponent.createManoeverLage(manoverVessel, minutes);
+            if (radarObserver != null) {
+                radarObserver.onCreateManoever(manoverVessel);
             }
         }
         invalidate();
@@ -593,6 +583,14 @@ public class RadarBasisView extends View {
 
     public void setDrawPositionTexte(boolean draw) {
         drawPositionText = draw;
+        invalidate();
+    }
+
+    public void setManoeverVessel(Vessel vessel) {
+        manoverVessel = vessel;
+        for (OpponentVessel opponent : opponentVesselList) {
+            opponent.createManoeverLage(vessel, minutes);
+        }
         invalidate();
     }
 
@@ -653,6 +651,8 @@ public class RadarBasisView extends View {
     }
 
     public interface RadarObserver {
+
+        void onCreateManoever(Vessel manoverVessel);
 
         void onVesselClick(Vessel vessel);
     }

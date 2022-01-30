@@ -36,4 +36,6 @@
     <string name="dist2">Diatanz bei zweiter Peilung</string>
     <string name="minutes">Minuten zwischen Pilungen</string>
     <string name="minutesLt1">Minuten müssen grösser 1 sein</string>
+    <string name="data">Beobachtungen und Lage</string>
+    <string name="radarbild">Radarbild</string>
 </resources>

@@ -39,6 +39,11 @@ public class RadarFragment extends Fragment {
         binding.radar.setRadarObserver(new RadarBasisView.RadarObserver() {
 
             @Override
+            public void onCreateManoever(Vessel manoverVessel) {
+                mModel.manoever.setValue(manoverVessel);
+            }
+
+            @Override
             public void onVesselClick(Vessel vessel) {
                 mModel.clickedVessel.setValue(vessel);
             }
@@ -68,6 +73,12 @@ public class RadarFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mModel.manoever.observe(getViewLifecycleOwner(), new Observer<Vessel>() {
+            @Override
+            public void onChanged(Vessel vessel) {
+                binding.radar.setManoeverVessel(vessel);
+            }
+        });
         mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
             @Override
             public void onChanged(List<OpponentVessel> opponents) {

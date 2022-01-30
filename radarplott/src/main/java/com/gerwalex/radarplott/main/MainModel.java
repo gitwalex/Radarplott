@@ -12,9 +12,9 @@ import java.util.Objects;
 
 public class MainModel extends ViewModel {
 
-    public final MutableLiveData<OpponentVessel> addOpponent = new MutableLiveData<>();
     public final MutableLiveData<Vessel> clickedVessel = new MutableLiveData<>();
     public final MutableLiveData<Integer> currentTime = new MutableLiveData<>();
+    public final MutableLiveData<Vessel> manoever = new MutableLiveData<>();
     public final MutableLiveData<Integer> maxTime = new MutableLiveData<>();
     public final MutableLiveData<List<OpponentVessel>> opponentVesselList = new MutableLiveData<>(new ArrayList<>());
     public final MutableLiveData<Vessel> ownVessel = new MutableLiveData<>();
