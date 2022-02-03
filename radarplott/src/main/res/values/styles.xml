@@ -20,5 +20,20 @@
         <item name="android:textSize">@dimen/extraSmallText</item>
     </style>
 
+    <style name="TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextAppearance">@style/HintText</item>
+        <item name="errorTextAppearance">@style/ErrorText</item>
+        <item name="android:selectAllOnFocus">true</item>
+    </style>
+
+    <style name="ErrorText" parent="RawApp.TextAppearance.Small">
+        <item name="android:textColor">@color/red</item>
+    </style>
+
+    <style name="HintText" parent="RawApp.TextAppearance.Small">
+        <item name="android:textColorHint">@android:color/holo_blue_light</item>
+        <item name="android:textColor">@android:color/holo_blue_light</item>
+    </style>
+
 
 </resources>

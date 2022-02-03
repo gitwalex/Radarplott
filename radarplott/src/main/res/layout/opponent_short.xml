@@ -15,53 +15,45 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:contentPadding="@dimen/content_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:strokeWidth="@dimen/cardviewborder">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/name"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{opponent.name}" />
+                android:text="@{@string/opponent_name(opponent.name)}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/r_lage_kurs"
+                layout="@layout/r_kurs_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:lage="@{opponent.lage}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/name" />
+
+            <include
+                android:id="@+id/w_lage_kurs"
+                layout="@layout/w_kurs_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:lage="@{opponent.lage}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/r_lage_kurs" />
 
             <TextView
-                android:id="@+id/Kurs"
-                android:layout_width="wrap_content"
+                android:id="@+id/abstandCPA"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{@string/Kurs(opponent.lage.headingAbsolut)}" />
-
-            <TextView
-                android:id="@+id/FdW"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{@string/FdW(opponent.lage.speedAbsolut)}" />
-
-
-            <TextView
-                android:id="@+id/man_rKurs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{@string/rKurs(opponent.manoever.headingRelativ)}" />
-
-            <TextView
-                android:id="@+id/man_rFdW"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{@string/rFdW(opponent.manoever.speedRelativ)}" />
-
-
-            <TextView
-                android:id="@+id/man_abstandCPA"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{@string/AbstandCPA(opponent.manoever.abstandCPA)}" />
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
+                android:text="@{@string/AbstandCPA(opponent.manoever.abstandCPA)}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/w_lage_kurs" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 </layout>

@@ -2,6 +2,7 @@ package com.gerwalex.radarplott.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -24,6 +25,7 @@ import java.util.Objects;
 public class FloatValueEditView extends TextInputEditText {
     private int decimalPlaces;
     private InverseBindingListener mBindingListener;
+    private String unit;
     private float value;
 
     @InverseBindingAdapter(attribute = "value")
@@ -56,6 +58,51 @@ public class FloatValueEditView extends TextInputEditText {
         return value;
     }
 
+    private void init(Context context, AttributeSet attrs) {
+        TypedArray a = context.getTheme()
+                .obtainStyledAttributes(attrs, R.styleable.FloatValueEditViewStyle, android.R.attr.editTextStyle,
+                        R.style.FloatValueEditView);
+        try {
+            decimalPlaces = a.getInt(R.styleable.FloatValueEditViewStyle_decimalPlaces, 0);
+            int type = InputType.TYPE_CLASS_NUMBER;
+            if (decimalPlaces != 0) {
+                type = type | InputType.TYPE_NUMBER_FLAG_DECIMAL;
+            }
+            setInputType(type);
+            if (a.hasValue(R.styleable.FloatValueEditViewStyle_unit)) {
+                unit = a.getString(R.styleable.FloatValueEditViewStyle_unit);
+            }
+        } finally {
+            a.recycle();
+        }
+        if (isInEditMode()) {
+            setValue(123_456_789);
+        }
+        setEms(7);
+        setSelectAllOnFocus(true);
+        setCursorVisible(false);
+    }
+
+    @Override
+    protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
+        setText(value);
+        super.onFocusChanged(focused, direction, previouslyFocusedRect);
+    }
+
+    private void setText(float value) {
+        String txt;
+        if (decimalPlaces == 0) {
+            int val = (int) value;
+            txt = String.valueOf(val);
+        } else {
+            txt = String.valueOf(value);
+        }
+        if (!hasFocus() && unit != null) {
+            txt += " " + unit;
+        }
+        setText(txt);
+    }
+
     /**
      * Setzt einen long-Wert als Text. Dieser wird in das entsprechende Currency-Format
      * umformatiert.
@@ -68,38 +115,9 @@ public class FloatValueEditView extends TextInputEditText {
         if (!Objects.equals(this.value, value)) {
             this.value = value;
             if (!hasFocus()) {
-                String txt;
-                if (decimalPlaces == 0) {
-                    int val = (int) value;
-                    txt = String.valueOf(val);
-                } else {
-                    txt = String.valueOf(value);
-                }
-                setText(txt);
+                setText(value);
             }
         }
-    }
-
-    private void init(Context context, AttributeSet attrs) {
-        TypedArray a = context.getTheme()
-                .obtainStyledAttributes(attrs, R.styleable.FloatValueEditViewStyle, android.R.attr.editTextStyle,
-                        R.style.FloatValueEditView);
-        try {
-            decimalPlaces = a.getInt(R.styleable.FloatValueEditViewStyle_decimalPlaces, 0);
-            int type = InputType.TYPE_CLASS_NUMBER;
-            if (decimalPlaces != 0) {
-                type = type | InputType.TYPE_NUMBER_FLAG_DECIMAL;
-            }
-            setInputType(type);
-        } finally {
-            a.recycle();
-        }
-        if (isInEditMode()) {
-            setValue(123_456_789);
-        }
-        setEms(7);
-        setSelectAllOnFocus(true);
-        setCursorVisible(false);
     }
 
     public void setValueChangeListener(InverseBindingListener listener) {

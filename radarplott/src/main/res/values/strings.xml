@@ -5,8 +5,6 @@
     <string name="speed">vA (FdW)</string>
     <string name="ok">OK</string>
     <string name="ownVesselData">Eigenes Schiff</string>
-    <string name="rwK">KA (rwK): %03.0f </string>
-    <string name="fdw">vA (FdW): %.1f kn </string>
     <string name="sm">%.1f sm</string>
     <string name="kurse">Kurse</string>
     <string name="positionen">Positionen</string>
@@ -18,10 +16,11 @@
     <string name="formattedSm">%.1f sm</string>
     <string name="formattedMinutes">%.1f min</string>
     <!---->
+    <string name="opponent_name">Name: %1s</string>
     <string name="rKurs">Kurs relativ %03.1f deg</string>
     <string name="rFdW">FdW relativ %.1f kn</string>
-    <string name="Kurs">Kurs %03.1f deg</string>
-    <string name="FdW">FdW %.1f kn</string>
+    <string name="wKurs">Kurs %03.1f deg</string>
+    <string name="wFdW">FdW %.1f kn</string>
     <string name="AbstandCPA">CPA %.1f sm</string>
     <string name="TimeToCPA">Zeit bis CPA %.1f min</string>
     <string name="DistanceToCPA">Distanz CPA %.1f sm</string>
@@ -32,9 +31,9 @@
     <string name="name">Name</string>
     <string name="rwsp1">1. Radarpeilung</string>
     <string name="rwsp2">2. Radarpeilung</string>
-    <string name="dist1">Distanz bei 1. Peilung</string>
-    <string name="dist2">Diatanz bei zweiter Peilung</string>
-    <string name="minutes">Minuten zwischen Pilungen</string>
+    <string name="dist1">Distanz bei erster Peilung</string>
+    <string name="dist2">Distanz bei zweiter Peilung</string>
+    <string name="minutes">Minuten zwischen Peilungen</string>
     <string name="minutesLt1">Minuten müssen grösser 1 sein</string>
     <string name="data">Beobachtungen und Lage</string>
     <string name="radarbild">Radarbild</string>

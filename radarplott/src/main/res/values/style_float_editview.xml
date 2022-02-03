@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="FloatValueEditViewStyle">
         <attr name="decimalPlaces" format="integer" />
+        <attr name="unit" format="string" />
     </declare-styleable>
 
     <style name="FloatValueEditView" parent="Widget.AppCompat.EditText">

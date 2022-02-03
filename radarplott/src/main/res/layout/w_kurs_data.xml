@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="lage"
+            type="com.gerwalex.radarplott.math.Lage" />
+
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/wKurs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/wKurs(lage.headingAbsolut)}" />
+
+        <TextView
+            android:id="@+id/wFdW"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/wFdW(lage.speedAbsolut)}" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</layout>

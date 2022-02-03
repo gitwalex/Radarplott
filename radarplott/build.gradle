@@ -57,12 +57,6 @@ android {
             DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG)
             resValue "string", "compileInfo", "Compilezeit: " + df.format(System.currentTimeMillis())
             resValue "string", "versionName", versionName
-            resValue "string", "backup_dir", "backup"
-            resValue "string", "download_dir", "download"
-            resValue "string", "import_dir", "import"
-            resValue "string", "appNamePrefix", "Ausgesorgt"
-            resValue "string", "notification_channel_id", "Radarplott"
-            resValue "string", "dbname", "ausgesorgt"
 
             javaCompileOptions {
                 annotationProcessorOptions {
@@ -118,10 +112,9 @@ android {
     }
 
     dependencies {
-
-        implementation 'androidx.appcompat:appcompat:1.4.0'
-        implementation 'com.google.android.material:material:1.4.0'
-        implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+        implementation 'androidx.appcompat:appcompat:1.4.1'
+        implementation 'com.google.android.material:material:1.5.0'
+        implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
         implementation 'androidx.navigation:navigation-fragment:2.4.0'
         implementation 'androidx.navigation:navigation-ui:2.4.0'
         testImplementation 'junit:junit:4.13.2'

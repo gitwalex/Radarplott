@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -9,21 +10,33 @@
             type="com.gerwalex.radarplott.main.OpponentVesselData" />
     </data>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/content_padding">
+        android:padding="@dimen/content_padding"
+        tools:ignore="MissingConstraints">
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:constraint_referenced_ids="name, rwsp1,dist1, rwsp2, dist2, minutes"
+            app:flow_horizontalAlign="start"
+            app:flow_maxElementsWrap="1"
+            app:flow_wrapMode="chain" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/name"
+            style="@style/TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:counterEnabled="true">
+            app:errorEnabled="true"
+            app:errorTextColor="@color/white">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints="@string/name"
                 android:hint="@string/name"
                 android:inputType="text"
                 android:maxLines="1"
@@ -39,47 +52,51 @@
             <com.gerwalex.radarplott.views.FloatValueEditView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:decimalPlaces="0"
+                app:unit="deg"
                 app:value="@={handler.rwSp1}" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/rwsp2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/rwsp2">
 
             <com.gerwalex.radarplott.views.FloatValueEditView
-                android:id="@+id/rwsp2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:decimalPlaces="0"
+                app:unit="deg"
                 app:value="@={handler.rwSp2}" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dist1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/dist1">
 
             <com.gerwalex.radarplott.views.FloatValueEditView
-                android:id="@+id/dist1"
-
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:decimalPlaces="1"
+                app:unit="sm"
                 app:value="@={handler.dist1}" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dist2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/dist2">
 
             <com.gerwalex.radarplott.views.FloatValueEditView
-                android:id="@+id/dist2"
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
+                app:decimalPlaces="1"
+                app:unit="sm"
                 app:value="@={handler.dist2}" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,6 +112,5 @@
                 app:decimalPlaces="0"
                 app:value="@={handler.minutes}" />
         </com.google.android.material.textfield.TextInputLayout>
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

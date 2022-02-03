@@ -99,7 +99,10 @@ public class OpponentVesselData extends DialogFragment {
         name.observe(this, new Observer<String>() {
             @Override
             public void onChanged(String value) {
-                binding.name.setError("Fehler");
+                if (value != null && value.length() > 5) {
+                    binding.name.setErrorEnabled(true);
+                    binding.name.setError("Fehler");
+                }
             }
         });
         minutes.observe(this, new Observer<Float>() {
