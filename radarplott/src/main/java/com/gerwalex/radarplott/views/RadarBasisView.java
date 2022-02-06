@@ -521,6 +521,15 @@ public class RadarBasisView extends FrameLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = getMeasuredWidth();
+        int heigth = getMeasuredHeight();
+        int dimen = Math.max(width, heigth);
+        setMeasuredDimension(dimen, dimen);
+    }
+
+    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (w != oldw && h != oldh) {
             Log.d("gerwalex", String.format("RadarView onSizeChanged: %1d, %2d", w, h));

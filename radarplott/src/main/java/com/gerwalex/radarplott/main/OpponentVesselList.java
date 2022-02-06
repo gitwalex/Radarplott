@@ -24,16 +24,13 @@ import java.util.List;
 
 public class OpponentVesselList extends Fragment {
 
-    private Adapter<ViewHolder> adapter;
     private RecyclerviewBinding binding;
-    private int[] colors;
     private MainModel mModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mModel = new ViewModelProvider(requireActivity()).get(MainModel.class);
-        colors = getResources().getIntArray(R.array.vesselcolors);
     }
 
     @Nullable
@@ -49,7 +46,8 @@ public class OpponentVesselList extends Fragment {
         mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
             @Override
             public void onChanged(List<OpponentVessel> opponentVessels) {
-                adapter = new Adapter<>(getParentFragmentManager(), requireContext(), opponentVessels);
+                Adapter<RecyclerView.ViewHolder> adapter =
+                        new Adapter<>(getParentFragmentManager(), requireContext(), opponentVessels);
                 binding.recyclerview.setAdapter(adapter);
             }
         });
