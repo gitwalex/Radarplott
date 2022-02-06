@@ -43,28 +43,28 @@
 
                     <include
                         android:id="@+id/r_lage_kurs"
-                        layout="@layout/r_kurs_data"
+                        layout="@layout/opponent_kurs_reletiv_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.lage}" />
 
                     <include
                         android:id="@+id/w_lage_kurs"
-                        layout="@layout/w_kurs_data"
+                        layout="@layout/kurs_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.lage}" />
 
                     <include
                         android:id="@+id/lage_cpa"
-                        layout="@layout/cpa_data"
+                        layout="@layout/opponent_cpa_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.lage}" />
 
                     <include
                         android:id="@+id/lage_bcr"
-                        layout="@layout/bcr_data"
+                        layout="@layout/opponent_bcr_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.lage}" />
@@ -95,21 +95,21 @@
 
                     <include
                         android:id="@+id/manoever_kurs_relativ"
-                        layout="@layout/r_kurs_data"
+                        layout="@layout/opponent_kurs_reletiv_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.manoever}" />
 
                     <include
                         android:id="@+id/manoever_cpa"
-                        layout="@layout/cpa_data"
+                        layout="@layout/opponent_cpa_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.manoever}" />
 
                     <include
                         android:id="@+id/manoever_bcr"
-                        layout="@layout/bcr_data"
+                        layout="@layout/opponent_bcr_data"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:lage="@{opponent.manoever}" />

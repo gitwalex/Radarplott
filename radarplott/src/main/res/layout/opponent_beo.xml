@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="handler"
+            type="com.gerwalex.radarplott.main.OpponentVesselData" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/content_padding"
+        tools:ignore="MissingConstraints">
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:constraint_referenced_ids="name, rwsp1,dist1, rwsp2, dist2, minutes"
+            app:flow_horizontalAlign="start"
+            app:flow_maxElementsWrap="1"
+            app:flow_wrapMode="chain" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="@string/name"
+            android:hint="@string/name"
+            android:maxLines="1"
+            android:text="@={handler.name}" />
+
+        <TextView
+            android:id="@+id/rwsp1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(handler.rwSp1)}" />
+
+
+        <TextView
+            android:id="@+id/rwsp2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(handler.rwSp2)}" />
+
+
+        <TextView
+            android:id="@+id/dist1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(handler.dist1)}" />
+
+
+        <TextView
+            android:id="@+id/dist2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(handler.dist2)}" />
+
+        <TextView
+            android:id="@+id/minutes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(handler.minutes)}" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

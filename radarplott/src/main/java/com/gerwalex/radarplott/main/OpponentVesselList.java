@@ -76,20 +76,20 @@ public class OpponentVesselList extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            int pos = holder.getAdapterPosition();
+            int pos = holder.getBindingAdapterPosition();
             holder.binding.lageCard.setStrokeColor(colors[pos]);
             OpponentVessel opponent = opponentList.get(position);
             holder.binding.setOpponent(opponent);
             opponent.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
                 @Override
                 public void onPropertyChanged(Observable sender, int propertyId) {
-                    notifyItemChanged(holder.getAdapterPosition());
+                    notifyItemChanged(holder.getAbsoluteAdapterPosition());
                 }
             });
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    OpponentVesselData dlg = OpponentVesselData.newInstance(holder.getAdapterPosition());
+                    OpponentVesselData dlg = OpponentVesselData.newInstance(holder.getAbsoluteAdapterPosition());
                     dlg.show(fm, null);
                 }
             });
