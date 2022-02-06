@@ -5,30 +5,30 @@
     <string name="speed">vA (FdW)</string>
     <string name="ok">OK</string>
     <string name="ownVesselData">Eigenes Schiff</string>
-    <string name="sm">%.1f sm</string>
     <string name="kurse">Kurse</string>
     <string name="positionen">Positionen</string>
     <string name="kursFormatted">%03.1f deg, %.1f kn</string>
     <string name="CPAFormatted">CPA %.1f sm</string>
     <!--    -->
-    <string name="formattedHeading">%03.0f deg</string>
-    <string name="formattedFdW">%.1f kn</string>
-    <string name="formattedSm">%.1f sm</string>
-    <string name="formattedMinutes">%.1f min</string>
+    <string name="fDeg">%03.1f deg</string>
+    <string name="fKnots">%.1f kn</string>
+    <string name="fSm">%.1f sm</string>
+    <string name="fMinutes">%.1f min</string>
     <!---->
     <string name="opponent_name">Name: %1s</string>
     <string name="rKurs">Kurs relativ %03.1f deg</string>
     <string name="rFdW">FdW relativ %.1f kn</string>
     <string name="wKurs">Kurs %03.1f deg</string>
     <string name="wFdW">FdW %.1f kn</string>
-    <string name="AbstandCPA">CPA %.1f sm</string>
-    <string name="TimeToCPA">Zeit bis CPA %.1f min</string>
-    <string name="DistanceToCPA">Distanz CPA %.1f sm</string>
-    <string name="rwPeilungCPA">Peilung CPA rw %03.1f deg </string>
-    <string name="AbstandBCR">Abstand BCR %.1f sm</string>
-    <string name="TimeToBCR">Zeit bis BCR %.1f min</string>
+    <string name="AbstandCPA">Abstand</string>
+    <string name="TimeToCPA">Zeit bis CPA</string>
+    <string name="Distance">Distanz</string>
+    <string name="rwPeilung">Peilung rw</string>
+    <string name="AbstandBCR">Abstand</string>
+    <string name="TimeToBCR">Zeit bis BCR</string>
     <string name="HDL">HDL</string>
-    <string name="name">Name</string>
+    <string name="name">Name %1s</string>
+    <string name="opponent">%1s, Kurs %03.1f deg, FdW %.1f kn</string>
     <string name="rwsp1">1. Radarpeilung</string>
     <string name="rwsp2">2. Radarpeilung</string>
     <string name="dist1">Distanz bei erster Peilung</string>
@@ -37,4 +37,12 @@
     <string name="minutesLt1">Minuten müssen grösser 1 sein</string>
     <string name="data">Beobachtungen und Lage</string>
     <string name="radarbild">Radarbild</string>
+    <string name="data1peilung">1. Peilung</string>
+    <string name="data2peilung">2. Peilung</string>
+    <string name="CPA">CPA</string>
+    <string name="BCR">BCR</string>
+    <string name="beobachtung">Beobachtungen</string>
+    <string name="lage">Lage</string>
+    <string name="nachManoever">nach Manöver</string>
+
 </resources>

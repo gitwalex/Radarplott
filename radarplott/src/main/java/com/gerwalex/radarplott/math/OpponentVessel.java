@@ -44,6 +44,10 @@ public class OpponentVessel extends BaseObservable {
         rwP1 = peilungRechtweisend;
     }
 
+    public float getMinutes() {
+        return minutes;
+    }
+
     public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend,
                           double distance, float time, float rwP2, double distance2) {
         this(me, startTime, name, peilungRechtweisend, distance);
@@ -84,6 +88,7 @@ public class OpponentVessel extends BaseObservable {
         return getLage().getRelativVessel();
     }
 
+    @Bindable
     public float getRwP1() {
         return rwP1;
     }

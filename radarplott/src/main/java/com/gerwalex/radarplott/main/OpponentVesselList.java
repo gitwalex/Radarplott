@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.databinding.OpponentShortBinding;
+import com.gerwalex.radarplott.databinding.OpponentBinding;
 import com.gerwalex.radarplott.databinding.RecyclerviewBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
 
@@ -79,6 +79,7 @@ public class OpponentVesselList extends Fragment {
             int pos = holder.getBindingAdapterPosition();
             holder.binding.lageCard.setStrokeColor(colors[pos]);
             OpponentVessel opponent = opponentList.get(position);
+            holder.binding.oppenentManoever.TVTitle.setText(R.string.nachManoever);
             holder.binding.setOpponent(opponent);
             opponent.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
                 @Override
@@ -98,15 +99,15 @@ public class OpponentVesselList extends Fragment {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ViewHolder(OpponentShortBinding.inflate(inflater));
+            return new ViewHolder(OpponentBinding.inflate(inflater));
         }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public final OpponentShortBinding binding;
+        public final OpponentBinding binding;
 
-        public ViewHolder(@NonNull OpponentShortBinding binding) {
+        public ViewHolder(@NonNull OpponentBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

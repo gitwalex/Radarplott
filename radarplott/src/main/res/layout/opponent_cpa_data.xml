@@ -41,13 +41,13 @@
             android:id="@+id/distanceToCPA"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{@string/DistanceToCPA(lage.DistanceToCPA)}" />
+            android:text="@{@string/Distance(lage.DistanceToCPA)}" />
 
         <TextView
             android:id="@+id/rwPeilungCPA"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{@string/rwPeilungCPA(lage.peilungRechtweisendCPA)}" />
+            android:text="@{@string/rwPeilung(lage.peilungRechtweisendCPA)}" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

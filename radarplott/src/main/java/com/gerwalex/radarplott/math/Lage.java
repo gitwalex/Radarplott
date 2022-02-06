@@ -1,19 +1,19 @@
 package com.gerwalex.radarplott.math;
 
 public class Lage {
-    public final float abstandBCR;
-    public final float abstandCPA;
-    public final float distanceToCPA;
-    public final float peilungRechtweisendCPA;
-    public final float timeToBCR;
-    public final float timeToCPA;
     private final Vessel absolutVessel;
+    private final float abstandBCR;
+    private final float abstandCPA;
     private final Punkt2D bcr;
     private final Punkt2D cpa;
+    private final float distanceToCPA;
     private final float maxCPA;
     private final Vessel me;
+    private final float peilungRechtweisendCPA;
     private final Punkt2D relPos;
     private final Vessel relativVessel;
+    private final float timeToBCR;
+    private final float timeToCPA;
 
     /**
      * Lage zum Beginn. Durch Peilungen stehen Kurs und Geschwindigkeit des Opponent fest. Anhand dieses relativen
