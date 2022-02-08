@@ -2,6 +2,7 @@ package com.gerwalex.radarplott.views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
@@ -57,6 +58,7 @@ public class RadarBasisView extends FrameLayout {
     private final long clickTime = -1;
     @ColorRes
     private final int[] colors;
+    private final float desiredSize;
     private final float extraSmallTextSize;
     private final GestureDetector gestureDetector;
     private final Paint manoeverCourselineStyle = new Paint();
@@ -110,13 +112,20 @@ public class RadarBasisView extends FrameLayout {
     }
 
     public RadarBasisView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.style.RadarView);
     }
 
     public RadarBasisView(Context context, AttributeSet attrs, int style) {
         super(context, attrs, style);
-        minRadarRings = context.getResources().getInteger(R.integer.minRadarRings);
-        maxRadarRings = context.getResources().getInteger(R.integer.maxRadarRings);
+        TypedArray a =
+                context.getTheme().obtainStyledAttributes(attrs, R.styleable.RadarViewStyle, 0, R.style.RadarView);
+        try {
+            minRadarRings = a.getInt(R.styleable.RadarViewStyle_minRadarRings, 3);
+            maxRadarRings = a.getInt(R.styleable.RadarViewStyle_maxRadarRings, 3);
+            desiredSize = a.getDimension(R.styleable.RadarViewStyle_radarSize, 300);
+        } finally {
+            a.recycle();
+        }
         colors = getResources().getIntArray(R.array.vesselcolors);
         ownVesselColor = ContextCompat.getColor(context, R.color.ownVesselColor);
         radarLineStyle.setTextSize(40);
@@ -522,8 +531,6 @@ public class RadarBasisView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int desiredWidth = 100;
-        int desiredHeight = 100;
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -539,7 +546,7 @@ public class RadarBasisView extends FrameLayout {
             width = widthSize;
         } else {
             //Be whatever you want
-            width = desiredWidth;
+            width = (int) desiredSize;
         }
         //Measure Height
         if (heightMode == MeasureSpec.EXACTLY) {
@@ -550,7 +557,7 @@ public class RadarBasisView extends FrameLayout {
             height = heightSize;
         } else {
             //Be whatever you want
-            height = desiredHeight;
+            height = (int) desiredSize;
         }
         int size = Math.min(width, height);
         //MUST CALL THIS

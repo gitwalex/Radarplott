@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RadarViewStyle">
+        <attr name="minRadarRings" format="integer" />
+        <attr name="maxRadarRings" format="integer" />
+        <attr name="radarSize" format="dimension" />
+
+    </declare-styleable>
+
+    <style name="RadarView" parent="">
+        <item name="minRadarRings">3</item>
+        <item name="maxRadarRings">12</item>
+        <item name="radarSize">300dp</item>
+    </style>
+    <!--Farben für Vessels-->
+    <array name="vesselcolors">
+        <item>@color/red</item>
+        <item>@color/orange</item>
+        <item>@color/yellow</item>
+        <item>@color/chartreuse</item>
+        <item>@color/spring_green</item>
+        <item>@color/cyan</item>
+        <item>@color/azure</item>
+        <item>@color/blue</item>
+        <item>@color/violet</item>
+        <item>@color/magenta</item>
+    </array>
+    <color name="ownVesselColor">@color/green</color>
+
+
+</resources>
