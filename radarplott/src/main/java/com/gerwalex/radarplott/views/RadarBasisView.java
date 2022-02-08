@@ -27,12 +27,12 @@ import androidx.core.widget.TextViewCompat;
 import androidx.databinding.Observable;
 import androidx.lifecycle.MutableLiveData;
 
+import com.gerwalex.lib.math.Kreis2D;
+import com.gerwalex.lib.math.Punkt2D;
 import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.math.Kreis2D;
 import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
-import com.gerwalex.radarplott.math.Punkt2D;
 import com.gerwalex.radarplott.math.Vessel;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -522,11 +522,39 @@ public class RadarBasisView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int width = getMeasuredWidth();
-        int heigth = getMeasuredHeight();
-        int dimen = Math.max(width, heigth);
-        setMeasuredDimension(dimen, dimen);
+        int desiredWidth = 100;
+        int desiredHeight = 100;
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        int width;
+        int height;
+        //Measure Width
+        if (widthMode == MeasureSpec.EXACTLY) {
+            //Must be this size
+            width = widthSize;
+        } else if (widthMode == MeasureSpec.AT_MOST) {
+            //Can't be bigger than...
+            width = widthSize;
+        } else {
+            //Be whatever you want
+            width = desiredWidth;
+        }
+        //Measure Height
+        if (heightMode == MeasureSpec.EXACTLY) {
+            //Must be this size
+            height = heightSize;
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            //Can't be bigger than...
+            height = heightSize;
+        } else {
+            //Be whatever you want
+            height = desiredHeight;
+        }
+        int size = Math.min(width, height);
+        //MUST CALL THIS
+        setMeasuredDimension(size, size);
     }
 
     @Override

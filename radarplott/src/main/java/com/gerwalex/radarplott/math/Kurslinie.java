@@ -2,6 +2,11 @@ package com.gerwalex.radarplott.math;
 
 import androidx.annotation.NonNull;
 
+import com.gerwalex.lib.math.Gerade2D;
+import com.gerwalex.lib.math.Kreis2D;
+import com.gerwalex.lib.math.Punkt2D;
+import com.gerwalex.lib.math.Vektor2D;
+
 public class Kurslinie {
 
     private final Gerade2D line;

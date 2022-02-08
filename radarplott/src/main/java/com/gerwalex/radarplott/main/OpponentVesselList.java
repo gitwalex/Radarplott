@@ -15,16 +15,16 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gerwalex.lib.databinding.LinearRecyclerviewBinding;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OpponentBinding;
-import com.gerwalex.radarplott.databinding.RecyclerviewBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
 
 import java.util.List;
 
 public class OpponentVesselList extends Fragment {
 
-    private RecyclerviewBinding binding;
+    private LinearRecyclerviewBinding binding;
     private MainModel mModel;
 
     @Override
@@ -37,7 +37,7 @@ public class OpponentVesselList extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = RecyclerviewBinding.inflate(inflater, container, false);
+        binding = LinearRecyclerviewBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -48,7 +48,7 @@ public class OpponentVesselList extends Fragment {
             public void onChanged(List<OpponentVessel> opponentVessels) {
                 Adapter<RecyclerView.ViewHolder> adapter =
                         new Adapter<>(getParentFragmentManager(), requireContext(), opponentVessels);
-                binding.recyclerview.setAdapter(adapter);
+                binding.defaultRecyclerView.setAdapter(adapter);
             }
         });
     }
@@ -101,7 +101,7 @@ public class OpponentVesselList extends Fragment {
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends com.gerwalex.lib.adapters.ViewHolder {
 
         public final OpponentBinding binding;
 

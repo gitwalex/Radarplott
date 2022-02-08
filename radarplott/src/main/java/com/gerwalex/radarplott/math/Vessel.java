@@ -5,6 +5,10 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.library.baseAdapters.BR;
 
+import com.gerwalex.lib.math.Kreis2D;
+import com.gerwalex.lib.math.Punkt2D;
+import com.gerwalex.lib.math.Vektor2D;
+
 import java.util.Objects;
 
 public class Vessel extends BaseObservable {

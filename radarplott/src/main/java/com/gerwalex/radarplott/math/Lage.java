@@ -1,5 +1,8 @@
 package com.gerwalex.radarplott.math;
 
+import com.gerwalex.lib.math.Kreis2D;
+import com.gerwalex.lib.math.Punkt2D;
+
 public class Lage {
     private final Vessel absolutVessel;
     private final float abstandBCR;

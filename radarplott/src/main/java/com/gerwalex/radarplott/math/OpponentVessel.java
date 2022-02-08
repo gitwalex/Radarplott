@@ -7,6 +7,8 @@ import androidx.databinding.Observable;
 import androidx.databinding.ObservableField;
 import androidx.databinding.library.baseAdapters.BR;
 
+import com.gerwalex.lib.math.Punkt2D;
+
 import java.util.Locale;
 import java.util.Objects;
 

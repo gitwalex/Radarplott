@@ -1,7 +1,5 @@
 package com.gerwalex.radarplott.main;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -13,12 +11,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.Observable;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gerwalex.lib.main.BasicFragment;
+import com.gerwalex.lib.main.Utils;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.MainFragmentBinding;
 import com.gerwalex.radarplott.databinding.OpponentBinding;
@@ -29,38 +28,9 @@ import com.google.android.material.slider.LabelFormatter;
 
 import java.util.List;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends BasicFragment {
     private MainFragmentBinding binding;
     private MainModel mModel;
-
-    private void flipCard(View visibleView, View invisibleView) {
-        Context context = visibleView.getContext();
-        visibleView.setVisibility(View.VISIBLE);
-        Animator flipOutAnimatorSet = AnimatorInflater.loadAnimator(context, R.animator.flip_out);
-        flipOutAnimatorSet.setTarget(invisibleView);
-        Animator flipInAnimatorset = AnimatorInflater.loadAnimator(context, R.animator.flip_in);
-        flipInAnimatorset.setTarget(visibleView);
-        flipInAnimatorset.start();
-        flipOutAnimatorSet.start();
-        flipInAnimatorset.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                invisibleView.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-            }
-        });
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -170,10 +140,10 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (binding.radar.getVisibility() == View.GONE) {
-                    flipCard(binding.radar, binding.recyclerview);
+                    Utils.flipCard(binding.radar, binding.recyclerview);
                 }
                 if (binding.recyclerview.getVisibility() == View.GONE) {
-                    flipCard(binding.recyclerview, binding.radar);
+                    Utils.flipCard(binding.recyclerview, binding.radar);
                 }
             }
         });
