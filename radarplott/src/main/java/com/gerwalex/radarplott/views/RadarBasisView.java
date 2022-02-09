@@ -48,7 +48,6 @@ import java.util.Objects;
  */
 public class RadarBasisView extends FrameLayout {
     public static final float RADARRINGE = 8;
-    private static final float sektorlinienlaenge = 40.0f;
     private static final int textPadding = 30;
     private static final int thickPath = 3;
     private static final int thinPath = 2;
@@ -223,18 +222,19 @@ public class RadarBasisView extends FrameLayout {
 
     private void createOuterRadarRing(int w, int h) {
         if (w * h != 0) {
+            float sektorlinienlaenge = (Math.min(w, h)) / 40f;
             textStyle.setColor(textColor);
             textStyle.setTextSize(extraSmallTextSize);
             textStyle.setTextAlign(Paint.Align.CENTER);
             Rect textRect = getTextRect(textStyle, "000");
-            outerRadarRingRadius = (Math.min(w, h) - textRect.width()) / 2f - sektorlinienlaenge - 10;
+            outerRadarRingRadius = (Math.min(w, h) - textRect.width()) / 2f - sektorlinienlaenge;
             outerRadarRing = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(outerRadarRing);
             canvas.save();
             canvas.translate(w / 2f, h / 2f);
             Punkt2D mp = new Punkt2D();
             for (int i = 0; i < 36; i++) {
-                Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge + 10);
+                Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge);
                 String text = "000" + i * 10;
                 canvas.drawText(text.substring(text.length() - 3), pkt.x, -pkt.y + textRect.height() / 2f, textStyle);
             }
@@ -559,9 +559,8 @@ public class RadarBasisView extends FrameLayout {
             //Be whatever you want
             height = (int) desiredSize;
         }
-        int size = Math.min(width, height);
         //MUST CALL THIS
-        setMeasuredDimension(size, size);
+        setMeasuredDimension(width, height);
     }
 
     @Override
