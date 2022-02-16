@@ -18,6 +18,7 @@ public class MainModel extends ViewModel {
     public final MutableLiveData<Integer> maxTime = new MutableLiveData<>();
     public final MutableLiveData<List<OpponentVessel>> opponentVesselList = new MutableLiveData<>(new ArrayList<>());
     public final MutableLiveData<Vessel> ownVessel = new MutableLiveData<>();
+    public final MutableLiveData<Boolean> radarClicked = new MutableLiveData<>();
 
     public MainModel() {
         Vessel me = new Vessel(80, 8);

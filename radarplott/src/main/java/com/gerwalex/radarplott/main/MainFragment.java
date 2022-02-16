@@ -8,15 +8,19 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.transition.TransitionManager;
 
 import com.gerwalex.lib.main.BasicFragment;
-import com.gerwalex.lib.main.Utils;
+import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.MainFragmentBinding;
 import com.google.android.material.slider.LabelFormatter;
 
 public class MainFragment extends BasicFragment {
+    boolean smallRadar = true;
     private MainFragmentBinding binding;
     private MainModel mModel;
 
@@ -37,6 +41,22 @@ public class MainFragment extends BasicFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        ConstraintSet constraint1 = new ConstraintSet();
+        constraint1.clone(binding.mainFragment);
+        ConstraintSet constraint2 = new ConstraintSet();
+        mModel.radarClicked.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean clicked) {
+                if (clicked) {
+                    constraint2.clone(view.getContext(), R.layout.main_fragment_large_radar);
+                    mModel.radarClicked.setValue(false);
+                    TransitionManager.beginDelayedTransition((ViewGroup) view, null);
+                    ConstraintSet currentConstraint = smallRadar ? constraint2 : constraint1;
+                    smallRadar = !smallRadar;
+                    currentConstraint.applyTo((ConstraintLayout) view);
+                }
+            }
+        });
         mModel.maxTime.observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
@@ -57,17 +77,6 @@ public class MainFragment extends BasicFragment {
             public String getFormattedValue(float value) {
                 int time = (int) value;
                 return String.format("%02d:%02d", time / 60, time % 60);
-            }
-        });
-        binding.flipBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (binding.radar.getVisibility() == View.GONE) {
-                    Utils.flipCard(binding.radar, binding.opponentVesselList);
-                }
-                if (binding.opponentVesselList.getVisibility() == View.GONE) {
-                    Utils.flipCard(binding.opponentVesselList, binding.radar);
-                }
             }
         });
     }

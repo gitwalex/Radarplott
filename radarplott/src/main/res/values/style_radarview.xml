@@ -3,14 +3,14 @@
     <declare-styleable name="RadarViewStyle">
         <attr name="minRadarRings" format="integer" />
         <attr name="maxRadarRings" format="integer" />
-        <attr name="radarSize" format="dimension" />
+        <attr name="minRadarSize" format="dimension" />
 
     </declare-styleable>
 
     <style name="RadarView" parent="">
         <item name="minRadarRings">3</item>
         <item name="maxRadarRings">12</item>
-        <item name="radarSize">300dp</item>
+        <item name="minRadarSize">300dp</item>
     </style>
     <!--Farben für Vessels-->
     <array name="vesselcolors">

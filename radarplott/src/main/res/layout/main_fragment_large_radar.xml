@@ -5,36 +5,27 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main_fragment"
+        android:id="@+id/main_fragment_large_radar"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/opponentVesselList"
-            android:name="com.gerwalex.radarplott.main.OpponentVesselList"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/radar"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout="@layout/linear_recyclerview" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/ownVessel"
             android:name="com.gerwalex.radarplott.main.OwnVessel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@id/radar"
-            app:layout_constraintEnd_toStartOf="@id/radar"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/radar" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/radar"
             android:name="com.gerwalex.radarplott.main.RadarFragment"
-            android:layout_width="wrap_content"
-            android:layout_height="240dp"
-            app:layout_constraintBottom_toTopOf="@id/time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:layout="@layout/radar_view"
             tools:visibility="visible" />
 

@@ -17,7 +17,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.widget.FrameLayout;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
@@ -30,12 +30,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.gerwalex.lib.math.Kreis2D;
 import com.gerwalex.lib.math.Punkt2D;
-import com.gerwalex.radarplott.BuildConfig;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.OpponentVessel;
 import com.gerwalex.radarplott.math.Vessel;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +44,7 @@ import java.util.Objects;
  *
  * @author Alexander Winkler
  */
-public class RadarBasisView extends FrameLayout {
+public class RadarBasisView extends View {
     public static final float RADARRINGE = 8;
     private static final int textPadding = 30;
     private static final int thickPath = 3;
@@ -59,7 +57,7 @@ public class RadarBasisView extends FrameLayout {
     private final int[] colors;
     private final float desiredSize;
     private final float extraSmallTextSize;
-    private final GestureDetector gestureDetector;
+    private final RadarTouchDetector gestureDetector;
     private final Paint manoeverCourselineStyle = new Paint();
     private final Path manoeverline = new Path();
     private final float markerRadius = 20f;
@@ -103,6 +101,7 @@ public class RadarBasisView extends FrameLayout {
     private float outerRadarRingRadius;
     private Kreis2D outerRing;
     private RadarObserver radarObserver;
+    private RadarSize radarSize = RadarSize.Small;
     private float scaleFactor;
     private int startTime;
 
@@ -121,7 +120,7 @@ public class RadarBasisView extends FrameLayout {
         try {
             minRadarRings = a.getInt(R.styleable.RadarViewStyle_minRadarRings, 3);
             maxRadarRings = a.getInt(R.styleable.RadarViewStyle_maxRadarRings, 3);
-            desiredSize = a.getDimension(R.styleable.RadarViewStyle_radarSize, 300);
+            desiredSize = a.getDimension(R.styleable.RadarViewStyle_minRadarSize, 300);
         } finally {
             a.recycle();
         }
@@ -153,43 +152,7 @@ public class RadarBasisView extends FrameLayout {
         textStyle.setTextSize(smallTextSize);
         textStyle.setAntiAlias(true);
         setWillNotDraw(false);
-        gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent e) {
-                int width = getWidth() / 2;
-                int height = getHeight() / 2;
-                float x = e.getX();
-                float y = e.getY();
-                Punkt2D pkt = new Punkt2D((x - width), (height - y));
-                Kreis2D k = new Kreis2D(pkt, 40f);
-                if (radarObserver != null) {
-                    for (OpponentVessel opponent : opponentVesselList) {
-                        Vessel vessel = opponent.getRelativeVessel();
-                        if (k.liegtImKreis(vessel.getSecondPosition())) {
-                            radarObserver.onVesselClick(vessel);
-                        }
-                    }
-                }
-                if (BuildConfig.DEBUG) {
-                    Snackbar.make(RadarBasisView.this, pkt.toString(), Snackbar.LENGTH_SHORT).show();
-                }
-                return true;
-            }
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-                longPressed = true;
-                int width = getWidth() / 2;
-                int height = getHeight() / 2;
-                float x = e.getX();
-                float y = e.getY();
-                Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
-                manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
-                if (radarObserver != null) {
-                    radarObserver.onCreateManoever(manoverVessel);
-                }
-            }
-        });
+        gestureDetector = new RadarTouchDetector(context);
     }
 
     public void addCircle(Path path, Punkt2D pos) {
@@ -206,9 +169,10 @@ public class RadarBasisView extends FrameLayout {
             Canvas canvas = new Canvas(innerRadarRing);
             canvas.translate(w / 2f, h / 2f);
             textStyle.setTextAlign(Paint.Align.CENTER);
+            boolean drawInnerRingText = radarSize.getDrawInnerRingText();
             for (int ringSize = 1; ringSize <= radarRings; ringSize++) {
                 canvas.drawCircle(0, 0, ringSize * scaleFactor, radarLineStyle);
-                if (ringSize % 2 == 0) {
+                if (drawInnerRingText && ringSize % 2 == 0) {
                     String text = String.valueOf(ringSize);
                     canvas.drawText(text, 0, -(ringSize * scaleFactor) + extraSmallTextSize / 2, textStyle);
                     canvas.drawText(text, 0, ringSize * scaleFactor + extraSmallTextSize / 2, textStyle);
@@ -223,6 +187,10 @@ public class RadarBasisView extends FrameLayout {
     private void createOuterRadarRing(int w, int h) {
         if (w * h != 0) {
             float sektorlinienlaenge = (Math.min(w, h)) / 40f;
+            float startsektorlinie2grad = outerRadarRingRadius - sektorlinienlaenge / 3;
+            float endsektorlinie2grad = outerRadarRingRadius + sektorlinienlaenge / 3;
+            float startsektorlinie5grad = outerRadarRingRadius - sektorlinienlaenge / 2;
+            float endsektorlinie5grad = outerRadarRingRadius + sektorlinienlaenge / 2;
             textStyle.setColor(textColor);
             textStyle.setTextSize(extraSmallTextSize);
             textStyle.setTextAlign(Paint.Align.CENTER);
@@ -233,21 +201,13 @@ public class RadarBasisView extends FrameLayout {
             canvas.save();
             canvas.translate(w / 2f, h / 2f);
             Punkt2D mp = new Punkt2D();
-            for (int i = 0; i < 36; i++) {
+            int stepsize = radarSize.getStepsize();
+            for (int i = 0; i < 36; i += stepsize) {
                 Punkt2D pkt = mp.getPunkt2D(i * 10, outerRadarRingRadius + sektorlinienlaenge);
                 String text = "000" + i * 10;
                 canvas.drawText(text.substring(text.length() - 3), pkt.x, -pkt.y + textRect.height() / 2f, textStyle);
             }
-            float startsektorlinie2grad = outerRadarRingRadius - sektorlinienlaenge / 3;
-            float endsektorlinie2grad = outerRadarRingRadius + sektorlinienlaenge / 3;
-            float startsektorlinie5grad = outerRadarRingRadius - sektorlinienlaenge / 2;
-            float endsektorlinie5grad = outerRadarRingRadius + sektorlinienlaenge / 2;
             for (int winkel = 0; winkel < 180; winkel++) {
-                // Festlegen Laenge der sektorlienien auf dem Aussenkreis
-                // Alle 2 Grad: halbe sektorlinienlaenge
-                // Alle 10 Grad: sektorlinienlaenge
-                // Alle 30 Grad: Linie vom Mittelpunkt zum aeusseren sichtbaren Radarkreis
-                // Berechnen der Linien - Abstand 2 Grad
                 if (winkel % 10 == 0) {
                     canvas.drawLine(0, -outerRadarRingRadius - sektorlinienlaenge, 0,
                             outerRadarRingRadius + sektorlinienlaenge, radarLineStyle);
@@ -486,13 +446,7 @@ public class RadarBasisView extends FrameLayout {
         }
         symbolPath.reset();
         canvas.save();
-        if (outerRadarRing == null) {
-            createOuterRadarRing(getWidth(), getHeight());
-        }
         canvas.drawBitmap(outerRadarRing, 0, 0, radarLineStyle);
-        if (innerRadarRing == null) {
-            createInnerRadarRings(RADARRINGE);
-        }
         canvas.drawBitmap(innerRadarRing, 0, 0, radarLineStyle);
         canvas.translate(getWidth() / 2f, getHeight() / 2f);
         if (me != null) {
@@ -559,13 +513,15 @@ public class RadarBasisView extends FrameLayout {
             //Be whatever you want
             height = (int) desiredSize;
         }
+        int size = Math.min(width, height);
         //MUST CALL THIS
-        setMeasuredDimension(width, height);
+        setMeasuredDimension(size, size);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (w != oldw && h != oldh) {
+            radarSize = RadarSize.getSize(w, h);
             Log.d("gerwalex", String.format("RadarView onSizeChanged: %1d, %2d", w, h));
             createOuterRadarRing(w, h);
             scaleFactor = outerRadarRingRadius / RADARRINGE;
@@ -579,24 +535,28 @@ public class RadarBasisView extends FrameLayout {
         performClick();
         boolean consumed = gestureDetector.onTouchEvent(event);
         if (!consumed) {
-            mScaleDetector.onTouchEvent(event);
-            int action = event.getAction();
-            if (action == MotionEvent.ACTION_MOVE && longPressed) {
-                int width = getWidth() / 2;
-                int height = getHeight() / 2;
-                float x = event.getX();
-                float y = event.getY();
-                Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
-                manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
-                if (radarObserver != null) {
-                    radarObserver.onCreateManoever(manoverVessel);
-                }
-                consumed = true;
-            } else if (action == MotionEvent.ACTION_UP) {
-                longPressed = false;
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:
+                    longPressed = false;
+                    consumed = true;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (longPressed) {
+                        int width = getWidth() / 2;
+                        int height = getHeight() / 2;
+                        float x = event.getX();
+                        float y = event.getY();
+                        Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
+                        manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
+                        if (radarObserver != null) {
+                            radarObserver.onCreateManoever(manoverVessel);
+                        }
+                        consumed = true;
+                    }
             }
         }
-        return consumed || super.onTouchEvent(event);
+        mScaleDetector.onTouchEvent(event);
+        return consumed;
     }
 
     @Override
@@ -607,7 +567,8 @@ public class RadarBasisView extends FrameLayout {
     public void setCurrentTime(int minutes) {
         this.minutes = minutes;
         if (manoverVessel != null) {
-            manoverVessel = new Vessel((int) manoverVessel.getHeading(), manoverVessel.getSpeed());
+            manoverVessel = new Vessel(manoverVessel.getPosition(minutes), (int) manoverVessel.getHeading(),
+                    manoverVessel.getSpeed());
             if (radarObserver != null) {
                 radarObserver.onCreateManoever(manoverVessel);
             }
@@ -671,6 +632,72 @@ public class RadarBasisView extends FrameLayout {
         return northupOrientierung;
     }
 
+    public enum RadarSize {
+        Small {
+            @Override
+            public int getStepsize() {
+                return 9;
+            }
+
+            @Override
+            public boolean drawTexte() {
+                return false;
+            }
+
+            @Override
+            public boolean getDrawInnerRingText() {
+                return false;
+            }
+        }, Medium {
+            @Override
+            public int getStepsize() {
+                return 3;
+            }
+
+            @Override
+            public boolean drawTexte() {
+                return true;
+            }
+
+            @Override
+            public boolean getDrawInnerRingText() {
+                return false;
+            }
+        }, Large {
+            @Override
+            public int getStepsize() {
+                return 1;
+            }
+
+            @Override
+            public boolean drawTexte() {
+                return true;
+            }
+
+            @Override
+            public boolean getDrawInnerRingText() {
+                return true;
+            }
+        };
+
+        public static RadarSize getSize(int width, int heigth) {
+            int size = Math.min(width, heigth);
+            if (size < 500) {
+                return Small;
+            }
+            if (size < 900) {
+                return Medium;
+            }
+            return Large;
+        }
+
+        public abstract boolean drawTexte();
+
+        public abstract boolean getDrawInnerRingText();
+
+        public abstract int getStepsize();
+    }
+
     public enum Symbols {
         ownMove {
             @Override
@@ -697,7 +724,59 @@ public class RadarBasisView extends FrameLayout {
 
         void onCreateManoever(Vessel manoverVessel);
 
+        default boolean onRadarClick() {
+            return false;
+        }
+
         void onVesselClick(Vessel vessel);
+    }
+
+    private class RadarTouchDetector extends GestureDetector {
+
+        public RadarTouchDetector(Context context) {
+            super(context, new SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(MotionEvent event) {
+                    int width = getWidth() / 2;
+                    int height = getHeight() / 2;
+                    float x = event.getX();
+                    float y = event.getY();
+                    Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
+                    Kreis2D k = new Kreis2D(pkt, 40f);
+                    if (radarObserver != null) {
+                        for (OpponentVessel opponent : opponentVesselList) {
+                            Vessel vessel = opponent.getRelativeVessel();
+                            if (k.liegtImKreis(vessel.getSecondPosition())) {
+                                radarObserver.onVesselClick(vessel);
+                            }
+                        }
+                    }
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent event) {
+                    longPressed = true;
+                    int width = getWidth() / 2;
+                    int height = getHeight() / 2;
+                    float x = event.getX();
+                    float y = event.getY();
+                    Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
+                    manoverVessel = new Vessel((int) new Punkt2D().getYAxisAngle(pkt), me.getSpeed());
+                    if (radarObserver != null) {
+                        radarObserver.onCreateManoever(manoverVessel);
+                    }
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    if (radarObserver != null) {
+                        radarObserver.onRadarClick();
+                    }
+                    return true;
+                }
+            });
+        }
     }
 
     /**
@@ -720,3 +799,7 @@ public class RadarBasisView extends FrameLayout {
         }
     }
 }
+
+
+
+

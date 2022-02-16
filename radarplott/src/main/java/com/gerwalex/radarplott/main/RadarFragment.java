@@ -37,10 +37,15 @@ public class RadarFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         binding = RadarViewBinding.inflate(inflater, container, false);
         binding.radar.setRadarObserver(new RadarBasisView.RadarObserver() {
-
             @Override
             public void onCreateManoever(Vessel manoverVessel) {
                 mModel.manoever.setValue(manoverVessel);
+            }
+
+            @Override
+            public boolean onRadarClick() {
+                mModel.radarClicked.setValue(true);
+                return true;
             }
 
             @Override
