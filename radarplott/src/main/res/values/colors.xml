@@ -9,7 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorRadarLinien">@android:color/darker_gray</color>
     <color name="green">@android:color/holo_green_light</color>
-    <color name="bright_pink">#FF007F</color>
     <color name="red">#FF0000</color>
     <color name="orange">#FF7F00</color>
     <color name="yellow">#FFFF00</color>

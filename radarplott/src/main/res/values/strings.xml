@@ -15,17 +15,10 @@
     <string name="fSm">%.1f sm</string>
     <string name="fMinutes">%.1f min</string>
     <!---->
-    <string name="opponent_name">Name: %1s</string>
-    <string name="rKurs">Kurs relativ %03.1f deg</string>
-    <string name="rFdW">FdW relativ %.1f kn</string>
     <string name="wKurs">Kurs %03.1f deg</string>
     <string name="wFdW">FdW %.1f kn</string>
-    <string name="AbstandCPA">Abstand</string>
-    <string name="TimeToCPA">Zeit bis CPA</string>
     <string name="Distance">Distanz</string>
     <string name="rwPeilung">Peilung rw</string>
-    <string name="AbstandBCR">Abstand</string>
-    <string name="TimeToBCR">Zeit bis BCR</string>
     <string name="HDL">HDL</string>
     <string name="name">Name %1s</string>
     <string name="opponent">%1s, Kurs %03.1f deg, FdW %.1f kn</string>
@@ -35,13 +28,8 @@
     <string name="dist2">Distanz bei zweiter Peilung</string>
     <string name="minutes">Minuten zwischen Peilungen</string>
     <string name="minutesLt1">Minuten müssen grösser 1 sein</string>
-    <string name="data">Beobachtungen und Lage</string>
-    <string name="radarbild">Radarbild</string>
-    <string name="data1peilung">1. Peilung</string>
-    <string name="data2peilung">2. Peilung</string>
     <string name="CPA">CPA</string>
     <string name="BCR">BCR</string>
-    <string name="beobachtung">Beobachtungen</string>
     <string name="lage">Lage</string>
     <string name="nachManoever">nach Manöver</string>
     <string name="Abstand">Abstand</string>
