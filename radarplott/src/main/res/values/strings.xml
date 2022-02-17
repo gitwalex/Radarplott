@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Radarplott</string>
-    <string name="ownVessel">Eigenes Schiff</string>
+    <string name="ownVesselTxt">Eigenes Schiff</string>
     <string name="heading">KA (rwK)</string>
     <string name="speed">vA (FdW)</string>
     <string name="ok">OK</string>
-    <string name="ownVesselData">Eigenes Schiff</string>
+    <string name="ownVesselData">Eigenes Schiff:</string>
     <string name="kurse">Kurse</string>
     <string name="positionen">Positionen</string>
     <string name="kursFormatted">%03.1f deg, %.1f kn</string>
@@ -21,7 +21,8 @@
     <string name="rwPeilung">Peilung rw</string>
     <string name="HDL">HDL</string>
     <string name="name">Name %1s</string>
-    <string name="opponent">%1s, Kurs %03.1f deg, FdW %.1f kn</string>
+    <string name="opponent">Opponent: </string>
+    <string name="ownVessel">Eigenes Schiff: Kurs %03.1f deg, FdW %.1f kn</string>
     <string name="rwsp1">1. Radarpeilung</string>
     <string name="rwsp2">2. Radarpeilung</string>
     <string name="dist1">Distanz bei erster Peilung</string>

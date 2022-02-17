@@ -4,6 +4,6 @@
     app:startDestination="@id/mainFragment">
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.gerwalex.radarplott.main.MainFragment"
+        android:name="com.gerwalex.radarplott.main.LageFragment"
         android:label="MainFragment" />
 </navigation>

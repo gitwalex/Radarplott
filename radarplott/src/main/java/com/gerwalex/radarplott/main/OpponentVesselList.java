@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gerwalex.lib.databinding.LinearRecyclerviewBinding;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OpponentNeuBinding;
-import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Opponent;
 
 import java.util.List;
 
@@ -43,11 +43,11 @@ public class OpponentVesselList extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<OpponentVessel>>() {
+        mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<Opponent>>() {
             @Override
-            public void onChanged(List<OpponentVessel> opponentVessels) {
+            public void onChanged(List<Opponent> opponents) {
                 Adapter<RecyclerView.ViewHolder> adapter =
-                        new Adapter<>(getParentFragmentManager(), requireContext(), opponentVessels);
+                        new Adapter<>(getParentFragmentManager(), requireContext(), opponents);
                 binding.defaultRecyclerView.setAdapter(adapter);
             }
         });
@@ -57,14 +57,13 @@ public class OpponentVesselList extends Fragment {
         private final int[] colors;
         private final FragmentManager fm;
         private final LayoutInflater inflater;
-        private final List<OpponentVessel> opponentList;
+        private final List<Opponent> opponentList;
 
-        public Adapter(@NonNull FragmentManager fm, @NonNull Context context,
-                       @NonNull List<OpponentVessel> opponentVessels) {
+        public Adapter(@NonNull FragmentManager fm, @NonNull Context context, @NonNull List<Opponent> opponents) {
             this.fm = fm;
             inflater = LayoutInflater.from(context);
             colors = context.getResources().getIntArray(R.array.vesselcolors);
-            this.opponentList = opponentVessels;
+            this.opponentList = opponents;
         }
 
         @Override
@@ -76,8 +75,7 @@ public class OpponentVesselList extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             int pos = holder.getBindingAdapterPosition();
             holder.binding.lageCard.setStrokeColor(colors[pos]);
-            OpponentVessel opponent = opponentList.get(position);
-            holder.binding.oppenentManoever.TVTitle.setText(R.string.nachManoever);
+            Opponent opponent = opponentList.get(position);
             holder.binding.setOpponent(opponent);
             opponent.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
                 @Override

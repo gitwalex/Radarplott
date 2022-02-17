@@ -11,7 +11,7 @@
 
         <variable
             name="opponent"
-            type="com.gerwalex.radarplott.math.OpponentVessel" />
+            type="com.gerwalex.radarplott.math.Opponent" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,8 +23,7 @@
             android:id="@+id/TVTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{opponent.name}"
-            android:textAppearance="@style/RawApp.TextAppearance.Medium"
+            android:text=""
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="name" />

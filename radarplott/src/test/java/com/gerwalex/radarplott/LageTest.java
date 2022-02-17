@@ -3,7 +3,7 @@ package com.gerwalex.radarplott;
 import static org.junit.Assert.assertEquals;
 
 import com.gerwalex.radarplott.math.Lage;
-import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Opponent;
 import com.gerwalex.radarplott.math.Vessel;
 
 import org.junit.Before;
@@ -21,7 +21,7 @@ public class LageTest {
     @Test
     public void boje1() {
         Vessel me = new Vessel(0, 6);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 0, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 0, 7.0);
         other.setSecondSeitenpeilung(60, 0, 1.0);
         Lage lage = Objects.requireNonNull(other.getLage());
         assertEquals(180.0, lage.getHeadingRelativ(), 0.1); // heading
@@ -33,7 +33,7 @@ public class LageTest {
     @Test
     public void cpa1() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         other.createManoeverLage(3.5f, 0);
         Lage manoever = Objects.requireNonNull(other.manoever.get());
@@ -49,7 +49,7 @@ public class LageTest {
     @Test
     public void cpa2() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Lage manoever = other.getLage().getLage(3.5f, 0);
         assertEquals(148.9, manoever.getHeadingRelativ(), 0.1); // heading
@@ -64,7 +64,7 @@ public class LageTest {
     @Test
     public void cpa3() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Lage manoever = other.getLage().getLage(3.3f, 6);
         assertEquals(131.1, manoever.getHeadingRelativ(), 0.1); // heading
@@ -83,7 +83,7 @@ public class LageTest {
     @Test
     public void lage1() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Lage lage = new Lage(me, other.getRelativeVessel());
         assertEquals(141.5, lage.getHeadingAbsolut(), 0.1);
@@ -100,7 +100,7 @@ public class LageTest {
     @Test
     public void lage2() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 12, 4.5);
         Lage lage = new Lage(me, other.getRelativeVessel());
         assertEquals(149.7, lage.getHeadingAbsolut(), 0.1);
@@ -117,7 +117,7 @@ public class LageTest {
     @Test
     public void lage3() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 12, 4.5);
         Lage lage = new Lage(me, other.getRelativeVessel());
         assertEquals(149.7, lage.getHeadingAbsolut(), 0.1);
@@ -134,7 +134,7 @@ public class LageTest {
     @Test
     public void manoeverLage1() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(180, 8);
         other.createManoeverLage(v, 6);
@@ -150,7 +150,7 @@ public class LageTest {
     @Test
     public void manoeverLage2() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(110, 8);
         other.createManoeverLage(v, 6);
@@ -167,7 +167,7 @@ public class LageTest {
     @Test
     public void manoeverLage3() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(110, 8);
         other.createManoeverLage(v, 12);
@@ -184,7 +184,7 @@ public class LageTest {
     @Test
     public void manoeverLage4() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(180, 8);
         Lage manoever = other.getLage().getLage(v, 6);
@@ -199,7 +199,7 @@ public class LageTest {
     @Test
     public void manoeverLage5() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(110, 8);
         Lage manoever = other.getLage().getLage(v, 6);
@@ -215,7 +215,7 @@ public class LageTest {
     @Test
     public void manoeverLage6() {
         Vessel me = new Vessel(80, 8);
-        OpponentVessel other = new OpponentVessel(me, 0, "B", 10, 7.0);
+        Opponent other = new Opponent(me, 0, "B", 10, 7.0);
         other.setSecondSeitenpeilung(12, 20, 4.5);
         Vessel v = new Vessel(110, 8);
         Lage manoever = other.getLage().getLage(v, 12);

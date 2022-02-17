@@ -12,7 +12,7 @@ import com.gerwalex.lib.math.Punkt2D;
 import java.util.Locale;
 import java.util.Objects;
 
-public class OpponentVessel extends BaseObservable {
+public class Opponent extends BaseObservable {
     public final ObservableField<Lage> manoever = new ObservableField<>();
     private final float dist1;
     private final Vessel me;
@@ -37,8 +37,8 @@ public class OpponentVessel extends BaseObservable {
      * @param distance            distance bei Peilung
      */
 
-    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend,
-                          double distance) {
+    public Opponent(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend,
+                    double distance) {
         this.me = Objects.requireNonNull(me);
         this.name = name;
         this.startTime = startTime;
@@ -46,14 +46,18 @@ public class OpponentVessel extends BaseObservable {
         rwP1 = peilungRechtweisend;
     }
 
+    public Opponent(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend, double distance,
+                    float time, float rwP2, double distance2) {
+        this(me, startTime, name, peilungRechtweisend, distance);
+        setSecondSeitenpeilung((int) time, rwP2, distance2);
+    }
+
     public float getMinutes() {
         return minutes;
     }
 
-    public OpponentVessel(@NonNull Vessel me, int startTime, @NonNull String name, float peilungRechtweisend,
-                          double distance, float time, float rwP2, double distance2) {
-        this(me, startTime, name, peilungRechtweisend, distance);
-        setSecondSeitenpeilung((int) time, rwP2, distance2);
+    public Vessel getMe() {
+        return me;
     }
 
     public void createManoeverLage(Vessel other, int minutes) {

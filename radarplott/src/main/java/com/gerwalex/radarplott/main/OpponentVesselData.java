@@ -17,12 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.databinding.OpponentDataBinding;
-import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Opponent;
 
 import java.util.Objects;
 
 public class OpponentVesselData extends DialogFragment {
-    private static final String POSITION = "POSITION";
+    public static final String POSITION = "POSITION";
     public final MutableLiveData<Float> dist1 = new MutableLiveData<>();
     public final MutableLiveData<Float> dist2 = new MutableLiveData<>();
     public final MutableLiveData<Float> minutes = new MutableLiveData<>();
@@ -31,7 +31,7 @@ public class OpponentVesselData extends DialogFragment {
     public final MutableLiveData<Float> rwSp2 = new MutableLiveData<>();
     private OpponentDataBinding binding;
     private MainModel mModel;
-    private OpponentVessel opponent;
+    private Opponent opponent;
     private int position;
 
     public static OpponentVesselData newInstance(int position) {
@@ -68,7 +68,7 @@ public class OpponentVesselData extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (opponent == null) {
-                    opponent = new OpponentVessel(mModel.ownVessel.getValue(), 0, name.getValue(), rwSp1.getValue(),
+                    opponent = new Opponent(mModel.ownVessel.getValue(), 0, name.getValue(), rwSp1.getValue(),
                             dist1.getValue(), minutes.getValue(), rwSp2.getValue(), dist2.getValue());
                     mModel.addOpponentVessel(opponent);
                 }

@@ -32,7 +32,7 @@ import com.gerwalex.lib.math.Kreis2D;
 import com.gerwalex.lib.math.Punkt2D;
 import com.gerwalex.radarplott.R;
 import com.gerwalex.radarplott.math.Lage;
-import com.gerwalex.radarplott.math.OpponentVessel;
+import com.gerwalex.radarplott.math.Opponent;
 import com.gerwalex.radarplott.math.Vessel;
 
 import java.util.ArrayList;
@@ -85,12 +85,12 @@ public class RadarBasisView extends View {
     private float minRadarRings;
     private int minutes;
     private boolean northupOrientierung = true;
-    private List<OpponentVessel> opponentVesselList = new ArrayList<>();
+    private List<Opponent> opponentList = new ArrayList<>();
     private final Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
         @Override
         public void onPropertyChanged(Observable sender, int propertyId) {
             if (manoverVessel != null) {
-                for (OpponentVessel opponent : opponentVesselList) {
+                for (Opponent opponent : opponentList) {
                     opponent.createManoeverLage(manoverVessel, minutes);
                 }
             }
@@ -320,7 +320,7 @@ public class RadarBasisView extends View {
     }
 
     @SuppressLint("DefaultLocale")
-    private void drawPosition(Canvas canvas, OpponentVessel opponent, int color) {
+    private void drawPosition(Canvas canvas, Opponent opponent, int color) {
         if (me != null) {
             relCourseline.reset();
             vesselPositionStyle.setColor(color);
@@ -349,7 +349,7 @@ public class RadarBasisView extends View {
         }
     }
 
-    private void drawPositionTexte(Canvas canvas, OpponentVessel opponent, int color) {
+    private void drawPositionTexte(Canvas canvas, Opponent opponent, int color) {
         textStyle.setColor(color);
         textStyle.setTextSize(extraSmallTextSize);
         Vessel vessel = opponent.getRelativeVessel();
@@ -457,8 +457,8 @@ public class RadarBasisView extends View {
                 drawCourseline(canvas, manoverVessel, ownVesselColor);
             }
         }
-        for (int i = 0; i < opponentVesselList.size(); i++) {
-            OpponentVessel opponent = opponentVesselList.get(i);
+        for (int i = 0; i < opponentList.size(); i++) {
+            Opponent opponent = opponentList.get(i);
             int color = colors[i];
             drawCourseline(canvas, opponent.getRelativeVessel(), color);
             drawPosition(canvas, opponent, color);
@@ -591,15 +591,15 @@ public class RadarBasisView extends View {
 
     public void setManoeverVessel(Vessel vessel) {
         manoverVessel = vessel;
-        for (OpponentVessel opponent : opponentVesselList) {
+        for (Opponent opponent : opponentList) {
             opponent.createManoeverLage(vessel, minutes);
         }
         invalidate();
     }
 
-    public void setOpponents(List<OpponentVessel> opponents) {
-        opponentVesselList = opponents;
-        for (OpponentVessel v : opponents) {
+    public void setOpponents(List<Opponent> opponents) {
+        opponentList = opponents;
+        for (Opponent v : opponents) {
             minRadarRings =
                     Math.max(getContext().getResources().getInteger(R.integer.minRadarRings), v.getMinRadarSize());
         }
@@ -614,7 +614,7 @@ public class RadarBasisView extends View {
         me.addOnPropertyChangedCallback(ownVesselObserver);
         maxTime.setValue(0);
         if (manoverVessel != null) {
-            for (OpponentVessel opponent : opponentVesselList) {
+            for (Opponent opponent : opponentList) {
                 opponent.createManoeverLage(manoverVessel, minutes);
             }
         }
@@ -743,7 +743,7 @@ public class RadarBasisView extends View {
                     Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
                     Kreis2D k = new Kreis2D(pkt, 40f);
                     if (radarObserver != null) {
-                        for (OpponentVessel opponent : opponentVesselList) {
+                        for (Opponent opponent : opponentList) {
                             Vessel vessel = opponent.getRelativeVessel();
                             if (k.liegtImKreis(vessel.getSecondPosition())) {
                                 radarObserver.onVesselClick(vessel);
