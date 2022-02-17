@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.gerwalex.lib.databinding.LinearRecyclerviewBinding;
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.databinding.OpponentBinding;
+import com.gerwalex.radarplott.databinding.OpponentNeuBinding;
 import com.gerwalex.radarplott.math.OpponentVessel;
 
 import java.util.List;
@@ -97,15 +97,15 @@ public class OpponentVesselList extends Fragment {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ViewHolder(OpponentBinding.inflate(inflater));
+            return new ViewHolder(OpponentNeuBinding.inflate(inflater));
         }
     }
 
     public static class ViewHolder extends com.gerwalex.lib.adapters.ViewHolder {
 
-        public final OpponentBinding binding;
+        public final OpponentNeuBinding binding;
 
-        public ViewHolder(@NonNull OpponentBinding binding) {
+        public ViewHolder(@NonNull OpponentNeuBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

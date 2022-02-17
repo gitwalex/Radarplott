@@ -567,8 +567,7 @@ public class RadarBasisView extends View {
     public void setCurrentTime(int minutes) {
         this.minutes = minutes;
         if (manoverVessel != null) {
-            manoverVessel = new Vessel(manoverVessel.getPosition(minutes), (int) manoverVessel.getHeading(),
-                    manoverVessel.getSpeed());
+            manoverVessel = new Vessel((int) manoverVessel.getHeading(), manoverVessel.getSpeed());
             if (radarObserver != null) {
                 radarObserver.onCreateManoever(manoverVessel);
             }

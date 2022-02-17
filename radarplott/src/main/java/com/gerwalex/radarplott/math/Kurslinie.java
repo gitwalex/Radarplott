@@ -12,7 +12,7 @@ public class Kurslinie {
     private final Gerade2D line;
 
     public Kurslinie(Punkt2D first, Punkt2D second) {
-        this(first, new Vektor2D(first, second).getYAxisAngle());
+        line = new Gerade2D(first, new Vektor2D(first, second));
     }
 
     public Kurslinie(Punkt2D first, float heading) {
@@ -59,5 +59,11 @@ public class Kurslinie {
      */
     public final boolean isPunktAufKurslinie(@NonNull Punkt2D p) {
         return Math.round(line.getAbstand(p.x, p.y) * 1E4f) < 1;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Kurslinie{" + line + '}';
     }
 }

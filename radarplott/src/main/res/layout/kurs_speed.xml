@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="lage"
+            type="com.gerwalex.radarplott.math.Lage" />
+
+        <variable
+            name="opponent"
+            type="com.gerwalex.radarplott.math.OpponentVessel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/content_padding">
+
+        <TextView
+            android:id="@+id/TVTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{opponent.name}"
+            android:textAppearance="@style/RawApp.TextAppearance.Medium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="name" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:barrierMargin="8dp"
+            app:constraint_referenced_ids="TVKurs, TVSpeed" />
+
+        <TextView
+            android:id="@+id/TVKurs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kurse"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TVTitle" />
+
+        <TextView
+            android:id="@+id/timeToBCR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/fDeg(lage.headingRelativ)}"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintBaseline_toBaselineOf="@id/TVKurs"
+            app:layout_constraintStart_toEndOf="@id/barrier" />
+
+        <TextView
+            android:id="@+id/TVSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/speed"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TVKurs" />
+
+        <TextView
+            android:id="@+id/timeToCPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/fKnots(lage.speedRelativ)}"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintBaseline_toBaselineOf="@id/TVSpeed"
+            app:layout_constraintStart_toEndOf="@id/barrier" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

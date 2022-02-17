@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="lage"
+            type="com.gerwalex.radarplott.math.Lage" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/content_padding">
+
+        <TextView
+            android:id="@+id/TVTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Abstand"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:barrierMargin="8dp"
+            app:constraint_referenced_ids="TVBCR, TVCPA" />
+
+        <TextView
+            android:id="@+id/TVBCR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/BCR"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TVTitle" />
+
+        <TextView
+            android:id="@+id/timeToBCR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/fSm(lage.abstandBCR)}"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintBaseline_toBaselineOf="@id/TVBCR"
+            app:layout_constraintStart_toEndOf="@id/barrier" />
+
+        <TextView
+            android:id="@+id/TVCPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/CPA"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TVBCR" />
+
+        <TextView
+            android:id="@+id/timeToCPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/fSm(lage.abstandCPA)}"
+            android:textAppearance="@style/RawApp.TextAppearance.Small"
+            app:layout_constraintBaseline_toBaselineOf="@id/TVCPA"
+            app:layout_constraintStart_toEndOf="@id/barrier" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

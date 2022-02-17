@@ -107,12 +107,11 @@ public class Lage {
      * @return neue Lage
      */
     public Lage getLage(Vessel manoever, int minutes) {
-        Vessel relativ = relativVessel;
-        Punkt2D mp = relativ.getPosition(minutes);
-        Punkt2D relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(relativ.minutes));
-        Vessel rv = new Vessel(relPos, absolutVessel.secondPosition, relativ.minutes);
-        Vessel relativVessel = new Vessel(mp, rv.getHeading(), rv.getSpeed());
-        return new Lage(manoever, relativVessel);
+        Punkt2D mp = relativVessel.getPosition(minutes);
+        Punkt2D relPos = absolutVessel.firstPosition.add(manoever.getRichtungsvektor(relativVessel.minutes));
+        Vessel rv = new Vessel(relPos, relativVessel.secondPosition, relativVessel.minutes);
+        Vessel relativ = new Vessel(mp, rv.getHeading(), rv.getSpeed());
+        return new Lage(manoever, relativ);
     }
 
     public float getMaxCPA() {

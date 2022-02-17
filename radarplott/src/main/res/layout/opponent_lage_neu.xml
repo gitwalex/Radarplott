@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="lage"
+            type="com.gerwalex.radarplott.math.Lage" />
+
+        <variable
+            name="opponent"
+            type="com.gerwalex.radarplott.math.OpponentVessel" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/content_padding">
+
+        <TextView
+            android:id="@+id/TVTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="kurs_speed,abstand, timeTo, cpa"
+            app:flow_wrapMode="aligned"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TVTitle" />
+
+
+        <include
+            android:id="@+id/kurs_speed"
+            layout="@layout/kurs_speed"
+            app:lage="@{lage}"
+            app:opponent="@{opponent}" />
+
+        <include
+            android:id="@+id/abstand"
+            layout="@layout/abstand"
+            app:lage="@{lage}" />
+
+        <include
+            android:id="@+id/timeTo"
+            layout="@layout/time_to"
+            app:lage="@{lage}" />
+
+        <include
+            android:id="@+id/cpa"
+            layout="@layout/cpa"
+            app:lage="@{lage}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

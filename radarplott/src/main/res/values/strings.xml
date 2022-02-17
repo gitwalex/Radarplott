@@ -44,5 +44,7 @@
     <string name="beobachtung">Beobachtungen</string>
     <string name="lage">Lage</string>
     <string name="nachManoever">nach Manöver</string>
+    <string name="Abstand">Abstand</string>
+    <string name="TimeTo">Zeit bis...</string>
 
 </resources>
