@@ -20,23 +20,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/meText"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.helper.widget.Flow
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/ownVesselData"
-                android:textAppearance="@style/RawApp.TextAppearance.ExtraSmall"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:constraint_referenced_ids="meText, heading, speed"
+                app:flow_horizontalGap="16dp"
+                app:flow_wrapMode="chain"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/meText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ownVesselData" />
 
             <TextView
                 android:id="@+id/heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{@string/wKurs(me.heading)}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/meText"
                 tools:text="rwP" />
 
             <TextView
@@ -44,8 +47,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{@string/wFdW(me.speed)}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/heading"
                 tools:text="kn" />
 
 

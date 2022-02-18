@@ -13,37 +13,31 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/lage_card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:contentPadding="@dimen/content_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name"
-        app:strokeWidth="@dimen/cardviewborder">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="wrap_content"
+            <include
+                android:id="@+id/opponent"
+                layout="@layout/opponent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="@{@string/opponent(opponent.lage.headingAbsolut, opponent.lage.speedAbsolut)}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:opponent="@{opponent}" />
 
 
             <include
                 android:id="@+id/oppenentManoever"
                 layout="@layout/opponent_lage_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 app:lage="@{opponent.manoever}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/name"
+                app:layout_constraintTop_toBottomOf="@id/opponent"
                 app:opponent="@{opponent}" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

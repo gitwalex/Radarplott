@@ -5,7 +5,7 @@
     <item
         android:id="@+id/zeigeKurse"
         android:checkable="true"
-        android:title="@string/kurse"
+        android:title="@string/kurs"
         app:actionViewClass="android.widget.CheckedTextView" />
     <item
         android:id="@+id/zeigePositionen"

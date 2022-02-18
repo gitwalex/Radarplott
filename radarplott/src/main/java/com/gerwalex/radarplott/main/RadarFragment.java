@@ -18,8 +18,6 @@ import com.gerwalex.radarplott.math.Opponent;
 import com.gerwalex.radarplott.math.Vessel;
 import com.gerwalex.radarplott.views.RadarBasisView;
 
-import java.util.List;
-
 public class RadarFragment extends Fragment {
     private RadarViewBinding binding;
     private MainModel mModel;
@@ -84,10 +82,10 @@ public class RadarFragment extends Fragment {
                 binding.radar.setManoeverVessel(vessel);
             }
         });
-        mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<Opponent>>() {
+        mModel.currentOpponent.observe(getViewLifecycleOwner(), new Observer<Opponent>() {
             @Override
-            public void onChanged(List<Opponent> opponents) {
-                binding.radar.setOpponents(opponents);
+            public void onChanged(Opponent opponent) {
+                binding.radar.setOpponent(opponent);
             }
         });
         mModel.ownVessel.observe(getViewLifecycleOwner(), new Observer<Vessel>() {

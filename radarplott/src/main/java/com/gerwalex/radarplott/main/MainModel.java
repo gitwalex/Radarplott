@@ -13,6 +13,7 @@ import java.util.Objects;
 public class MainModel extends ViewModel {
 
     public final MutableLiveData<Vessel> clickedVessel = new MutableLiveData<>();
+    public final MutableLiveData<Opponent> currentOpponent = new MutableLiveData<>();
     public final MutableLiveData<Integer> currentTime = new MutableLiveData<>();
     public final MutableLiveData<Vessel> manoever = new MutableLiveData<>();
     public final MutableLiveData<Integer> maxTime = new MutableLiveData<>();
@@ -32,5 +33,6 @@ public class MainModel extends ViewModel {
         List<Opponent> opponents = Objects.requireNonNull(opponentVesselList.getValue());
         opponents.add(opponent);
         opponentVesselList.setValue(opponents);
+        currentOpponent.setValue(opponent);
     }
 }

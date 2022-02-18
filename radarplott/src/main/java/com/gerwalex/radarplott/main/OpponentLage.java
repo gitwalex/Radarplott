@@ -1,7 +1,5 @@
 package com.gerwalex.radarplott.main;
 
-import static com.gerwalex.radarplott.main.OpponentVesselData.POSITION;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,23 +11,13 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.lib.main.BasicFragment;
-import com.gerwalex.radarplott.databinding.OpponentNeuBinding;
+import com.gerwalex.radarplott.databinding.OpponentLageBinding;
 import com.gerwalex.radarplott.math.Opponent;
 
-import java.util.List;
+public class OpponentLage extends BasicFragment {
 
-public class OpponentVessel extends BasicFragment {
-
-    private OpponentNeuBinding binding;
+    private OpponentLageBinding binding;
     private MainModel mModel;
-
-    public static OpponentVessel newInstance(int position) {
-        Bundle args = new Bundle();
-        args.putInt(POSITION, position);
-        OpponentVessel fragment = new OpponentVessel();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,18 +29,23 @@ public class OpponentVessel extends BasicFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = OpponentNeuBinding.inflate(inflater, container, false);
+        binding = OpponentLageBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        int position = args.getInt(POSITION);
-        mModel.opponentVesselList.observe(getViewLifecycleOwner(), new Observer<List<Opponent>>() {
+        mModel.currentOpponent.observe(getViewLifecycleOwner(), new Observer<Opponent>() {
             @Override
-            public void onChanged(List<Opponent> opponents) {
-                Opponent opponent = opponents.get(position);
+            public void onChanged(Opponent opponent) {
                 binding.setOpponent(opponent);
+            }
+        });
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OpponentDataDialog dlg = new OpponentDataDialog();
+                dlg.show(getChildFragmentManager(), null);
             }
         });
     }

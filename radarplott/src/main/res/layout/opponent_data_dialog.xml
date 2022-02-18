@@ -7,7 +7,7 @@
 
         <variable
             name="handler"
-            type="com.gerwalex.radarplott.main.OpponentVesselData" />
+            type="com.gerwalex.radarplott.main.OpponentDataDialog" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

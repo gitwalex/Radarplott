@@ -61,6 +61,9 @@ public class Lage {
         return distanceToCPA;
     }
 
+    /**
+     * @return Wahrer Kurs
+     */
     public float getHeadingAbsolut() {
         return absolutVessel.getHeading();
     }

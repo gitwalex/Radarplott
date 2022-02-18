@@ -13,6 +13,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -35,8 +36,6 @@ import com.gerwalex.radarplott.math.Lage;
 import com.gerwalex.radarplott.math.Opponent;
 import com.gerwalex.radarplott.math.Vessel;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -80,19 +79,17 @@ public class RadarBasisView extends View {
     private Vessel manoverVessel;
     private Vessel me;
     /**
-     * Mindestanzahl der Radarringe. Wird in @{link {@link RadarBasisView#setOpponents(List)} gesetzt.}
+     * Mindestanzahl der Radarringe. Wird in @{link {@link RadarBasisView#setOpponent(Opponent)} gesetzt.}
      */
     private float minRadarRings;
     private int minutes;
     private boolean northupOrientierung = true;
-    private List<Opponent> opponentList = new ArrayList<>();
+    private Opponent opponent;
     private final Observable.OnPropertyChangedCallback ownVesselObserver = new Observable.OnPropertyChangedCallback() {
         @Override
         public void onPropertyChanged(Observable sender, int propertyId) {
             if (manoverVessel != null) {
-                for (Opponent opponent : opponentList) {
-                    opponent.createManoeverLage(manoverVessel, minutes);
-                }
+                opponent.createManoeverLage(manoverVessel, minutes);
             }
             invalidate();
         }
@@ -120,7 +117,12 @@ public class RadarBasisView extends View {
         try {
             minRadarRings = a.getInt(R.styleable.RadarViewStyle_minRadarRings, 3);
             maxRadarRings = a.getInt(R.styleable.RadarViewStyle_maxRadarRings, 3);
-            desiredSize = a.getDimension(R.styleable.RadarViewStyle_minRadarSize, 300);
+            float size = a.getDimension(R.styleable.RadarViewStyle_minRadarSize, -1);
+            if (size == -1) {
+                DisplayMetrics dp = getResources().getDisplayMetrics();
+                size = Math.min(dp.heightPixels, dp.widthPixels);
+            }
+            desiredSize = size;
         } finally {
             a.recycle();
         }
@@ -457,9 +459,8 @@ public class RadarBasisView extends View {
                 drawCourseline(canvas, manoverVessel, ownVesselColor);
             }
         }
-        for (int i = 0; i < opponentList.size(); i++) {
-            Opponent opponent = opponentList.get(i);
-            int color = colors[i];
+        if (opponent != null) {
+            int color = colors[0];
             drawCourseline(canvas, opponent.getRelativeVessel(), color);
             drawPosition(canvas, opponent, color);
             if (drawPositionText) {
@@ -486,9 +487,9 @@ public class RadarBasisView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec) - getPaddingStart() - getPaddingEnd();
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec) - getPaddingBottom() - getPaddingTop();
         int width;
         int height;
         //Measure Width
@@ -591,18 +592,13 @@ public class RadarBasisView extends View {
 
     public void setManoeverVessel(Vessel vessel) {
         manoverVessel = vessel;
-        for (Opponent opponent : opponentList) {
-            opponent.createManoeverLage(vessel, minutes);
-        }
+        opponent.createManoeverLage(vessel, minutes);
         invalidate();
     }
 
-    public void setOpponents(List<Opponent> opponents) {
-        opponentList = opponents;
-        for (Opponent v : opponents) {
-            minRadarRings =
-                    Math.max(getContext().getResources().getInteger(R.integer.minRadarRings), v.getMinRadarSize());
-        }
+    public void setOpponent(Opponent opponent) {
+        this.opponent = opponent;
+        minRadarRings = opponent.getMinRadarSize();
         invalidate();
     }
 
@@ -614,9 +610,7 @@ public class RadarBasisView extends View {
         me.addOnPropertyChangedCallback(ownVesselObserver);
         maxTime.setValue(0);
         if (manoverVessel != null) {
-            for (Opponent opponent : opponentList) {
-                opponent.createManoeverLage(manoverVessel, minutes);
-            }
+            opponent.createManoeverLage(manoverVessel, minutes);
         }
         invalidate();
     }
@@ -743,11 +737,9 @@ public class RadarBasisView extends View {
                     Punkt2D pkt = new Punkt2D((x - width) / scaleFactor, (height - y) / scaleFactor);
                     Kreis2D k = new Kreis2D(pkt, 40f);
                     if (radarObserver != null) {
-                        for (Opponent opponent : opponentList) {
-                            Vessel vessel = opponent.getRelativeVessel();
-                            if (k.liegtImKreis(vessel.getSecondPosition())) {
-                                radarObserver.onVesselClick(vessel);
-                            }
+                        Vessel vessel = opponent.getRelativeVessel();
+                        if (k.liegtImKreis(vessel.getSecondPosition())) {
+                            radarObserver.onVesselClick(vessel);
                         }
                     }
                     return true;

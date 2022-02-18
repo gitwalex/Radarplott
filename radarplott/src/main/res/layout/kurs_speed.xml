@@ -40,13 +40,13 @@
             android:id="@+id/TVKurs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/kurse"
+            android:text="@string/kurs"
             android:textAppearance="@style/RawApp.TextAppearance.Small"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/TVTitle" />
 
         <TextView
-            android:id="@+id/timeToBCR"
+            android:id="@+id/heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{@string/fDeg(lage.headingRelativ)}"
@@ -64,7 +64,7 @@
             app:layout_constraintTop_toBottomOf="@id/TVKurs" />
 
         <TextView
-            android:id="@+id/timeToCPA"
+            android:id="@+id/speed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{@string/fKnots(lage.speedRelativ)}"

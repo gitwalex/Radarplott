@@ -16,12 +16,12 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gerwalex.radarplott.R;
-import com.gerwalex.radarplott.databinding.OpponentDataBinding;
+import com.gerwalex.radarplott.databinding.OpponentDataDialogBinding;
 import com.gerwalex.radarplott.math.Opponent;
 
 import java.util.Objects;
 
-public class OpponentVesselData extends DialogFragment {
+public class OpponentDataDialog extends DialogFragment {
     public static final String POSITION = "POSITION";
     public final MutableLiveData<Float> dist1 = new MutableLiveData<>();
     public final MutableLiveData<Float> dist2 = new MutableLiveData<>();
@@ -29,15 +29,15 @@ public class OpponentVesselData extends DialogFragment {
     public final MutableLiveData<String> name = new MutableLiveData<>();
     public final MutableLiveData<Float> rwSp1 = new MutableLiveData<>();
     public final MutableLiveData<Float> rwSp2 = new MutableLiveData<>();
-    private OpponentDataBinding binding;
+    private OpponentDataDialogBinding binding;
     private MainModel mModel;
     private Opponent opponent;
     private int position;
 
-    public static OpponentVesselData newInstance(int position) {
+    public static OpponentDataDialog newInstance(int position) {
         Bundle args = new Bundle();
         args.putInt(POSITION, position);
-        OpponentVesselData fragment = new OpponentVesselData();
+        OpponentDataDialog fragment = new OpponentDataDialog();
         fragment.setArguments(args);
         return fragment;
     }
@@ -50,13 +50,15 @@ public class OpponentVesselData extends DialogFragment {
         if (args != null) {
             position = args.getInt(POSITION);
             opponent = Objects.requireNonNull(mModel.opponentVesselList.getValue()).get(position);
-            name.setValue(opponent.name);
-            rwSp1.setValue(opponent.getRwP1());
-            rwSp2.setValue(opponent.getRwP2());
-            dist1.setValue(opponent.getDist1());
-            dist2.setValue(opponent.getDist2());
-            minutes.setValue((float) opponent.getTime());
+        } else {
+            opponent = Objects.requireNonNull(mModel.currentOpponent.getValue());
         }
+        name.setValue(opponent.name);
+        rwSp1.setValue(opponent.getRwP1());
+        rwSp2.setValue(opponent.getRwP2());
+        dist1.setValue(opponent.getDist1());
+        dist2.setValue(opponent.getDist2());
+        minutes.setValue((float) opponent.getTime());
     }
 
     @NonNull
@@ -83,7 +85,7 @@ public class OpponentVesselData extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = OpponentDataBinding.inflate(inflater);
+        binding = OpponentDataDialogBinding.inflate(inflater);
         return binding.getRoot();
     }
 
